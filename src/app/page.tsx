@@ -10,7 +10,7 @@ export default function Home() {
         {/* 히어로 섹션 */}
         <div className="text-center mb-16">
           <h1 className="text-5xl font-bold mb-4 bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 bg-clip-text text-transparent">
-            악세사리 판매매출 요약
+            브랜드별 재고주수 대시보드
           </h1>
           <p className="text-xl text-gray-400 max-w-2xl mx-auto">
             브랜드별 악세사리 판매매출 월별 현황을 한눈에 확인하세요.
@@ -21,39 +21,74 @@ export default function Home() {
 
         {/* 브랜드 카드 */}
         <div className="grid md:grid-cols-3 gap-6 mb-16">
-          {BRANDS.map((brand) => (
-            <Link
-              key={brand.key}
-              href={brand.path}
-              className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-700 p-8 transition-all duration-300 hover:border-blue-500/50 hover:shadow-lg hover:shadow-blue-500/10"
-            >
-              <div className="absolute inset-0 bg-gradient-to-br from-blue-600/10 to-purple-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-              <div className="relative">
-                <h2 className="text-2xl font-bold text-white mb-3 group-hover:text-blue-400 transition-colors">
-                  {brand.name}
-                </h2>
-                <p className="text-gray-400 mb-4">
-                  {brand.name} 브랜드 악세사리 판매매출
-                </p>
-                <div className="flex items-center text-blue-400 text-sm font-medium">
-                  <span>상세보기</span>
-                  <svg
-                    className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M9 5l7 7-7 7"
-                    />
-                  </svg>
-                </div>
+          {/* MLB - 네이비 */}
+          <Link
+            href="/mlb-sales"
+            className="group relative overflow-hidden rounded-2xl p-8 transition-all duration-300 hover:shadow-xl"
+            style={{ backgroundColor: '#1e3a5f' }}
+          >
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-400/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            <div className="relative">
+              <h2 className="text-2xl font-bold text-white mb-3">
+                MLB
+              </h2>
+              <p className="text-blue-200 mb-4">
+                MLB 브랜드 악세사리 판매매출
+              </p>
+              <div className="flex items-center text-blue-300 text-sm font-medium">
+                <span>상세보기</span>
+                <svg className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
               </div>
-            </Link>
-          ))}
+            </div>
+          </Link>
+
+          {/* MLB KIDS - 연한 노랑 */}
+          <Link
+            href="/mlb-kids-sales"
+            className="group relative overflow-hidden rounded-2xl p-8 transition-all duration-300 hover:shadow-xl"
+            style={{ backgroundColor: '#fcd34d' }}
+          >
+            <div className="absolute inset-0 bg-gradient-to-br from-yellow-300/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            <div className="relative">
+              <h2 className="text-2xl font-bold text-gray-900 mb-3">
+                MLB KIDS
+              </h2>
+              <p className="text-gray-800 mb-4">
+                MLB KIDS 브랜드 악세사리 판매매출
+              </p>
+              <div className="flex items-center text-gray-900 text-sm font-medium">
+                <span>상세보기</span>
+                <svg className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </div>
+            </div>
+          </Link>
+
+          {/* DISCOVERY - 연한 초록 */}
+          <Link
+            href="/discovery-sales"
+            className="group relative overflow-hidden rounded-2xl p-8 transition-all duration-300 hover:shadow-xl"
+            style={{ backgroundColor: '#4ade80' }}
+          >
+            <div className="absolute inset-0 bg-gradient-to-br from-green-300/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            <div className="relative">
+              <h2 className="text-2xl font-bold text-gray-800 mb-3">
+                DISCOVERY
+              </h2>
+              <p className="text-gray-700 mb-4">
+                DISCOVERY 브랜드 악세사리 판매매출
+              </p>
+              <div className="flex items-center text-gray-800 text-sm font-medium">
+                <span>상세보기</span>
+                <svg className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </div>
+            </div>
+          </Link>
         </div>
 
         {/* 정보 섹션 */}

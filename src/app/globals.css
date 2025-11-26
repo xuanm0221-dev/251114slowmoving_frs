@@ -65,7 +65,9 @@ body {
 }
 
 .sales-table th {
-  @apply bg-gray-100 font-semibold text-gray-700 sticky top-0 z-10 text-center;
+  @apply font-semibold sticky top-0 z-10 text-center;
+  background-color: #1B365D;
+  color: white;
 }
 
 .sales-table th:first-child {
@@ -86,7 +88,8 @@ body {
 }
 
 .row-header {
-  @apply font-bold bg-gray-50 text-left;
+  @apply font-bold text-left;
+  background-color: #e0f2fe !important; /* 연한 하늘색 (sky-100) */
 }
 
 .row-indent {

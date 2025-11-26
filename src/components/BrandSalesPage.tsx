@@ -116,7 +116,7 @@ export default function BrandSalesPage({ brand, title }: BrandSalesPageProps) {
           <>
             {/* 1. 아이템 탭 + Stock Week 입력 */}
             <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-              <ItemTabs selectedTab={selectedTab} onTabChange={setSelectedTab} />
+              <ItemTabs selectedTab={selectedTab} onTabChange={setSelectedTab} brand={brand} />
               <StockWeekInput value={stockWeek} onChange={setStockWeek} />
             </div>
 

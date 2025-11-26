@@ -67,6 +67,10 @@ export default function StockWeeksTable({
       return { display: "판매0", value: -1 };
     }
     const weeks = inventory / weeklySales;
+    // 마이너스 값은 △ 기호로 표시
+    if (weeks < 0) {
+      return { display: `△${Math.abs(weeks).toFixed(1)}주`, value: weeks };
+    }
     return { display: `${weeks.toFixed(1)}주`, value: weeks };
   };
 
@@ -155,11 +159,11 @@ export default function StockWeeksTable({
         <table className="sales-table min-w-max">
           <thead>
             <tr>
-              <th className="text-left min-w-[120px] sticky left-0 bg-gray-100 z-20">
+              <th className="text-left min-w-[120px] sticky left-0 bg-[#1B365D] text-white z-20">
                 구분
               </th>
               {months.map((month) => (
-                <th key={month} className="min-w-[70px]">
+                <th key={month} className="min-w-[70px] bg-[#1B365D] text-white">
                   {getMonthHeader(month)}
                 </th>
               ))}
@@ -170,10 +174,12 @@ export default function StockWeeksTable({
               <tr key={idx}>
                 <td
                   className={cn(
-                    "text-left sticky left-0 bg-white z-10",
-                    row.isHeader && "row-header font-semibold text-gray-800",
+                    "text-left sticky left-0 z-10",
+                    row.isHeader && "font-semibold text-gray-800",
+                    !row.isHeader && "bg-white",
                     row.indent && "row-indent"
                   )}
+                  style={row.isHeader ? { backgroundColor: '#f3f4f6' } : undefined}
                 >
                   {row.label}
                 </td>
@@ -183,16 +189,21 @@ export default function StockWeeksTable({
                   const isZeroSales = cellData.display === "판매0";
                   const hasHeatmap = row.hasHeatmap && cellData.value >= 0;
                   
+                  // 헤더 행은 연한 회색 배경, 히트맵이 있는 셀은 히트맵 색상
+                  const cellStyle = row.isHeader 
+                    ? { backgroundColor: '#f3f4f6' } 
+                    : (hasHeatmap ? getHeatmapStyle(cellData.value) : undefined);
+                  
                   return (
                     <td
                       key={month}
                       className={cn(
                         "text-center",
-                        row.isHeader && "row-header font-semibold",
+                        row.isHeader && "font-semibold text-gray-800",
                         isNoData && "text-gray-400",
                         isZeroSales && "text-amber-600 text-xs"
                       )}
-                      style={hasHeatmap ? getHeatmapStyle(cellData.value) : undefined}
+                      style={cellStyle}
                     >
                       {cellData.display}
                     </td>

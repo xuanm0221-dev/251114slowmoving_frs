@@ -75,32 +75,44 @@ export default function InventoryTable({ data, months, daysInMonth, stockWeek }:
           </tr>
         </thead>
         <tbody>
-          {INVENTORY_TABLE_ROWS.map((row, idx) => (
-            <tr key={idx}>
-              <td
-                className={cn(
-                  "text-left sticky left-0 bg-white z-10",
-                  row.isHeader && "row-header font-semibold text-gray-800",
-                  row.indent && "row-indent"
-                )}
-              >
-                {row.label}
-              </td>
-              {months.map((month) => {
-                const value = getCellValue(month, row.dataKey);
-                return (
-                  <td
-                    key={month}
-                    className={cn(
-                      row.isHeader && "row-header font-semibold"
-                    )}
-                  >
-                    {formatAmountM(value)}
-                  </td>
-                );
-              })}
-            </tr>
-          ))}
+          {INVENTORY_TABLE_ROWS.map((row, idx) => {
+            // 직영재고, 창고재고는 연한 회색 배경
+            const isGrayRow = row.dataKey === "직영" || row.dataKey === "창고";
+            // 인라인 스타일로 배경색 적용 (globals.css 우선순위 문제 해결)
+            const grayBgStyle = isGrayRow ? { backgroundColor: '#f3f4f6' } : undefined;
+            
+            return (
+              <tr key={idx}>
+                <td
+                  className={cn(
+                    "text-left sticky left-0 z-10",
+                    row.isHeader && !isGrayRow && "row-header font-semibold text-gray-800",
+                    row.isHeader && isGrayRow && "font-semibold text-gray-800",
+                    !row.isHeader && "bg-white",
+                    row.indent && "row-indent"
+                  )}
+                  style={grayBgStyle}
+                >
+                  {row.label}
+                </td>
+                {months.map((month) => {
+                  const value = getCellValue(month, row.dataKey);
+                  return (
+                    <td
+                      key={month}
+                      className={cn(
+                        row.isHeader && !isGrayRow && "row-header font-semibold",
+                        row.isHeader && isGrayRow && "font-semibold"
+                      )}
+                      style={grayBgStyle}
+                    >
+                      {formatAmountM(value)}
+                    </td>
+                  );
+                })}
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>

@@ -134,11 +134,43 @@ export const INVENTORY_TABLE_ROWS: TableRow[] = [
 // 아이템 탭 목록
 export const ITEM_TABS: ItemTab[] = ["전체", "Shoes", "Headwear", "Bag", "Acc_etc"];
 
-// 브랜드 정보
-export const BRANDS: { key: Brand; name: string; path: string }[] = [
-  { key: "MLB", name: "MLB", path: "/mlb-sales" },
-  { key: "MLB KIDS", name: "MLB KIDS", path: "/mlb-kids-sales" },
-  { key: "DISCOVERY", name: "DISCOVERY", path: "/discovery-sales" },
+// 브랜드 정보 (각 브랜드별 대표색 포함)
+export const BRANDS: { 
+  key: Brand; 
+  name: string; 
+  path: string;
+  activeColor: string;      // 선택시 배경색
+  activeTextColor: string;  // 선택시 텍스트 색상
+  hoverColor: string;       // 호버시 배경색
+  textColor: string;        // 비선택시 텍스트 색상
+}[] = [
+  { 
+    key: "MLB", 
+    name: "MLB", 
+    path: "/mlb-sales",
+    activeColor: "bg-[#1B365D]",      // MLB 네이비 블루
+    activeTextColor: "text-white",
+    hoverColor: "hover:bg-[#1B365D]/10",
+    textColor: "text-[#1B365D]"
+  },
+  { 
+    key: "MLB KIDS", 
+    name: "MLB KIDS", 
+    path: "/mlb-kids-sales",
+    activeColor: "bg-[#F5C518]",      // MLB KIDS 골드/옐로우
+    activeTextColor: "text-gray-900", // 노란 배경에는 검은 텍스트
+    hoverColor: "hover:bg-[#F5C518]/10",
+    textColor: "text-[#D4A600]"
+  },
+  { 
+    key: "DISCOVERY", 
+    name: "DISCOVERY", 
+    path: "/discovery-sales",
+    activeColor: "bg-[#2ED573]",      // Discovery 민트 그린
+    activeTextColor: "text-white",
+    hoverColor: "hover:bg-[#2ED573]/10",
+    textColor: "text-[#2ED573]"
+  },
 ];
 
 // 기본 stock_week 값
