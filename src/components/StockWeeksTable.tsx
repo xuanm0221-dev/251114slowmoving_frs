@@ -185,8 +185,9 @@ export default function StockWeeksTable({
   };
 
   const getMonthHeader = (month: string): string => {
-    const monthNum = parseInt(month.split(".")[1], 10);
-    return `${monthNum}월`;
+    const [yearStr, monthStr] = month.split(".");
+    // "25.01", "26.01" 형식으로 표시
+    return `${yearStr.slice(-2)}.${monthStr}`;
   };
 
   return (

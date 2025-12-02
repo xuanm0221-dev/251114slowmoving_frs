@@ -278,7 +278,9 @@ export default function InventoryChart({
       // “당년” 역할: 해당 월의 재고자산 (채널별, forecast 포함)
       const curr = getChannelInventory(invData, slsData);
 
-      const monthLabel = `${parseInt(monthYm.split(".")[1], 10)}월`;
+      // 월 레이블을 "25.01", "26.01" 형식으로 변환
+      const [yearStr, monthStr] = monthYm.split(".");
+      const monthLabel = `${yearStr.slice(-2)}.${monthStr}`;
 
       return {
         month: monthLabel,
@@ -318,7 +320,7 @@ export default function InventoryChart({
       <div className="flex flex-wrap items-center gap-4 mb-4">
         <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
           <span className="text-green-500">📊</span>
-          월별 {channelLabel} 재고자산 추이 ({itemLabel}) - 25년
+          월별 {channelLabel} 재고자산 추이 ({itemLabel})
         </h2>
         
         {/* 채널 탭 (ALL, 대리상, 창고) - 제목 바로 옆 */}
