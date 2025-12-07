@@ -58,6 +58,7 @@ export default function BrandSalesPage({ brand, title }: BrandSalesPageProps) {
   const [stockWeekWindow, setStockWeekWindow] = useState<StockWeekWindow>(1);
   const [productTypeTab, setProductTypeTab] = useState<ProductTypeTab>("전체"); // 상품 타입 탭 (전체/주력/아울렛)
   const [stagnantDimensionTab, setStagnantDimensionTab] = useState<DimensionTab>("컬러&사이즈"); // 정체재고 분석 단위
+  const [stagnantThresholdPct, setStagnantThresholdPct] = useState<number>(0.01); // 정체재고 기준 %
   
   // 특정 아이템의 stockWeek 변경 핸들러
   const handleStockWeekChange = (itemTab: ItemTab, value: number) => {
@@ -376,13 +377,20 @@ export default function BrandSalesPage({ brand, title }: BrandSalesPageProps) {
             )}
 
             {/* 1.75. 재고택금액 추이 (시즌별) - 전년대비/매출액대비 전환 차트 */}
-            <InventorySeasonChart brand={brand} dimensionTab={stagnantDimensionTab} onDimensionTabChange={setStagnantDimensionTab} />
+            <InventorySeasonChart 
+              brand={brand} 
+              dimensionTab={stagnantDimensionTab} 
+              onDimensionTabChange={setStagnantDimensionTab}
+              thresholdPct={stagnantThresholdPct}
+            />
 
             {/* 1.8. 정체재고 분석 */}
             <StagnantStockAnalysis 
               brand={brand} 
               dimensionTab={stagnantDimensionTab}
               onDimensionTabChange={setStagnantDimensionTab}
+              thresholdPct={stagnantThresholdPct}
+              onThresholdPctChange={setStagnantThresholdPct}
             />
 
             {/* 2. 재고주수 히트맵 (2025년, 2024년) */}

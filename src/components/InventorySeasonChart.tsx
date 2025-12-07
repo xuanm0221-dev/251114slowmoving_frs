@@ -23,6 +23,7 @@ interface InventorySeasonChartProps {
   brand: Brand;
   dimensionTab?: DimensionTab;
   onDimensionTabChange?: (tab: DimensionTab) => void;
+  thresholdPct?: number;
 }
 
 // 시즌 그룹 타입
@@ -287,7 +288,7 @@ const SalesTooltip = ({ active, payload, label, data2024, data2025 }: SalesToolt
 // 데이터 기준월 제한 상수 (2025년 11월까지만 표시)
 const MAX_MONTH = "202511";
 
-export default function InventorySeasonChart({ brand, dimensionTab = "스타일", onDimensionTabChange }: InventorySeasonChartProps) {
+export default function InventorySeasonChart({ brand, dimensionTab = "스타일", onDimensionTabChange, thresholdPct = 0.01 }: InventorySeasonChartProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<InventorySeasonChartResponse | null>(null);
@@ -295,7 +296,7 @@ export default function InventorySeasonChart({ brand, dimensionTab = "스타일"
 
   const brandCode = BRAND_CODE_MAP[brand] || "M";
 
-  // 데이터 로드 (dimensionTab 변경 시 다시 로드)
+  // 데이터 로드 (dimensionTab 또는 thresholdPct 변경 시 다시 로드)
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
@@ -303,7 +304,7 @@ export default function InventorySeasonChart({ brand, dimensionTab = "스타일"
       try {
         const params = new URLSearchParams({
           brand: brandCode,
-          thresholdPct: "0.01",
+          thresholdPct: String(thresholdPct),
           dimensionTab: dimensionTab,
         });
         const response = await fetch(`/api/inventory-season-chart?${params}`);
@@ -319,7 +320,7 @@ export default function InventorySeasonChart({ brand, dimensionTab = "스타일"
       }
     };
     fetchData();
-  }, [brandCode, dimensionTab]);
+  }, [brandCode, dimensionTab, thresholdPct]);
 
   // 차트 데이터 생성
   const chartData = useMemo(() => {
@@ -855,7 +856,7 @@ export default function InventorySeasonChart({ brand, dimensionTab = "스타일"
           {/* 오른쪽: 정체재고 기준 설명 */}
           <div className="flex items-center gap-1.5 text-gray-500">
             <span className="w-3 h-3 rounded-sm flex-shrink-0" style={{ backgroundColor: COLORS.curr.정체재고 }}></span>
-            <span>정체재고 = 과시즌 중 (당월판매 ÷ 중분류 기말재고) {"<"} 0.01%</span>
+            <span>정체재고 = 과시즌 중 (당월판매 ÷ 중분류 기말재고) {"<"} {thresholdPct}%</span>
           </div>
         </div>
       </div>

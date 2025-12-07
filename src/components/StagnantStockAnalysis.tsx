@@ -20,6 +20,8 @@ interface StagnantStockAnalysisProps {
   brand: Brand;
   dimensionTab?: DimensionTab;
   onDimensionTabChange?: (tab: DimensionTab) => void;
+  thresholdPct?: number;
+  onThresholdPctChange?: (pct: number) => void;
 }
 
 // 숫자 포맷팅 함수
@@ -490,7 +492,9 @@ function DetailTable({
 export default function StagnantStockAnalysis({ 
   brand, 
   dimensionTab: externalDimensionTab,
-  onDimensionTabChange 
+  onDimensionTabChange,
+  thresholdPct: externalThresholdPct,
+  onThresholdPctChange,
 }: StagnantStockAnalysisProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -499,7 +503,7 @@ export default function StagnantStockAnalysis({
   // 컨트롤 상태
   const [availableMonths, setAvailableMonths] = useState<string[]>([]);
   const [targetMonth, setTargetMonth] = useState<string>("");
-  const [thresholdPct, setThresholdPct] = useState<number>(0.01);
+  const [internalThresholdPct, setInternalThresholdPct] = useState<number>(0.01);
   const [internalDimensionTab, setInternalDimensionTab] = useState<DimensionTab>("스타일");
   
   // 외부에서 제어되면 외부 값 사용, 아니면 내부 상태 사용
@@ -509,6 +513,16 @@ export default function StagnantStockAnalysis({
       onDimensionTabChange(tab);
     } else {
       setInternalDimensionTab(tab);
+    }
+  };
+  
+  // thresholdPct도 외부에서 제어되면 외부 값 사용
+  const thresholdPct = externalThresholdPct ?? internalThresholdPct;
+  const setThresholdPct = (pct: number) => {
+    if (onThresholdPctChange) {
+      onThresholdPctChange(pct);
+    } else {
+      setInternalThresholdPct(pct);
     }
   };
   
