@@ -12,6 +12,8 @@ import {
   ResponsiveContainer,
   Cell,
   TooltipProps,
+  LabelList,
+  ReferenceLine,
 } from "recharts";
 import type { Brand } from "@/types/sales";
 import { BRAND_CODE_MAP } from "@/types/stagnantStock";
@@ -199,9 +201,9 @@ const SalesTooltip = ({ active, payload, label, data2024, data2025 }: SalesToolt
   const daysInMonth = getDaysInMonth(curr.month);
   const totalStockWeeks = calcStockWeeks(curr.total_stock_amt, curr.total_sales_amt, daysInMonth);
   
-  // 매출액 기준 YOY 계산
-  const salesYoy = prev?.total_sales_amt > 0 
-    ? ((curr.total_sales_amt / prev.total_sales_amt - 1) * 100).toFixed(1) 
+  // 매출액 기준 YOY 계산 (전년/당년 비율)
+  const salesYoy = curr.total_sales_amt > 0 
+    ? ((prev?.total_sales_amt || 0) / curr.total_sales_amt * 100).toFixed(1) 
     : "-";
 
   return (
@@ -331,19 +333,31 @@ export default function InventorySeasonChart({ brand, dimensionTab = "스타일"
         };
       } else {
         // 매출액대비 모드: 왼쪽=당년 판매, 오른쪽=당년 재고
-        // [매출액 기준 YOY 계산] (당년 매출 / 전년 매출 - 1) * 100
-        const salesYoy = prev?.total_sales_amt > 0 
-          ? (curr.total_sales_amt / prev.total_sales_amt - 1) * 100 
+        // [매출액 기준 YOY 계산] (전년 매출 / 당년 매출) * 100
+        const salesYoy = curr.total_sales_amt > 0 
+          ? ((prev?.total_sales_amt || 0) / curr.total_sales_amt) * 100 
           : 0;
+
+        // 매출 비중(%) 계산
+        const salesTotal = curr.total_sales_amt || 0;
+        const sales과시즌 = curr.과시즌?.sales_amt || 0;
+        const sales당시즌 = curr.당시즌?.sales_amt || 0;
+        const sales차기시즌 = curr.차기시즌?.sales_amt || 0;
+        const sales정체재고 = curr.정체재고?.sales_amt || 0;
 
         return {
           month: `2025-${String(monthNum).padStart(2, "0")}`,
           monthIdx: idx,
           // 당년 판매 (왼쪽 막대)
-          sales_과시즌: (curr.과시즌?.sales_amt || 0) / 1_000_000,
-          sales_당시즌: (curr.당시즌?.sales_amt || 0) / 1_000_000,
-          sales_차기시즌: (curr.차기시즌?.sales_amt || 0) / 1_000_000,
-          sales_정체재고: (curr.정체재고?.sales_amt || 0) / 1_000_000,
+          sales_과시즌: sales과시즌 / 1_000_000,
+          sales_당시즌: sales당시즌 / 1_000_000,
+          sales_차기시즌: sales차기시즌 / 1_000_000,
+          sales_정체재고: sales정체재고 / 1_000_000,
+          // 매출 비중(%) - 소수점 0자리 반올림
+          sales_과시즌_ratio: salesTotal > 0 ? Math.round((sales과시즌 / salesTotal) * 100) : 0,
+          sales_당시즌_ratio: salesTotal > 0 ? Math.round((sales당시즌 / salesTotal) * 100) : 0,
+          sales_차기시즌_ratio: salesTotal > 0 ? Math.round((sales차기시즌 / salesTotal) * 100) : 0,
+          sales_정체재고_ratio: salesTotal > 0 ? Math.round((sales정체재고 / salesTotal) * 100) : 0,
           // 당년 재고 (오른쪽 막대)
           curr_과시즌: (curr.과시즌?.stock_amt || 0) / 1_000_000,
           curr_당시즌: (curr.당시즌?.stock_amt || 0) / 1_000_000,
@@ -352,19 +366,19 @@ export default function InventorySeasonChart({ brand, dimensionTab = "스타일"
           // [매출액 기준 YOY] 매출액대비 탭에서만 사용
           yoy: salesYoy,
           // 합계
-          sales_total: curr.total_sales_amt / 1_000_000,
+          sales_total: salesTotal / 1_000_000,
           curr_total: curr.total_stock_amt / 1_000_000,
         };
       }
     });
   }, [data, mode]);
 
-  // Y축 포맷
+  // Y축 포맷 (숫자 + M)
   const formatYAxis = (value: number) => {
-    return Math.round(value).toLocaleString();
+    return Math.round(value).toLocaleString() + "M";
   };
 
-  // 커스텀 라벨 렌더러 (막대 위에 비율 표시)
+  // 커스텀 라벨 렌더러 (막대 위에 비율 표시 - 매출액대비 탭용)
   const renderCustomLabel = (props: any) => {
     const { x, y, width, value, dataKey, index } = props;
     if (!chartData[index]) return null;
@@ -374,16 +388,8 @@ export default function InventorySeasonChart({ brand, dimensionTab = "스타일"
     let labelY = y - 5;
 
     if (mode === "전년대비") {
-      // 전년 막대 위에 전년 비율, 당년 막대 위에 당년 비율
-      const prevTotal = item.prev_total ?? 0;
-      const currTotal = item.curr_total ?? 0;
-      if (dataKey === "prev_정체재고" && prevTotal > 0) {
-        const ratio = ((item.prev_정체재고 || 0) / prevTotal * 100).toFixed(0);
-        labelText = `${ratio}%`;
-      } else if (dataKey === "curr_정체재고" && currTotal > 0) {
-        const ratio = ((item.curr_정체재고 || 0) / currTotal * 100).toFixed(0);
-        labelText = `${ratio}%`;
-      }
+      // 전년대비 탭에서는 막대 안에 표시하므로 여기서는 생략
+      return null;
     } else {
       // 매출액대비 모드
       const salesTotal = item.sales_total ?? 0;
@@ -412,6 +418,122 @@ export default function InventorySeasonChart({ brand, dimensionTab = "스타일"
       </text>
     );
   };
+
+  // 막대 안에 비율 표시 생성 함수 (전년대비 탭 전용)
+  const createBarLabelRenderer = (dataKeyName: string, totalKey: "prev_total" | "curr_total") => (props: any) => {
+    const { x, y, width, height, index } = props;
+    if (!chartData[index] || mode !== "전년대비") return null;
+    
+    // 막대 높이가 너무 작으면 표시 안함 (18px 미만)
+    if (height < 18) return null;
+    
+    const item = chartData[index];
+    const total = item[totalKey] ?? 0;
+    if (total <= 0) return null;
+    
+    const value = item[dataKeyName] || 0;
+    const ratio = (value / total * 100).toFixed(0);
+    
+    // 비율이 5% 미만이면 표시 안함
+    if (parseInt(ratio) < 5) return null;
+    
+    return (
+      <text 
+        x={x + width / 2} 
+        y={y + height / 2 + 4}
+        fill="#ffffff"
+        fontSize={10}
+        fontWeight="bold"
+        textAnchor="middle"
+        style={{ textShadow: "0 0 2px rgba(0,0,0,0.5)" }}
+      >
+        {ratio}%
+      </text>
+    );
+  };
+
+  // 각 시즌별 렌더러 (prev)
+  const renderPrev과시즌Label = useMemo(() => createBarLabelRenderer("prev_과시즌", "prev_total"), [chartData, mode]);
+  const renderPrev당시즌Label = useMemo(() => createBarLabelRenderer("prev_당시즌", "prev_total"), [chartData, mode]);
+  const renderPrev차기시즌Label = useMemo(() => createBarLabelRenderer("prev_차기시즌", "prev_total"), [chartData, mode]);
+  const renderPrev정체재고Label = useMemo(() => createBarLabelRenderer("prev_정체재고", "prev_total"), [chartData, mode]);
+
+  // 각 시즌별 렌더러 (curr)
+  const renderCurr과시즌Label = useMemo(() => createBarLabelRenderer("curr_과시즌", "curr_total"), [chartData, mode]);
+  const renderCurr당시즌Label = useMemo(() => createBarLabelRenderer("curr_당시즌", "curr_total"), [chartData, mode]);
+  const renderCurr차기시즌Label = useMemo(() => createBarLabelRenderer("curr_차기시즌", "curr_total"), [chartData, mode]);
+
+  // 매출 비중(%) 라벨 렌더러 (매출액대비 탭 전용)
+  const createSalesLabelRenderer = (ratioKey: string) => (props: any) => {
+    const { x, y, width, height, index } = props;
+    if (!chartData[index] || mode !== "매출액대비") return null;
+    
+    // 막대 높이가 너무 작으면 표시 안함 (18px 미만)
+    if (height < 18) return null;
+    
+    const item = chartData[index];
+    const ratio = item[ratioKey] || 0;
+    
+    // 비율이 5% 미만이면 표시 안함
+    if (ratio < 5) return null;
+    
+    return (
+      <text 
+        x={x + width / 2} 
+        y={y + height / 2 + 4}
+        fill="#ffffff"
+        fontSize={10}
+        fontWeight="bold"
+        textAnchor="middle"
+        style={{ textShadow: "0 0 2px rgba(0,0,0,0.5)" }}
+      >
+        {ratio}%
+      </text>
+    );
+  };
+
+  // 각 시즌별 매출 비중 라벨 렌더러
+  const renderSales과시즌Label = useMemo(() => createSalesLabelRenderer("sales_과시즌_ratio"), [chartData, mode]);
+  const renderSales당시즌Label = useMemo(() => createSalesLabelRenderer("sales_당시즌_ratio"), [chartData, mode]);
+  const renderSales차기시즌Label = useMemo(() => createSalesLabelRenderer("sales_차기시즌_ratio"), [chartData, mode]);
+  const renderSales정체재고Label = useMemo(() => createSalesLabelRenderer("sales_정체재고_ratio"), [chartData, mode]);
+  const renderCurr정체재고Label = useMemo(() => createBarLabelRenderer("curr_정체재고", "curr_total"), [chartData, mode]);
+
+  // 매출액대비 탭용 재고 비중 라벨 렌더러
+  const createCurrLabelForSalesTab = (dataKeyName: string) => (props: any) => {
+    const { x, y, width, height, index } = props;
+    if (!chartData[index] || mode !== "매출액대비") return null;
+    
+    if (height < 18) return null;
+    
+    const item = chartData[index];
+    const total = item.curr_total ?? 0;
+    if (total <= 0) return null;
+    
+    const value = item[dataKeyName] || 0;
+    const ratio = (value / total * 100).toFixed(0);
+    
+    if (parseInt(ratio) < 5) return null;
+    
+    return (
+      <text 
+        x={x + width / 2} 
+        y={y + height / 2 + 4}
+        fill="#ffffff"
+        fontSize={10}
+        fontWeight="bold"
+        textAnchor="middle"
+        style={{ textShadow: "0 0 2px rgba(0,0,0,0.5)" }}
+      >
+        {ratio}%
+      </text>
+    );
+  };
+
+  const renderCurr과시즌LabelForSales = useMemo(() => createCurrLabelForSalesTab("curr_과시즌"), [chartData, mode]);
+  const renderCurr당시즌LabelForSales = useMemo(() => createCurrLabelForSalesTab("curr_당시즌"), [chartData, mode]);
+  const renderCurr차기시즌LabelForSales = useMemo(() => createCurrLabelForSalesTab("curr_차기시즌"), [chartData, mode]);
+  const renderCurr정체재고LabelForSales = useMemo(() => createCurrLabelForSalesTab("curr_정체재고"), [chartData, mode]);
 
   if (loading) {
     return (
@@ -442,7 +564,7 @@ export default function InventorySeasonChart({ brand, dimensionTab = "스타일"
       <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
         <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
           <span className="text-purple-500">📊</span>
-          재고택금액 추이 (시즌별, M단위) - 당년재고/매출액 비교
+          정상,정체 재고금액 추이
         </h2>
         
         {/* 모드 전환 탭 */}
@@ -479,36 +601,48 @@ export default function InventorySeasonChart({ brand, dimensionTab = "스타일"
               axisLine={{ stroke: "#d1d5db" }}
               tickFormatter={(value) => value.slice(5)} // "2025-01" -> "01"
             />
+            {/* 재고금액용 Y축 (오른쪽) */}
             <YAxis 
-              yAxisId="left"
+              yAxisId="inventory"
+              orientation="right"
               tick={{ fontSize: 11, fill: "#6b7280" }}
               axisLine={{ stroke: "#d1d5db" }}
               tickFormatter={formatYAxis}
-              label={{ 
-                value: "M", 
-                angle: 0, 
-                position: "top",
-                offset: 10,
-                style: { fontSize: 11, fill: "#6b7280" }
-              }}
+              ticks={[0, 1000, 2000, 3000, 4000, 5000]}
+              domain={[0, 5000]}
             />
-            {/* [오른쪽 Y축] 매출액대비 탭에서만 YOY 축 표시 */}
+            
+            {/* 매출액대비 탭에서만 추가 Y축들 */}
             {mode === "매출액대비" && (
-              <YAxis 
-                yAxisId="right"
-                orientation="right"
-                tick={{ fontSize: 11, fill: "#FDA4AF" }}
-                axisLine={{ stroke: "#FDA4AF" }}
-                tickFormatter={(v) => `${v.toFixed(0)}%`}
-                domain={[-50, 50]}
-                label={{ 
-                  value: "매출액 YOY", 
-                  angle: 0, 
-                  position: "top",
-                  offset: 10,
-                  style: { fontSize: 11, fill: "#FDA4AF" }
-                }}
-              />
+              <>
+                {/* 매출금액용 Y축 (왼쪽) - 0M ~ 1000M */}
+                <YAxis 
+                  yAxisId="sales"
+                  orientation="left"
+                  tick={{ fontSize: 11, fill: "#6b7280" }}
+                  axisLine={{ stroke: "#d1d5db" }}
+                  tickFormatter={formatYAxis}
+                  ticks={[0, 200, 400, 600, 800, 1000]}
+                  domain={[0, 1000]}
+                />
+                
+                {/* YOY용 Y축 (숨김 처리 - 스케일만 유지) */}
+                <YAxis 
+                  yAxisId="yoy"
+                  orientation="right"
+                  hide={true}
+                  domain={[0, 150]}
+                />
+                
+                {/* YOY 100% 기준선 */}
+                <ReferenceLine
+                  yAxisId="yoy"
+                  y={100}
+                  stroke="#ff6699"
+                  strokeDasharray="4 2"
+                  strokeOpacity={0.4}
+                />
+              </>
             )}
             
             <Tooltip 
@@ -521,36 +655,68 @@ export default function InventorySeasonChart({ brand, dimensionTab = "스타일"
 
             {mode === "전년대비" ? (
               <>
-                {/* 전년 재고 막대 (왼쪽) */}
-                <Bar yAxisId="left" dataKey="prev_과시즌" stackId="prev" fill={COLORS.prev.과시즌} name="24년 과시즌" />
-                <Bar yAxisId="left" dataKey="prev_당시즌" stackId="prev" fill={COLORS.prev.당시즌} name="24년 당시즌" />
-                <Bar yAxisId="left" dataKey="prev_차기시즌" stackId="prev" fill={COLORS.prev.차기시즌} name="24년 차기시즌" />
-                <Bar yAxisId="left" dataKey="prev_정체재고" stackId="prev" fill={COLORS.prev.정체재고} name="24년 정체재고" label={renderCustomLabel} />
+                {/* 전년 재고 막대 (왼쪽) - 막대 안에 비율 표시 */}
+                <Bar yAxisId="inventory" dataKey="prev_과시즌" stackId="prev" fill={COLORS.prev.과시즌} name="24년 과시즌">
+                  <LabelList content={renderPrev과시즌Label} />
+                </Bar>
+                <Bar yAxisId="inventory" dataKey="prev_당시즌" stackId="prev" fill={COLORS.prev.당시즌} name="24년 당시즌">
+                  <LabelList content={renderPrev당시즌Label} />
+                </Bar>
+                <Bar yAxisId="inventory" dataKey="prev_차기시즌" stackId="prev" fill={COLORS.prev.차기시즌} name="24년 차기시즌">
+                  <LabelList content={renderPrev차기시즌Label} />
+                </Bar>
+                <Bar yAxisId="inventory" dataKey="prev_정체재고" stackId="prev" fill={COLORS.prev.정체재고} name="24년 정체재고">
+                  <LabelList content={renderPrev정체재고Label} />
+                </Bar>
                 
-                {/* 당년 재고 막대 (오른쪽) */}
-                <Bar yAxisId="left" dataKey="curr_과시즌" stackId="curr" fill={COLORS.curr.과시즌} name="25년 과시즌" />
-                <Bar yAxisId="left" dataKey="curr_당시즌" stackId="curr" fill={COLORS.curr.당시즌} name="25년 당시즌" />
-                <Bar yAxisId="left" dataKey="curr_차기시즌" stackId="curr" fill={COLORS.curr.차기시즌} name="25년 차기시즌" />
-                <Bar yAxisId="left" dataKey="curr_정체재고" stackId="curr" fill={COLORS.curr.정체재고} name="25년 정체재고" label={renderCustomLabel} />
+                {/* 당년 재고 막대 (오른쪽) - 막대 안에 비율 표시 */}
+                <Bar yAxisId="inventory" dataKey="curr_과시즌" stackId="curr" fill={COLORS.curr.과시즌} name="25년 과시즌">
+                  <LabelList content={renderCurr과시즌Label} />
+                </Bar>
+                <Bar yAxisId="inventory" dataKey="curr_당시즌" stackId="curr" fill={COLORS.curr.당시즌} name="25년 당시즌">
+                  <LabelList content={renderCurr당시즌Label} />
+                </Bar>
+                <Bar yAxisId="inventory" dataKey="curr_차기시즌" stackId="curr" fill={COLORS.curr.차기시즌} name="25년 차기시즌">
+                  <LabelList content={renderCurr차기시즌Label} />
+                </Bar>
+                <Bar yAxisId="inventory" dataKey="curr_정체재고" stackId="curr" fill={COLORS.curr.정체재고} name="25년 정체재고">
+                  <LabelList content={renderCurr정체재고Label} />
+                </Bar>
                 {/* [전년대비 탭] YOY 라인 렌더링 안함 - 막대차트만 표시 */}
               </>
             ) : (
               <>
-                {/* 당년 판매 막대 (왼쪽) */}
-                <Bar yAxisId="left" dataKey="sales_과시즌" stackId="sales" fill={COLORS.curr.과시즌} name="25년 판매 과시즌" />
-                <Bar yAxisId="left" dataKey="sales_당시즌" stackId="sales" fill={COLORS.curr.당시즌} name="25년 판매 당시즌" />
-                <Bar yAxisId="left" dataKey="sales_차기시즌" stackId="sales" fill={COLORS.curr.차기시즌} name="25년 판매 차기시즌" />
-                <Bar yAxisId="left" dataKey="sales_정체재고" stackId="sales" fill={COLORS.curr.정체재고} name="25년 판매 정체재고" label={renderCustomLabel} />
+                {/* 당년 판매 막대 - yAxisId="sales" (왼쪽 Y축) - 막대 안에 비율 표시 */}
+                <Bar yAxisId="sales" dataKey="sales_과시즌" stackId="sales" fill={COLORS.prev.과시즌} name="25년 판매 과시즌">
+                  <LabelList content={renderSales과시즌Label} />
+                </Bar>
+                <Bar yAxisId="sales" dataKey="sales_당시즌" stackId="sales" fill={COLORS.prev.당시즌} name="25년 판매 당시즌">
+                  <LabelList content={renderSales당시즌Label} />
+                </Bar>
+                <Bar yAxisId="sales" dataKey="sales_차기시즌" stackId="sales" fill={COLORS.prev.차기시즌} name="25년 판매 차기시즌">
+                  <LabelList content={renderSales차기시즌Label} />
+                </Bar>
+                <Bar yAxisId="sales" dataKey="sales_정체재고" stackId="sales" fill={COLORS.prev.정체재고} name="25년 판매 정체재고">
+                  <LabelList content={renderSales정체재고Label} />
+                </Bar>
                 
-                {/* 당년 재고 막대 (오른쪽) */}
-                <Bar yAxisId="left" dataKey="curr_과시즌" stackId="curr" fill={COLORS.curr.과시즌} name="25년 재고 과시즌" />
-                <Bar yAxisId="left" dataKey="curr_당시즌" stackId="curr" fill={COLORS.curr.당시즌} name="25년 재고 당시즌" />
-                <Bar yAxisId="left" dataKey="curr_차기시즌" stackId="curr" fill={COLORS.curr.차기시즌} name="25년 재고 차기시즌" />
-                <Bar yAxisId="left" dataKey="curr_정체재고" stackId="curr" fill={COLORS.curr.정체재고} name="25년 재고 정체재고" label={renderCustomLabel} />
+                {/* 당년 재고 막대 - yAxisId="inventory" (오른쪽 Y축) - 막대 안에 비율 표시 */}
+                <Bar yAxisId="inventory" dataKey="curr_과시즌" stackId="curr" fill={COLORS.curr.과시즌} name="25년 재고 과시즌">
+                  <LabelList content={renderCurr과시즌LabelForSales} />
+                </Bar>
+                <Bar yAxisId="inventory" dataKey="curr_당시즌" stackId="curr" fill={COLORS.curr.당시즌} name="25년 재고 당시즌">
+                  <LabelList content={renderCurr당시즌LabelForSales} />
+                </Bar>
+                <Bar yAxisId="inventory" dataKey="curr_차기시즌" stackId="curr" fill={COLORS.curr.차기시즌} name="25년 재고 차기시즌">
+                  <LabelList content={renderCurr차기시즌LabelForSales} />
+                </Bar>
+                <Bar yAxisId="inventory" dataKey="curr_정체재고" stackId="curr" fill={COLORS.curr.정체재고} name="25년 재고 정체재고">
+                  <LabelList content={renderCurr정체재고LabelForSales} />
+                </Bar>
 
-                {/* [매출액대비 탭] 매출액 기준 YOY 라인 - 전년 동월 대비 매출액 증감률(%) */}
+                {/* [매출액대비 탭] YOY 라인 - yAxisId="yoy" (숨겨진 Y축) */}
                 <Line 
-                  yAxisId="right"
+                  yAxisId="yoy"
                   type="monotone"
                   dataKey="yoy"
                   stroke={COLORS.yoy}

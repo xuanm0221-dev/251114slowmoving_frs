@@ -709,9 +709,8 @@ export default function StagnantStockAnalysis({
   useEffect(() => {
     const loadInitialMonths = async () => {
       try {
-        // 현재 날짜 기준 기본 월 설정
-        const now = new Date();
-        const defaultMonth = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, "0")}`;
+        // 기본 기준월을 2025년 11월로 고정
+        const defaultMonth = "202511";
         
         const params = new URLSearchParams({
           brand: brandCode,
@@ -725,7 +724,11 @@ export default function StagnantStockAnalysis({
           const result: StagnantStockResponse = await response.json();
           if (result.availableMonths && result.availableMonths.length > 0) {
             setAvailableMonths(result.availableMonths);
-            setTargetMonth(result.availableMonths[0]); // 최신 월 선택
+            // 2025년 11월이 availableMonths에 있으면 선택, 없으면 최신 월 선택
+            const targetDefault = result.availableMonths.includes("202511") 
+              ? "202511" 
+              : result.availableMonths[0];
+            setTargetMonth(targetDefault);
           }
         }
       } catch (err) {
@@ -869,8 +872,13 @@ export default function StagnantStockAnalysis({
           </div>
 
           {/* 범례 */}
-          <div className="mt-3 text-xs text-gray-500">
-            <span className="font-medium">정체재고 기준:</span> 해당 품번의 월 판매금액 ÷ 중분류 전체 재고금액 {"<"} {thresholdPct}% 이면 정체재고로 분류
+          <div className="mt-3 text-xs text-gray-500 flex justify-between items-center">
+            <span>
+              <span className="font-medium">정체재고 기준:</span> 해당 품번의 월 판매금액 ÷ 중분류 전체 재고금액 {"<"} {thresholdPct}% 이면 정체재고로 분류
+            </span>
+            <span className="text-right">
+              기준월: {formatMonth(targetMonth)} | 브랜드: {brand} | 분석단위: {dimensionTab} | 정체기준: {thresholdPct}% | 당해연도: 2025 | 차기연도: 2026
+            </span>
           </div>
         </div>
 
