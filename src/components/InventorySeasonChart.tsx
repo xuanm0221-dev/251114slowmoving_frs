@@ -428,10 +428,10 @@ export default function InventorySeasonChart({ brand, dimensionTab = "스타일"
     if (height < 18) return null;
     
     const item = chartData[index];
-    const total = item[totalKey] ?? 0;
+    const total = (item as any)[totalKey] ?? 0;
     if (total <= 0) return null;
     
-    const value = item[dataKeyName] || 0;
+    const value = (item as any)[dataKeyName] || 0;
     const ratio = (value / total * 100).toFixed(0);
     
     // 비율이 5% 미만이면 표시 안함
@@ -472,7 +472,7 @@ export default function InventorySeasonChart({ brand, dimensionTab = "스타일"
     if (height < 18) return null;
     
     const item = chartData[index];
-    const ratio = item[ratioKey] || 0;
+    const ratio = (item as any)[ratioKey] || 0;
     
     // 비율이 5% 미만이면 표시 안함
     if (ratio < 5) return null;
@@ -510,7 +510,7 @@ export default function InventorySeasonChart({ brand, dimensionTab = "스타일"
     const total = item.curr_total ?? 0;
     if (total <= 0) return null;
     
-    const value = item[dataKeyName] || 0;
+    const value = (item as any)[dataKeyName] || 0;
     const ratio = (value / total * 100).toFixed(0);
     
     if (parseInt(ratio) < 5) return null;
