@@ -16,6 +16,7 @@ import type {
 } from "@/types/stagnantStock";
 import { DIMENSION_TABS, BRAND_CODE_MAP, STAGNANT_CHANNEL_TABS } from "@/types/stagnantStock";
 import CollapsibleSection from "./CollapsibleSection";
+import StagnantStockDetailModal from "./StagnantStockDetailModal";
 
 // 아이템 필터 탭 타입
 type ItemFilterTab = "ACC합계" | "신발" | "모자" | "가방" | "기타";
@@ -300,6 +301,7 @@ function DetailTable({
   getChannelData,
   totalItemCount,
   totalStockAmt,
+  onItemClick,
 }: {
   data: DetailTableData;
   dimensionTab: DimensionTab;
@@ -310,6 +312,7 @@ function DetailTable({
   getChannelData: (item: StagnantStockItem, channel: StagnantChannelTab) => { stock_amt: number; stock_qty: number; sales_amt: number };
   totalItemCount: number;  // 전체 품번 수 (4개 테이블 합계)
   totalStockAmt: number;   // 전체 재고 금액
+  onItemClick?: (item: StagnantStockItem) => void;  // 품번 클릭 핸들러
 }) {
   const daysInMonth = getDaysInMonth(targetMonth);
 
@@ -487,7 +490,13 @@ function DetailTable({
                   return (
                     <tr key={item.dimensionKey + idx} className="border-b border-gray-200 hover:bg-white/50">
                       <td className="py-2 px-2 text-gray-700">{item.mid_category_kr}</td>
-                      <td className="py-2 px-2 text-gray-900 font-mono text-xs">{item.dimensionKey}</td>
+                      <td 
+                        className="py-2 px-2 text-blue-600 font-mono text-xs cursor-pointer hover:text-blue-800 hover:underline"
+                        onClick={() => onItemClick?.(item)}
+                        title="클릭하여 상세 정보 보기"
+                      >
+                        {item.dimensionKey}
+                      </td>
                       <td className="py-2 px-2 text-gray-700 max-w-[200px] truncate" title={item.prdt_nm}>
                         {item.prdt_nm}
                       </td>
@@ -585,6 +594,16 @@ export default function StagnantStockAnalysis({
 
   // 검색어 상태
   const [searchQuery, setSearchQuery] = useState<string>("");
+
+  // 품번 상세 모달 상태
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedItem, setSelectedItem] = useState<StagnantStockItem | null>(null);
+
+  // 품번 클릭 핸들러
+  const handleItemClick = (item: StagnantStockItem) => {
+    setSelectedItem(item);
+    setModalOpen(true);
+  };
 
   // 시즌 필터 상태 (전체 시즌, 당시즌, 차기시즌, 과시즌, 정체재고)
   type SeasonFilterOption = "전체 시즌" | "당시즌" | "차기시즌" | "과시즌" | "정체재고";
@@ -1153,6 +1172,7 @@ export default function StagnantStockAnalysis({
                       getChannelData={getChannelData}
                       totalItemCount={totalItemCount}
                       totalStockAmt={totalStockAmt}
+                      onItemClick={handleItemClick}
                     />
                   )}
                   
@@ -1168,6 +1188,7 @@ export default function StagnantStockAnalysis({
                       getChannelData={getChannelData}
                       totalItemCount={totalItemCount}
                       totalStockAmt={totalStockAmt}
+                      onItemClick={handleItemClick}
                     />
                   )}
                   
@@ -1183,6 +1204,7 @@ export default function StagnantStockAnalysis({
                       getChannelData={getChannelData}
                       totalItemCount={totalItemCount}
                       totalStockAmt={totalStockAmt}
+                      onItemClick={handleItemClick}
                     />
                   )}
                   
@@ -1198,6 +1220,7 @@ export default function StagnantStockAnalysis({
                       getChannelData={getChannelData}
                       totalItemCount={totalItemCount}
                       totalStockAmt={totalStockAmt}
+                      onItemClick={handleItemClick}
                     />
                   )}
                 </div>
@@ -1214,6 +1237,17 @@ export default function StagnantStockAnalysis({
           </div>
         )}
       </CollapsibleSection>
+
+      {/* 품번 상세 모달 */}
+      {selectedItem && (
+        <StagnantStockDetailModal
+          isOpen={modalOpen}
+          onClose={() => setModalOpen(false)}
+          item={selectedItem}
+          brand={brandCode}
+          dimensionTab={dimensionTab}
+        />
+      )}
     </div>
   );
 }

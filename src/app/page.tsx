@@ -6,7 +6,7 @@ export default function Home() {
   return (
     <>
       <Navigation />
-      <main className="max-w-[1800px] mx-auto px-6 py-12">
+      <main className="max-w-[1800px] mx-auto px-6 py-12 mt-14">
         {/* 히어로 섹션 */}
         <div className="text-center mb-16">
           <h1 className="text-5xl font-bold mb-4 bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 bg-clip-text text-transparent">

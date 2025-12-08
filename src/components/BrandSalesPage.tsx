@@ -250,9 +250,9 @@ export default function BrandSalesPage({ brand, title }: BrandSalesPageProps) {
   }, [salesTabData, inventoryTabDataWithForecast, inventoryData?.daysInMonth, stockWeekWindow, productTypeTab]);
 
   return (
-    <>
-      <Navigation />
-      <main className="max-w-[1800px] mx-auto px-6 py-6">
+      <>
+        <Navigation />
+        <main className="max-w-[1800px] mx-auto px-6 py-6 mt-14">
         {/* 예상치 못한 중분류 경고 */}
         {allUnexpectedCategories.length > 0 && (
           <WarningBanner categories={allUnexpectedCategories} />

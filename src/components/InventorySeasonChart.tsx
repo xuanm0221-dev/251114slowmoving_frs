@@ -590,6 +590,74 @@ export default function InventorySeasonChart({ brand, dimensionTab = "스타일"
   const renderCurr차기시즌LabelForSales = useMemo(() => createCurrLabelForSalesTab("curr_차기시즌"), [chartData, mode]);
   const renderCurr정체재고LabelForSales = useMemo(() => createCurrLabelForSalesTab("curr_정체재고"), [chartData, mode]);
 
+  // Y축 동적 범위 계산 (브랜드별 데이터 스케일에 맞게 자동 조정)
+  const { inventoryTicks, inventoryDomain, salesTicks, salesDomain } = useMemo(() => {
+    if (!chartData || chartData.length === 0) {
+      return {
+        inventoryTicks: [0, 1000, 2000, 3000, 4000, 5000],
+        inventoryDomain: [0, 5000] as [number, number],
+        salesTicks: [0, 200, 400, 600, 800, 1000],
+        salesDomain: [0, 1000] as [number, number],
+      };
+    }
+
+    // 재고금액/매출금액 최대값 계산
+    let maxInventory = 0;
+    let maxSales = 0;
+    
+    chartData.forEach((item: any) => {
+      if (mode === "전년대비") {
+        // 전년대비: prev_total, curr_total 비교
+        const prevTotal = item.prev_total || 0;
+        const currTotal = item.curr_total || 0;
+        maxInventory = Math.max(maxInventory, prevTotal, currTotal);
+      } else {
+        // 매출액대비: curr_total (재고), sales_total (매출)
+        const currTotal = item.curr_total || 0;
+        const salesTotal = item.sales_total || 0;
+        maxInventory = Math.max(maxInventory, currTotal);
+        maxSales = Math.max(maxSales, salesTotal);
+      }
+    });
+
+    // 적절한 Y축 최대값 계산 (깔끔한 숫자로 반올림)
+    const calcNiceMax = (max: number): number => {
+      if (max <= 0) return 1000;
+      // 최대값의 1.15배를 기준으로 깔끔한 숫자로 올림
+      const target = max * 1.15;
+      const magnitude = Math.pow(10, Math.floor(Math.log10(target)));
+      const normalized = target / magnitude;
+      let niceNormalized;
+      if (normalized <= 1) niceNormalized = 1;
+      else if (normalized <= 2) niceNormalized = 2;
+      else if (normalized <= 2.5) niceNormalized = 2.5;
+      else if (normalized <= 5) niceNormalized = 5;
+      else niceNormalized = 10;
+      return niceNormalized * magnitude;
+    };
+
+    // 균등 간격 ticks 생성
+    const calcTicks = (maxVal: number, count: number = 5): number[] => {
+      const niceMax = calcNiceMax(maxVal);
+      const step = niceMax / count;
+      const ticks = [];
+      for (let i = 0; i <= count; i++) {
+        ticks.push(Math.round(step * i));
+      }
+      return ticks;
+    };
+
+    const niceMaxInv = calcNiceMax(maxInventory);
+    const niceMaxSales = calcNiceMax(maxSales);
+
+    return {
+      inventoryTicks: calcTicks(maxInventory),
+      inventoryDomain: [0, niceMaxInv] as [number, number],
+      salesTicks: calcTicks(maxSales),
+      salesDomain: [0, niceMaxSales] as [number, number],
+    };
+  }, [chartData, mode]);
+
   if (loading) {
     return (
       <div className="card mb-4">
@@ -697,29 +765,29 @@ export default function InventorySeasonChart({ brand, dimensionTab = "스타일"
               axisLine={{ stroke: "#d1d5db" }}
               tickFormatter={(value) => `${value.slice(2, 4)}.${value.slice(5)}`} // "2025-01" -> "25.01"
             />
-            {/* 재고금액용 Y축 - 전년대비:왼쪽, 매출액대비:오른쪽 */}
+            {/* 재고금액용 Y축 - 전년대비:왼쪽, 매출액대비:오른쪽 (동적 범위) */}
             <YAxis 
               yAxisId="inventory"
               orientation={mode === "전년대비" ? "left" : "right"}
               tick={{ fontSize: 11, fill: "#6b7280" }}
               axisLine={{ stroke: "#d1d5db" }}
               tickFormatter={formatYAxis}
-              ticks={[0, 1000, 2000, 3000, 4000, 5000]}
-              domain={[0, 5000]}
+              ticks={inventoryTicks}
+              domain={inventoryDomain}
             />
             
             {/* 매출액대비 탭에서만 추가 Y축들 */}
             {mode === "매출액대비" && (
               <>
-                {/* 매출금액용 Y축 (왼쪽) - 0M ~ 1000M */}
+                {/* 매출금액용 Y축 (왼쪽) - 동적 범위 */}
                 <YAxis 
                   yAxisId="sales"
                   orientation="left"
                   tick={{ fontSize: 11, fill: "#6b7280" }}
                   axisLine={{ stroke: "#d1d5db" }}
                   tickFormatter={formatYAxis}
-                  ticks={[0, 200, 400, 600, 800, 1000]}
-                  domain={[0, 1000]}
+                  ticks={salesTicks}
+                  domain={salesDomain}
                 />
                 
                 {/* YOY용 Y축 (숨김 처리 - 스케일만 유지) */}
