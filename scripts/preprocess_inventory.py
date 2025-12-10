@@ -325,9 +325,9 @@ def merge_inventory_month(months_to_merge: list, new_inventory_path: str = None)
                         if channel == "FRS":
                             key_frs = (brand, item_tab, year_month, "FRS", op_group)
                             agg_dict[key_frs] += amount
-                        elif channel == "OR":
-                            key_hq = (brand, item_tab, year_month, "HQ_OR", op_group)
-                            agg_dict[key_hq] += amount
+                        elif channel in ["HQ", "OR"]:  # HQ + OR = 본사재고
+                            key_hq_or = (brand, item_tab, year_month, "HQ_OR", op_group)
+                            agg_dict[key_hq_or] += amount
                         
         except Exception as e:
             print(f"[ERROR] 파일 처리 실패: {file_path}")
