@@ -36,17 +36,26 @@ INVENTORY_COLUMNS = [
 
 
 def determine_operation_group(op_basis: str, season: str) -> str:
+    """
+    주력/아울렛 상품 구분
+    1. 운영기준이 INTRO, FOCUS, 26SS면 → 주력
+    2. 운영기준이 미지정("")이면 → 시즌코드(24FW, 25SS, 25FW, 26SS)로 판단
+    3. 그 외 → 아울렛
+    """
     op_basis = str(op_basis).strip() if pd.notna(op_basis) else ""
     season = str(season).strip() if pd.notna(season) else ""
     
-    if op_basis in ["INTRO", "FOCUS"]:
+    # 1. 운영기준이 INTRO/FOCUS/26SS면 → 주력
+    if op_basis in ["INTRO", "FOCUS", "26SS"]:
         return "core"
     
+    # 2. 운영기준이 미지정("")이면 → 시즌코드로 판단
     if op_basis == "":
         for core_season in CORE_SEASONS:
             if core_season in season:
                 return "core"
     
+    # 3. 그 외 → 아울렛
     return "outlet"
 
 
@@ -264,7 +273,7 @@ def merge_inventory_month(months_to_merge: list, new_inventory_path: str = None)
             for chunk in pd.read_csv(
                 file_path,
                 chunksize=CHUNK_SIZE,
-                encoding='utf-8',
+                encoding='utf-8-sig',
                 usecols=INVENTORY_COLUMNS,
                 dtype={
                     "Channel 2": str,
