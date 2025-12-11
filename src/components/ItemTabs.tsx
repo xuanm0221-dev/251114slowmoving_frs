@@ -173,7 +173,7 @@ export default function ItemTabs({
         {/* 신규발주가능 금액 표시 */}
         <div className="flex items-center gap-2">
           <span className="text-xs font-medium text-gray-600 whitespace-nowrap">
-            4개월 후 신규발주 가능금액:
+            신규발주 가능금액:
           </span>
             <span
               className={cn(
