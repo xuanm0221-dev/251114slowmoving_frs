@@ -533,7 +533,7 @@ export default function DealerStagnantStockAnalysis({
         const itemInfo = itemInfoMap.get(ab.dimensionKey);
         if (!itemInfo) return false;
         if (group === "정체재고") return itemInfo.seasonGroup === "정체재고";
-        return itemInfo.seasonGroup === group && itemInfo.seasonGroup !== "정체재고";
+        return itemInfo.seasonGroup === group;
       });
       
       const stockAmt = items.reduce((sum, ab) => sum + ab.stock_amt, 0);
@@ -564,8 +564,8 @@ export default function DealerStagnantStockAnalysis({
         const itemInfo = itemInfoMap.get(ab.dimensionKey);
         if (!itemInfo) return false;
         if (selectedSeasonGroup === "정체재고") return itemInfo.seasonGroup === "정체재고";
-        if (selectedSeasonGroup === "과시즌(정체제외)") return itemInfo.seasonGroup === "과시즌" && itemInfo.seasonGroup !== "정체재고";
-        return itemInfo.seasonGroup === selectedSeasonGroup && itemInfo.seasonGroup !== "정체재고";
+        if (selectedSeasonGroup === "과시즌(정체제외)") return itemInfo.seasonGroup === "과시즌";
+        return itemInfo.seasonGroup === selectedSeasonGroup;
       })
       .map(ab => {
         const itemInfo = itemInfoMap.get(ab.dimensionKey)!;
