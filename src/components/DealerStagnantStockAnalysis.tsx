@@ -823,170 +823,169 @@ export default function DealerStagnantStockAnalysis({
 
         {!loading && !error && data && (
           <>
-            {/* 요약 카드 3개 가로 배열 */}
+            {/* 요약 카드 3개 가로 배열 - 테이블만 표시 */}
             <div className="mb-6 grid grid-cols-3 gap-4">
               {/* 전체 카드 */}
-              <div className="rounded-lg border border-gray-200 bg-white p-4 flex flex-col">
-                <div className="flex items-center gap-2 mb-3 pb-2 border-b border-gray-100">
+              <div className="rounded-lg border border-gray-200 bg-white p-4">
+                <div className="flex items-center gap-2 mb-3">
                   <span className="px-2 py-0.5 bg-gray-500 text-white text-xs font-medium rounded">전체</span>
                   <span className="text-xs text-gray-500">FR 재고 합계</span>
                 </div>
-                <div className="grid grid-cols-2 gap-3 text-xs flex-1">
-                  <div>
-                    <span className="text-gray-500">재고금액</span>
-                    <p className="font-semibold text-gray-900 text-sm">{formatAmountK(stagnantNormalSummary.total?.stock_amt || 0)}</p>
-                  </div>
-                  <div>
-                    <span className="text-gray-500">재고수량</span>
-                    <p className="font-semibold text-gray-900 text-sm">{formatNumber(stagnantNormalSummary.total?.stock_qty || 0)}</p>
-                  </div>
-                  <div>
-                    <span className="text-gray-500">매출금액</span>
-                    <p className="font-semibold text-gray-900 text-sm">{formatAmountK(stagnantNormalSummary.total?.sales_amt || 0)}</p>
-                  </div>
-                  <div>
-                    <span className="text-gray-500">재고주수</span>
-                    <p className="font-semibold text-gray-900 text-sm">{formatStockWeeks(stagnantNormalSummary.total?.stock_weeks || null)}</p>
-                  </div>
-                </div>
-                {/* 중분류 요약 */}
-                <div className="mt-3 pt-3 border-t border-gray-100">
-                  <p className="text-xs text-gray-500 mb-2">중분류별</p>
-                  <table className="w-full text-xs">
-                    <thead>
-                      <tr className="text-gray-500">
-                        <th className="text-left py-1 font-normal">구분</th>
-                        <th className="text-right py-1 font-normal">재고(K)</th>
-                        <th className="text-right py-1 font-normal">수량</th>
-                        <th className="text-right py-1 font-normal">매출(K)</th>
-                        <th className="text-right py-1 font-normal">주수</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {categorySummaries.slice(1).map((cat) => (
-                        <tr key={cat.category} className="border-t border-gray-50">
-                          <td className="py-1 text-gray-700">{cat.category}</td>
-                          <td className="text-right py-1 text-gray-900">{formatAmountK(cat.stock_amt)}</td>
-                          <td className="text-right py-1 text-gray-900">{formatNumber(cat.stock_qty)}</td>
-                          <td className="text-right py-1 text-gray-900">{formatAmountK(cat.sales_amt)}</td>
-                          <td className="text-right py-1 text-gray-900">{formatStockWeeks(cat.stock_weeks)}</td>
+                <table className="w-full text-xs">
+                  <thead>
+                    <tr className="text-gray-500 border-b border-gray-200">
+                      <th className="text-left py-1.5 font-medium">구분</th>
+                      <th className="text-right py-1.5 font-medium">재고(K)</th>
+                      <th className="text-right py-1.5 font-medium">비중</th>
+                      <th className="text-right py-1.5 font-medium">수량</th>
+                      <th className="text-right py-1.5 font-medium">비중</th>
+                      <th className="text-right py-1.5 font-medium">매출(K)</th>
+                      <th className="text-right py-1.5 font-medium">주수</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {/* 합계 행 */}
+                    <tr className="border-b border-gray-100 bg-gray-50 font-bold">
+                      <td className="py-1.5 text-gray-900">합계</td>
+                      <td className="text-right py-1.5 text-gray-900">{formatAmountK(stagnantNormalSummary.total?.stock_amt || 0)}</td>
+                      <td className="text-right py-1.5 text-gray-600">100.0%</td>
+                      <td className="text-right py-1.5 text-gray-900">{formatNumber(stagnantNormalSummary.total?.stock_qty || 0)}</td>
+                      <td className="text-right py-1.5 text-gray-600">100.0%</td>
+                      <td className="text-right py-1.5 text-gray-900">{formatAmountK(stagnantNormalSummary.total?.sales_amt || 0)}</td>
+                      <td className="text-right py-1.5 text-gray-900">{formatStockWeeks(stagnantNormalSummary.total?.stock_weeks || null)}</td>
+                    </tr>
+                    {/* 중분류 행 */}
+                    {categorySummaries.slice(1).map((cat) => {
+                      const totalStockAmt = stagnantNormalSummary.total?.stock_amt || 1;
+                      const totalStockQty = stagnantNormalSummary.total?.stock_qty || 1;
+                      return (
+                        <tr key={cat.category} className="border-b border-gray-50">
+                          <td className="py-1.5 text-gray-700">{cat.category}</td>
+                          <td className="text-right py-1.5 text-gray-900">{formatAmountK(cat.stock_amt)}</td>
+                          <td className="text-right py-1.5 text-gray-500">{(cat.stock_amt / totalStockAmt * 100).toFixed(1)}%</td>
+                          <td className="text-right py-1.5 text-gray-900">{formatNumber(cat.stock_qty)}</td>
+                          <td className="text-right py-1.5 text-gray-500">{(cat.stock_qty / totalStockQty * 100).toFixed(1)}%</td>
+                          <td className="text-right py-1.5 text-gray-900">{formatAmountK(cat.sales_amt)}</td>
+                          <td className="text-right py-1.5 text-gray-900">{formatStockWeeks(cat.stock_weeks)}</td>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                      );
+                    })}
+                  </tbody>
+                </table>
               </div>
 
               {/* 정체 카드 */}
-              <div className="rounded-lg border-2 border-red-200 bg-red-50 p-4 flex flex-col">
-                <div className="flex items-center gap-2 mb-3 pb-2 border-b border-red-100">
+              <div className="rounded-lg border-2 border-red-200 bg-red-50 p-4">
+                <div className="flex items-center gap-2 mb-3">
                   <span className="px-2 py-0.5 bg-red-500 text-white text-xs font-medium rounded">정체</span>
                   <span className="text-xs text-gray-500">과시즌 중 판매율 &lt; {thresholdPct}%</span>
                 </div>
-                <div className="grid grid-cols-2 gap-3 text-xs flex-1">
-                  <div>
-                    <span className="text-gray-500">재고금액</span>
-                    <p className="font-semibold text-red-700 text-sm">{formatAmountK(stagnantNormalSummary.stagnant?.stock_amt || 0)}</p>
-                  </div>
-                  <div>
-                    <span className="text-gray-500">재고수량</span>
-                    <p className="font-semibold text-gray-900 text-sm">{formatNumber(stagnantNormalSummary.stagnant?.stock_qty || 0)}</p>
-                  </div>
-                  <div>
-                    <span className="text-gray-500">매출금액</span>
-                    <p className="font-semibold text-gray-900 text-sm">{formatAmountK(stagnantNormalSummary.stagnant?.sales_amt || 0)}</p>
-                  </div>
-                  <div>
-                    <span className="text-gray-500">재고주수</span>
-                    <p className="font-semibold text-gray-900 text-sm">{formatStockWeeks(stagnantNormalSummary.stagnant?.stock_weeks || null)}</p>
-                  </div>
-                  <div className="col-span-2">
-                    <span className="text-gray-500">비율</span>
-                    <p className="font-bold text-red-600 text-lg">{formatPercent(stagnantNormalSummary.stagnant?.rate || 0)}</p>
-                  </div>
-                </div>
-                {/* 중분류 요약 */}
-                <div className="mt-3 pt-3 border-t border-red-200">
-                  <p className="text-xs text-gray-500 mb-2">중분류별</p>
-                  <table className="w-full text-xs">
-                    <thead>
-                      <tr className="text-gray-500">
-                        <th className="text-left py-1 font-normal">구분</th>
-                        <th className="text-right py-1 font-normal">재고(K)</th>
-                        <th className="text-right py-1 font-normal">수량</th>
-                        <th className="text-right py-1 font-normal">매출(K)</th>
-                        <th className="text-right py-1 font-normal">주수</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {(stagnantNormalSummary.stagnant?.byCategory || []).map((cat: { category: string; stock_amt: number; stock_qty: number; sales_amt: number; stock_weeks: number | null }) => (
-                        <tr key={cat.category} className="border-t border-red-100">
-                          <td className="py-1 text-gray-700">{cat.category}</td>
-                          <td className="text-right py-1 text-red-700">{formatAmountK(cat.stock_amt)}</td>
-                          <td className="text-right py-1 text-gray-900">{formatNumber(cat.stock_qty)}</td>
-                          <td className="text-right py-1 text-gray-900">{formatAmountK(cat.sales_amt)}</td>
-                          <td className="text-right py-1 text-gray-900">{formatStockWeeks(cat.stock_weeks)}</td>
+                <table className="w-full text-xs">
+                  <thead>
+                    <tr className="text-gray-600 border-b border-red-200">
+                      <th className="text-left py-1.5 font-medium">구분</th>
+                      <th className="text-right py-1.5 font-medium">재고(K)</th>
+                      <th className="text-right py-1.5 font-medium">비중</th>
+                      <th className="text-right py-1.5 font-medium">수량</th>
+                      <th className="text-right py-1.5 font-medium">비중</th>
+                      <th className="text-right py-1.5 font-medium">매출(K)</th>
+                      <th className="text-right py-1.5 font-medium">주수</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {/* 합계 행 */}
+                    {(() => {
+                      const totalStockAmt = stagnantNormalSummary.total?.stock_amt || 1;
+                      const totalStockQty = stagnantNormalSummary.total?.stock_qty || 1;
+                      const stagnantStockAmt = stagnantNormalSummary.stagnant?.stock_amt || 0;
+                      const stagnantStockQty = stagnantNormalSummary.stagnant?.stock_qty || 0;
+                      return (
+                        <tr className="border-b border-red-100 bg-red-100 font-bold">
+                          <td className="py-1.5 text-red-900">합계</td>
+                          <td className="text-right py-1.5 text-red-700">{formatAmountK(stagnantStockAmt)}</td>
+                          <td className="text-right py-1.5 text-red-600">{(stagnantStockAmt / totalStockAmt * 100).toFixed(1)}%</td>
+                          <td className="text-right py-1.5 text-red-700">{formatNumber(stagnantStockQty)}</td>
+                          <td className="text-right py-1.5 text-red-600">{(stagnantStockQty / totalStockQty * 100).toFixed(1)}%</td>
+                          <td className="text-right py-1.5 text-red-700">{formatAmountK(stagnantNormalSummary.stagnant?.sales_amt || 0)}</td>
+                          <td className="text-right py-1.5 text-red-700">{formatStockWeeks(stagnantNormalSummary.stagnant?.stock_weeks || null)}</td>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                      );
+                    })()}
+                    {/* 중분류 행 */}
+                    {(stagnantNormalSummary.stagnant?.byCategory || []).map((cat: { category: string; stock_amt: number; stock_qty: number; sales_amt: number; stock_weeks: number | null }) => {
+                      const totalStockAmt = stagnantNormalSummary.total?.stock_amt || 1;
+                      const totalStockQty = stagnantNormalSummary.total?.stock_qty || 1;
+                      return (
+                        <tr key={cat.category} className="border-b border-red-50">
+                          <td className="py-1.5 text-gray-700">{cat.category}</td>
+                          <td className="text-right py-1.5 text-red-700">{formatAmountK(cat.stock_amt)}</td>
+                          <td className="text-right py-1.5 text-red-500">{(cat.stock_amt / totalStockAmt * 100).toFixed(1)}%</td>
+                          <td className="text-right py-1.5 text-gray-900">{formatNumber(cat.stock_qty)}</td>
+                          <td className="text-right py-1.5 text-red-500">{(cat.stock_qty / totalStockQty * 100).toFixed(1)}%</td>
+                          <td className="text-right py-1.5 text-gray-900">{formatAmountK(cat.sales_amt)}</td>
+                          <td className="text-right py-1.5 text-gray-900">{formatStockWeeks(cat.stock_weeks)}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
               </div>
 
               {/* 정상 카드 */}
-              <div className="rounded-lg border-2 border-green-200 bg-green-50 p-4 flex flex-col">
-                <div className="flex items-center gap-2 mb-3 pb-2 border-b border-green-100">
+              <div className="rounded-lg border-2 border-green-200 bg-green-50 p-4">
+                <div className="flex items-center gap-2 mb-3">
                   <span className="px-2 py-0.5 bg-green-500 text-white text-xs font-medium rounded">정상</span>
                   <span className="text-xs text-gray-500">차기 + 당시즌 + 과시즌(정체제외)</span>
                 </div>
-                <div className="grid grid-cols-2 gap-3 text-xs flex-1">
-                  <div>
-                    <span className="text-gray-500">재고금액</span>
-                    <p className="font-semibold text-green-700 text-sm">{formatAmountK(stagnantNormalSummary.normal?.stock_amt || 0)}</p>
-                  </div>
-                  <div>
-                    <span className="text-gray-500">재고수량</span>
-                    <p className="font-semibold text-gray-900 text-sm">{formatNumber(stagnantNormalSummary.normal?.stock_qty || 0)}</p>
-                  </div>
-                  <div>
-                    <span className="text-gray-500">매출금액</span>
-                    <p className="font-semibold text-gray-900 text-sm">{formatAmountK(stagnantNormalSummary.normal?.sales_amt || 0)}</p>
-                  </div>
-                  <div>
-                    <span className="text-gray-500">재고주수</span>
-                    <p className="font-semibold text-gray-900 text-sm">{formatStockWeeks(stagnantNormalSummary.normal?.stock_weeks || null)}</p>
-                  </div>
-                  <div className="col-span-2">
-                    <span className="text-gray-500">비율</span>
-                    <p className="font-bold text-green-600 text-lg">{formatPercent(stagnantNormalSummary.normal?.rate || 0)}</p>
-                  </div>
-                </div>
-                {/* 중분류 요약 */}
-                <div className="mt-3 pt-3 border-t border-green-200">
-                  <p className="text-xs text-gray-500 mb-2">중분류별</p>
-                  <table className="w-full text-xs">
-                    <thead>
-                      <tr className="text-gray-500">
-                        <th className="text-left py-1 font-normal">구분</th>
-                        <th className="text-right py-1 font-normal">재고(K)</th>
-                        <th className="text-right py-1 font-normal">수량</th>
-                        <th className="text-right py-1 font-normal">매출(K)</th>
-                        <th className="text-right py-1 font-normal">주수</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {(stagnantNormalSummary.normal?.byCategory || []).map((cat: { category: string; stock_amt: number; stock_qty: number; sales_amt: number; stock_weeks: number | null }) => (
-                        <tr key={cat.category} className="border-t border-green-100">
-                          <td className="py-1 text-gray-700">{cat.category}</td>
-                          <td className="text-right py-1 text-green-700">{formatAmountK(cat.stock_amt)}</td>
-                          <td className="text-right py-1 text-gray-900">{formatNumber(cat.stock_qty)}</td>
-                          <td className="text-right py-1 text-gray-900">{formatAmountK(cat.sales_amt)}</td>
-                          <td className="text-right py-1 text-gray-900">{formatStockWeeks(cat.stock_weeks)}</td>
+                <table className="w-full text-xs">
+                  <thead>
+                    <tr className="text-gray-600 border-b border-green-200">
+                      <th className="text-left py-1.5 font-medium">구분</th>
+                      <th className="text-right py-1.5 font-medium">재고(K)</th>
+                      <th className="text-right py-1.5 font-medium">비중</th>
+                      <th className="text-right py-1.5 font-medium">수량</th>
+                      <th className="text-right py-1.5 font-medium">비중</th>
+                      <th className="text-right py-1.5 font-medium">매출(K)</th>
+                      <th className="text-right py-1.5 font-medium">주수</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {/* 합계 행 */}
+                    {(() => {
+                      const totalStockAmt = stagnantNormalSummary.total?.stock_amt || 1;
+                      const totalStockQty = stagnantNormalSummary.total?.stock_qty || 1;
+                      const normalStockAmt = stagnantNormalSummary.normal?.stock_amt || 0;
+                      const normalStockQty = stagnantNormalSummary.normal?.stock_qty || 0;
+                      return (
+                        <tr className="border-b border-green-100 bg-green-100 font-bold">
+                          <td className="py-1.5 text-green-900">합계</td>
+                          <td className="text-right py-1.5 text-green-700">{formatAmountK(normalStockAmt)}</td>
+                          <td className="text-right py-1.5 text-green-600">{(normalStockAmt / totalStockAmt * 100).toFixed(1)}%</td>
+                          <td className="text-right py-1.5 text-green-700">{formatNumber(normalStockQty)}</td>
+                          <td className="text-right py-1.5 text-green-600">{(normalStockQty / totalStockQty * 100).toFixed(1)}%</td>
+                          <td className="text-right py-1.5 text-green-700">{formatAmountK(stagnantNormalSummary.normal?.sales_amt || 0)}</td>
+                          <td className="text-right py-1.5 text-green-700">{formatStockWeeks(stagnantNormalSummary.normal?.stock_weeks || null)}</td>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                      );
+                    })()}
+                    {/* 중분류 행 */}
+                    {(stagnantNormalSummary.normal?.byCategory || []).map((cat: { category: string; stock_amt: number; stock_qty: number; sales_amt: number; stock_weeks: number | null }) => {
+                      const totalStockAmt = stagnantNormalSummary.total?.stock_amt || 1;
+                      const totalStockQty = stagnantNormalSummary.total?.stock_qty || 1;
+                      return (
+                        <tr key={cat.category} className="border-b border-green-50">
+                          <td className="py-1.5 text-gray-700">{cat.category}</td>
+                          <td className="text-right py-1.5 text-green-700">{formatAmountK(cat.stock_amt)}</td>
+                          <td className="text-right py-1.5 text-green-500">{(cat.stock_amt / totalStockAmt * 100).toFixed(1)}%</td>
+                          <td className="text-right py-1.5 text-gray-900">{formatNumber(cat.stock_qty)}</td>
+                          <td className="text-right py-1.5 text-green-500">{(cat.stock_qty / totalStockQty * 100).toFixed(1)}%</td>
+                          <td className="text-right py-1.5 text-gray-900">{formatAmountK(cat.sales_amt)}</td>
+                          <td className="text-right py-1.5 text-gray-900">{formatStockWeeks(cat.stock_weeks)}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
               </div>
             </div>
 
