@@ -154,9 +154,9 @@ function ProductDetailModal({
   // 중분류별 집계
   const categoryOrder = ["전체", "신발", "모자", "가방", "기타"];
   const categorySummary = useMemo(() => {
-    const catMap: Record<string, { stock_amt: number; stock_qty: number; sales_amt: number; stagnant_count: number; total_count: number }> = {};
+    const catMap: Record<string, { stock_amt: number; stock_qty: number; sales_amt: number; stagnant_count: number; total_count: number; stagnant_amt: number }> = {};
     categoryOrder.forEach(cat => {
-      catMap[cat] = { stock_amt: 0, stock_qty: 0, sales_amt: 0, stagnant_count: 0, total_count: 0 };
+      catMap[cat] = { stock_amt: 0, stock_qty: 0, sales_amt: 0, stagnant_count: 0, total_count: 0, stagnant_amt: 0 };
     });
 
     filteredProducts.forEach(p => {
@@ -167,19 +167,26 @@ function ProductDetailModal({
       catMap[targetCat].stock_qty += p.stock_qty;
       catMap[targetCat].sales_amt += p.sales_amt;
       catMap[targetCat].total_count += 1;
-      if (p.is_stagnant) catMap[targetCat].stagnant_count += 1;
+      if (p.is_stagnant) {
+        catMap[targetCat].stagnant_count += 1;
+        catMap[targetCat].stagnant_amt += p.stock_amt;
+      }
 
       // 전체에도 누적
       catMap["전체"].stock_amt += p.stock_amt;
       catMap["전체"].stock_qty += p.stock_qty;
       catMap["전체"].sales_amt += p.sales_amt;
       catMap["전체"].total_count += 1;
-      if (p.is_stagnant) catMap["전체"].stagnant_count += 1;
+      if (p.is_stagnant) {
+        catMap["전체"].stagnant_count += 1;
+        catMap["전체"].stagnant_amt += p.stock_amt;
+      }
     });
 
     return categoryOrder.map(cat => ({
       category: cat,
       ...catMap[cat],
+      stagnant_rate: catMap[cat].stock_amt > 0 ? (catMap[cat].stagnant_amt / catMap[cat].stock_amt) * 100 : 0,
     }));
   }, [filteredProducts]);
 
@@ -207,6 +214,7 @@ function ProductDetailModal({
                 <th className="text-right py-1.5 px-2 font-medium text-gray-600">재고수량</th>
                 <th className="text-right py-1.5 px-2 font-medium text-gray-600">매출금액(K)</th>
                 <th className="text-right py-1.5 px-2 font-medium text-gray-600">재고주수</th>
+                <th className="text-right py-1.5 px-2 font-medium text-gray-600">정체금액(K)</th>
                 <th className="text-center py-1.5 px-2 font-medium text-gray-600">정체여부</th>
               </tr>
             </thead>
@@ -220,6 +228,7 @@ function ProductDetailModal({
                     <td className="text-right py-1 px-2 text-gray-900">{formatNumber(cat.stock_qty)}</td>
                     <td className="text-right py-1 px-2 text-gray-900">{formatAmountK(cat.sales_amt)}</td>
                     <td className="text-right py-1 px-2 text-gray-900">{stockWeeks !== null ? `${Math.round(stockWeeks)}주` : "-"}</td>
+                    <td className="text-right py-1 px-2 text-red-600">{formatAmountK(cat.stagnant_amt)}</td>
                     <td className="text-center py-1 px-2">
                       {cat.stagnant_count > 0 ? (
                         <span className="px-1.5 py-0.5 bg-red-100 text-red-600 text-xs rounded">{cat.stagnant_count}건</span>
@@ -263,12 +272,13 @@ function ProductDetailModal({
                 <th className="text-right py-2 px-3 font-medium text-gray-600">재고수량</th>
                 <th className="text-right py-2 px-3 font-medium text-gray-600">매출금액(K)</th>
                 <th className="text-right py-2 px-3 font-medium text-gray-600">재고주수</th>
+                <th className="text-right py-2 px-3 font-medium text-gray-600">정체금액(K)</th>
                 <th className="text-center py-2 px-3 font-medium text-gray-600">정체여부</th>
               </tr>
             </thead>
             <tbody>
               {filteredProducts.length === 0 ? (
-                <tr><td colSpan={9} className="text-center py-8 text-gray-500">데이터가 없습니다.</td></tr>
+                <tr><td colSpan={10} className="text-center py-8 text-gray-500">데이터가 없습니다.</td></tr>
               ) : (
                 filteredProducts.map((product, idx) => (
                   <tr key={product.dimensionKey + idx} className="border-b border-gray-100 hover:bg-gray-50">
@@ -280,6 +290,9 @@ function ProductDetailModal({
                     <td className="text-right py-2 px-3 text-gray-900">{formatNumber(product.stock_qty)}</td>
                     <td className="text-right py-2 px-3 text-gray-900">{formatAmountK(product.sales_amt)}</td>
                     <td className="text-right py-2 px-3 text-gray-900">{formatStockWeeks(product.stock_weeks)}</td>
+                    <td className="text-right py-2 px-3 text-red-600">
+                      {product.is_stagnant ? formatAmountK(product.stock_amt) : "-"}
+                    </td>
                     <td className="text-center py-2 px-3">
                       {product.is_stagnant ? (
                         <span className="px-2 py-0.5 bg-red-100 text-red-600 text-xs rounded">정체</span>
