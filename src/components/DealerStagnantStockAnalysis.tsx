@@ -893,35 +893,33 @@ export default function DealerStagnantStockAnalysis({
                     </tr>
                   </thead>
                   <tbody>
-                    {/* 합계 행 */}
+                    {/* 합계 행 - 정체 박스 내부 기준 100% */}
                     {(() => {
-                      const totalStockAmt = stagnantNormalSummary.total?.stock_amt || 1;
-                      const totalStockQty = stagnantNormalSummary.total?.stock_qty || 1;
                       const stagnantStockAmt = stagnantNormalSummary.stagnant?.stock_amt || 0;
                       const stagnantStockQty = stagnantNormalSummary.stagnant?.stock_qty || 0;
                       return (
                         <tr className="border-b border-red-100 bg-red-100 font-bold">
                           <td className="py-1.5 text-red-900">합계</td>
                           <td className="text-right py-1.5 text-red-700">{formatAmountK(stagnantStockAmt)}</td>
-                          <td className="text-right py-1.5 text-red-600">{(stagnantStockAmt / totalStockAmt * 100).toFixed(1)}%</td>
+                          <td className="text-right py-1.5 text-red-600">100.0%</td>
                           <td className="text-right py-1.5 text-red-700">{formatNumber(stagnantStockQty)}</td>
-                          <td className="text-right py-1.5 text-red-600">{(stagnantStockQty / totalStockQty * 100).toFixed(1)}%</td>
+                          <td className="text-right py-1.5 text-red-600">100.0%</td>
                           <td className="text-right py-1.5 text-red-700">{formatAmountK(stagnantNormalSummary.stagnant?.sales_amt || 0)}</td>
                           <td className="text-right py-1.5 text-red-700">{formatStockWeeks(stagnantNormalSummary.stagnant?.stock_weeks || null)}</td>
                         </tr>
                       );
                     })()}
-                    {/* 중분류 행 */}
+                    {/* 중분류 행 - 정체 박스 합계 대비 비중 */}
                     {(stagnantNormalSummary.stagnant?.byCategory || []).map((cat: { category: string; stock_amt: number; stock_qty: number; sales_amt: number; stock_weeks: number | null }) => {
-                      const totalStockAmt = stagnantNormalSummary.total?.stock_amt || 1;
-                      const totalStockQty = stagnantNormalSummary.total?.stock_qty || 1;
+                      const stagnantStockAmt = stagnantNormalSummary.stagnant?.stock_amt || 1;
+                      const stagnantStockQty = stagnantNormalSummary.stagnant?.stock_qty || 1;
                       return (
                         <tr key={cat.category} className="border-b border-red-50">
                           <td className="py-1.5 text-gray-700">{cat.category}</td>
                           <td className="text-right py-1.5 text-red-700">{formatAmountK(cat.stock_amt)}</td>
-                          <td className="text-right py-1.5 text-red-500">{(cat.stock_amt / totalStockAmt * 100).toFixed(1)}%</td>
+                          <td className="text-right py-1.5 text-red-500">{(cat.stock_amt / stagnantStockAmt * 100).toFixed(1)}%</td>
                           <td className="text-right py-1.5 text-gray-900">{formatNumber(cat.stock_qty)}</td>
-                          <td className="text-right py-1.5 text-red-500">{(cat.stock_qty / totalStockQty * 100).toFixed(1)}%</td>
+                          <td className="text-right py-1.5 text-red-500">{(cat.stock_qty / stagnantStockQty * 100).toFixed(1)}%</td>
                           <td className="text-right py-1.5 text-gray-900">{formatAmountK(cat.sales_amt)}</td>
                           <td className="text-right py-1.5 text-gray-900">{formatStockWeeks(cat.stock_weeks)}</td>
                         </tr>
@@ -950,35 +948,33 @@ export default function DealerStagnantStockAnalysis({
                     </tr>
                   </thead>
                   <tbody>
-                    {/* 합계 행 */}
+                    {/* 합계 행 - 정상 박스 내부 기준 100% */}
                     {(() => {
-                      const totalStockAmt = stagnantNormalSummary.total?.stock_amt || 1;
-                      const totalStockQty = stagnantNormalSummary.total?.stock_qty || 1;
                       const normalStockAmt = stagnantNormalSummary.normal?.stock_amt || 0;
                       const normalStockQty = stagnantNormalSummary.normal?.stock_qty || 0;
                       return (
                         <tr className="border-b border-green-100 bg-green-100 font-bold">
                           <td className="py-1.5 text-green-900">합계</td>
                           <td className="text-right py-1.5 text-green-700">{formatAmountK(normalStockAmt)}</td>
-                          <td className="text-right py-1.5 text-green-600">{(normalStockAmt / totalStockAmt * 100).toFixed(1)}%</td>
+                          <td className="text-right py-1.5 text-green-600">100.0%</td>
                           <td className="text-right py-1.5 text-green-700">{formatNumber(normalStockQty)}</td>
-                          <td className="text-right py-1.5 text-green-600">{(normalStockQty / totalStockQty * 100).toFixed(1)}%</td>
+                          <td className="text-right py-1.5 text-green-600">100.0%</td>
                           <td className="text-right py-1.5 text-green-700">{formatAmountK(stagnantNormalSummary.normal?.sales_amt || 0)}</td>
                           <td className="text-right py-1.5 text-green-700">{formatStockWeeks(stagnantNormalSummary.normal?.stock_weeks || null)}</td>
                         </tr>
                       );
                     })()}
-                    {/* 중분류 행 */}
+                    {/* 중분류 행 - 정상 박스 합계 대비 비중 */}
                     {(stagnantNormalSummary.normal?.byCategory || []).map((cat: { category: string; stock_amt: number; stock_qty: number; sales_amt: number; stock_weeks: number | null }) => {
-                      const totalStockAmt = stagnantNormalSummary.total?.stock_amt || 1;
-                      const totalStockQty = stagnantNormalSummary.total?.stock_qty || 1;
+                      const normalStockAmt = stagnantNormalSummary.normal?.stock_amt || 1;
+                      const normalStockQty = stagnantNormalSummary.normal?.stock_qty || 1;
                       return (
                         <tr key={cat.category} className="border-b border-green-50">
                           <td className="py-1.5 text-gray-700">{cat.category}</td>
                           <td className="text-right py-1.5 text-green-700">{formatAmountK(cat.stock_amt)}</td>
-                          <td className="text-right py-1.5 text-green-500">{(cat.stock_amt / totalStockAmt * 100).toFixed(1)}%</td>
+                          <td className="text-right py-1.5 text-green-500">{(cat.stock_amt / normalStockAmt * 100).toFixed(1)}%</td>
                           <td className="text-right py-1.5 text-gray-900">{formatNumber(cat.stock_qty)}</td>
-                          <td className="text-right py-1.5 text-green-500">{(cat.stock_qty / totalStockQty * 100).toFixed(1)}%</td>
+                          <td className="text-right py-1.5 text-green-500">{(cat.stock_qty / normalStockQty * 100).toFixed(1)}%</td>
                           <td className="text-right py-1.5 text-gray-900">{formatAmountK(cat.sales_amt)}</td>
                           <td className="text-right py-1.5 text-gray-900">{formatStockWeeks(cat.stock_weeks)}</td>
                         </tr>
