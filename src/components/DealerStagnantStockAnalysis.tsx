@@ -928,12 +928,16 @@ export default function DealerStagnantStockAnalysis({
                       const isExpanded = expandedDealerId === dealer.account_id;
                       const seasonDetails = isExpanded ? getSeasonDetailsForDealer(dealer.account_id) : [];
                       
+                      const isHighStagnant = dealer.stagnant_rate >= 30;
+                      
                       return (
                         <>
                           {/* 대리상 행 */}
                           <tr
                             key={dealer.account_id}
-                            className={`border-b border-gray-100 cursor-pointer transition-colors ${isExpanded ? "bg-gray-100" : "hover:bg-gray-50"}`}
+                            className={`border-b border-gray-100 cursor-pointer transition-colors ${
+                              isExpanded ? "bg-gray-100" : isHighStagnant ? "bg-amber-50 hover:bg-amber-100" : "hover:bg-gray-50"
+                            }`}
                             onClick={() => handleDealerClick(dealer)}
                           >
                             <td className="py-2 px-2 text-center">
