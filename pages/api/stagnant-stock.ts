@@ -10,6 +10,7 @@ import type {
   MidCategory,
   StockStatus,
   SeasonGroup,
+  AccountBreakdownItem,
 } from "../../src/types/stagnantStock";
 
 // 단위 탭별 KEY 컬럼 매핑 (판매: s, 재고: a 테이블 alias 사용)
@@ -55,6 +56,7 @@ function getPrevMonth(targetMonth: string): string {
 
 // 시즌 그룹 결정 - 시즌 구분 선행, 과시즌만 정체재고 판단 (2단계)
 // 변경: 과시즌 상품에 대해 전월말 수량 조건 추가
+// ignoreMinQty: true일 경우 전월말 수량 조건 무시 (대리상 단위 분석용)
 function getSeasonGroup(
   season: string, 
   ratio: number, 
@@ -62,17 +64,19 @@ function getSeasonGroup(
   currentYear: string, 
   nextYear: string,
   prevMonthStockQty: number,
-  minQty: number
+  minQty: number,
+  ignoreMinQty: boolean = false
 ): SeasonGroup {
   // 1. 먼저 시즌 구분 (당시즌, 차기시즌은 정체재고로 바뀌지 않음)
   if (season && season.startsWith(currentYear)) return "당시즌";
   if (season && season.startsWith(nextYear)) return "차기시즌";
   
-  // 2. 과시즌인 경우: 2단계 정체재고 판단
-  // (1) 전월말 수량이 minQty 미만이면 정체 아님 (과시즌)
-  if (prevMonthStockQty < minQty) return "과시즌";
+  // 2. 과시즌인 경우: 정체재고 판단
+  // ignoreMinQty=false: 전월말 수량이 minQty 미만이면 정체 아님 (과시즌)
+  // ignoreMinQty=true: 전월말 수량 조건 무시
+  if (!ignoreMinQty && prevMonthStockQty < minQty) return "과시즌";
   
-  // (2) 전월말 수량 >= minQty인 경우, 비율로 정체재고 판단
+  // (2) 비율로 정체재고 판단
   if (ratio < thresholdRatio) return "정체재고";
   return "과시즌";
 }
@@ -106,6 +110,72 @@ function buildStyleStockQtyQuery(
       AND a.brd_cd = '${brand}'
       AND b.prdt_hrrc1_nm = 'ACC'
     GROUP BY a.prdt_cd
+  `;
+}
+
+// 월의 일수 계산 함수
+function getDaysInMonth(yyyymm: string): number {
+  if (yyyymm.length !== 6) return 30;
+  const year = parseInt(yyyymm.slice(0, 4), 10);
+  const month = parseInt(yyyymm.slice(4, 6), 10);
+  return new Date(year, month, 0).getDate();
+}
+
+// FR 채널 대리상별(account_id) 재고/판매 조회 쿼리 (대리상 단위 분석용)
+function buildAccountBreakdownQuery(
+  brand: string,
+  targetMonth: string,
+  dimensionTab: DimensionTab
+): string {
+  const dimConfig = DIMENSION_KEY_MAP[dimensionTab];
+  
+  return `
+    WITH 
+    -- FR 재고 데이터 (account_id + dimension_key 단위)
+    fr_stock AS (
+      SELECT 
+        d.account_id,
+        ${dimConfig.stockKey} AS dimension_key,
+        SUM(a.stock_tag_amt_expected) AS stock_amt,
+        SUM(a.stock_qty_expected) AS stock_qty
+      FROM fnf.chn.dw_stock_m a
+      LEFT JOIN fnf.sap_fnf.mst_prdt b ON a.prdt_cd = b.prdt_cd
+      LEFT JOIN fnf.chn.dw_shop_wh_detail d ON a.shop_id = d.oa_map_shop_id
+      WHERE a.yymm = '${targetMonth}'
+        AND a.brd_cd = '${brand}'
+        AND b.prdt_hrrc1_nm = 'ACC'
+        AND d.fr_or_cls = 'FR'
+      GROUP BY d.account_id, ${dimConfig.stockKey}
+    ),
+    
+    -- FR 판매 데이터 (account_id + dimension_key 단위)
+    fr_sales AS (
+      SELECT 
+        d.account_id,
+        ${dimConfig.salesKey} AS dimension_key,
+        SUM(s.tag_amt) AS sales_amt
+      FROM fnf.chn.dw_sale s
+      LEFT JOIN fnf.sap_fnf.mst_prdt p ON s.prdt_cd = p.prdt_cd
+      LEFT JOIN fnf.chn.dw_shop_wh_detail d ON s.shop_id = d.oa_map_shop_id
+      WHERE TO_CHAR(s.sale_dt, 'YYYYMM') = '${targetMonth}'
+        AND s.brd_cd = '${brand}'
+        AND p.prdt_hrrc1_nm = 'ACC'
+        AND d.fr_or_cls = 'FR'
+      GROUP BY d.account_id, ${dimConfig.salesKey}
+    )
+    
+    -- 재고/판매 조인
+    SELECT 
+      COALESCE(st.account_id, sa.account_id, '(미매핑)') AS account_id,
+      COALESCE(st.dimension_key, sa.dimension_key) AS dimension_key,
+      COALESCE(st.stock_amt, 0) AS stock_amt,
+      COALESCE(st.stock_qty, 0) AS stock_qty,
+      COALESCE(sa.sales_amt, 0) AS sales_amt
+    FROM fr_stock st
+    FULL OUTER JOIN fr_sales sa 
+      ON st.account_id = sa.account_id AND st.dimension_key = sa.dimension_key
+    WHERE COALESCE(st.stock_amt, 0) > 0
+    ORDER BY st.account_id, st.stock_amt DESC
   `;
 }
 
@@ -406,7 +476,16 @@ export default async function handler(
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  const { brand, targetMonth, dimensionTab, thresholdPct, minQty: minQtyParam, currentMonthMinQty: currentMonthMinQtyParam } = req.query;
+  const { 
+    brand, 
+    targetMonth, 
+    dimensionTab, 
+    thresholdPct, 
+    minQty: minQtyParam, 
+    currentMonthMinQty: currentMonthMinQtyParam,
+    includeAccountBreakdown: includeAccountBreakdownParam,
+    ignoreMinQty: ignoreMinQtyParam,
+  } = req.query;
 
   // 파라미터 검증
   if (!brand || typeof brand !== "string") {
@@ -421,7 +500,10 @@ export default async function handler(
   const thresholdRatio = threshold / 100; // 0.01% → 0.0001
   const minQty = parseInt(minQtyParam as string, 10) || 10; // 최소 수량 기준 (기본값 10) - 전월말 기준
   const currentMonthMinQty = parseInt(currentMonthMinQtyParam as string, 10) || 10; // 당월수량 기준 (기본값 10)
+  const includeAccountBreakdown = includeAccountBreakdownParam === "true"; // 대리상별 FR 데이터 포함 여부
+  const ignoreMinQty = ignoreMinQtyParam === "true"; // 전월말 수량 조건 무시 여부 (대리상 단위 분석용)
   const prevMonth = getPrevMonth(targetMonth); // 전월 계산
+  const daysInMonth = getDaysInMonth(targetMonth); // 해당 월의 일수
 
   const { currentYear, nextYear } = getYearConfig();
 
@@ -471,7 +553,8 @@ export default async function handler(
         seasonGroup = "당월수량미달";
       } else {
         // 기존 로직: 시즌 구분 먼저, 과시즌인 경우 2단계 판단
-        seasonGroup = getSeasonGroup(season, ratio, thresholdRatio, currentYear, nextYear, prevStockQty, minQty);
+        // ignoreMinQty: 대리상 단위 분석에서는 전월말 수량 조건 무시
+        seasonGroup = getSeasonGroup(season, ratio, thresholdRatio, currentYear, nextYear, prevStockQty, minQty, ignoreMinQty);
       }
       
       // status는 seasonGroup 기반으로 결정 (정체재고이면 정체재고, 당월수량미달/기타는 정상재고)
@@ -515,7 +598,22 @@ export default async function handler(
       item.seasonGroup !== "정체재고" && item.seasonGroup !== "당월수량미달"
     );
 
-    // 7. 응답 생성
+    // 7. 대리상별 FR 데이터 조회 (includeAccountBreakdown=true인 경우)
+    let accountBreakdown: AccountBreakdownItem[] | undefined;
+    if (includeAccountBreakdown) {
+      const accountQuery = buildAccountBreakdownQuery(brand, targetMonth, dimTab);
+      const accountResult = await runQuery(accountQuery);
+      
+      accountBreakdown = accountResult.map((row: any) => ({
+        account_id: row.ACCOUNT_ID || "(미매핑)",
+        dimensionKey: row.DIMENSION_KEY || "",
+        stock_amt: Number(row.STOCK_AMT) || 0,
+        stock_qty: Number(row.STOCK_QTY) || 0,
+        sales_amt: Number(row.SALES_AMT) || 0,
+      }));
+    }
+
+    // 8. 응답 생성
     const response: StagnantStockResponse = {
       availableMonths,
       
@@ -533,6 +631,9 @@ export default async function handler(
       // 당월수량미달 스타일 목록 (다른 분석단위에서 참조용)
       excludedStyles: Array.from(lowStockStyles),
       
+      // 대리상별 FR 데이터 (대리상 단위 분석용)
+      accountBreakdown,
+      
       meta: {
         targetMonth,
         brand,
@@ -541,6 +642,7 @@ export default async function handler(
         currentYear,
         nextYear,
         currentMonthMinQty,
+        daysInMonth,
       },
     };
 

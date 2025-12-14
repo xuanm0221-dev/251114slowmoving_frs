@@ -925,7 +925,7 @@ export default function StagnantStockAnalysis({
   return (
     <div className="mb-4">
       <CollapsibleSection
-        title="정체재고 분석"
+        title="(상품단위)정체재고 분석"
         icon="📊"
         iconColor="text-orange-500"
         defaultOpen={false}

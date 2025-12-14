@@ -33,6 +33,7 @@ import ForecastInventoryTable from "./ForecastInventoryTable";
 import InventoryStockSummaryTable from "./InventoryStockSummaryTable";
 import ActualArrivalTable from "./ActualArrivalTable";
 import StagnantStockAnalysis from "./StagnantStockAnalysis";
+import DealerStagnantStockAnalysis from "./DealerStagnantStockAnalysis";
 import InventorySeasonChart from "./InventorySeasonChart";
 import { generateForecastForBrand } from "@/lib/forecast";
 import { buildInventoryForecastForTab } from "@/lib/inventoryForecast";
@@ -459,6 +460,15 @@ export default function BrandSalesPage({ brand, title }: BrandSalesPageProps) {
               onCurrentMonthMinQtyChange={setStagnantCurrentMonthMinQty}
               itemTab={stagnantItemTab}
               onItemTabChange={setStagnantItemTab}
+            />
+
+            {/* 1.9. 대리상 단위 정체재고 분석 (FR 기준) */}
+            <DealerStagnantStockAnalysis 
+              brand={brand}
+              thresholdPct={stagnantThresholdPct}
+              onThresholdPctChange={setStagnantThresholdPct}
+              minQty={stagnantMinQty}
+              onMinQtyChange={setStagnantMinQty}
             />
 
             {/* 2. 재고주수 히트맵 (2025년, 2024년) */}

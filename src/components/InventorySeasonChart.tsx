@@ -725,7 +725,7 @@ export default function InventorySeasonChart({ brand, dimensionTab = "스타일"
         <div className="flex items-center gap-4">
           <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
             <span className="text-purple-500">📊</span>
-            정상,정체 재고금액 추이
+            (상품단위)정상,정체 재고금액 추이
           </h2>
           
           {/* 분석 단위 탭 - iOS 세그먼트 컨트롤 스타일 */}

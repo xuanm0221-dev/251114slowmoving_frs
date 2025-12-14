@@ -100,6 +100,9 @@ export interface StagnantStockResponse {
   // 당월수량미달 제외 스타일 목록 (다른 분석단위에서 사용)
   excludedStyles: string[];
   
+  // 대리상별 FR 데이터 (includeAccountBreakdown=true 시)
+  accountBreakdown?: AccountBreakdownItem[];
+  
   // 메타 정보
   meta: {
     targetMonth: string;
@@ -109,7 +112,17 @@ export interface StagnantStockResponse {
     currentYear: string;  // 당해 연도 (예: "25")
     nextYear: string;     // 차기 연도 (예: "26")
     currentMonthMinQty: number;  // 당월수량 기준 (기본값 10)
+    daysInMonth?: number; // 해당 월의 일수
   };
+}
+
+// 대리상별 FR 데이터 (account_id + dimension_key 단위)
+export interface AccountBreakdownItem {
+  account_id: string;       // 대리상 코드
+  dimensionKey: string;     // 상품 키 (prdt_scs_cd 등)
+  stock_amt: number;        // FR 재고금액
+  stock_qty: number;        // FR 재고수량
+  sales_amt: number;        // FR 매출금액
 }
 
 // API 요청 파라미터
