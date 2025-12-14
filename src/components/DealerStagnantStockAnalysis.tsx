@@ -854,22 +854,18 @@ export default function DealerStagnantStockAnalysis({
                       <td className="text-right py-1.5 text-gray-900">{formatAmountK(stagnantNormalSummary.total?.sales_amt || 0)}</td>
                       <td className="text-right py-1.5 text-gray-900">{formatStockWeeks(stagnantNormalSummary.total?.stock_weeks || null)}</td>
                     </tr>
-                    {/* 중분류 행 */}
-                    {categorySummaries.slice(1).map((cat) => {
-                      const totalStockAmt = stagnantNormalSummary.total?.stock_amt || 1;
-                      const totalStockQty = stagnantNormalSummary.total?.stock_qty || 1;
-                      return (
-                        <tr key={cat.category} className="border-b border-gray-50">
-                          <td className="py-1.5 text-gray-700">{cat.category}</td>
-                          <td className="text-right py-1.5 text-gray-900">{formatAmountK(cat.stock_amt)}</td>
-                          <td className="text-right py-1.5 text-gray-500">{(cat.stock_amt / totalStockAmt * 100).toFixed(1)}%</td>
-                          <td className="text-right py-1.5 text-gray-900">{formatNumber(cat.stock_qty)}</td>
-                          <td className="text-right py-1.5 text-gray-500">{(cat.stock_qty / totalStockQty * 100).toFixed(1)}%</td>
-                          <td className="text-right py-1.5 text-gray-900">{formatAmountK(cat.sales_amt)}</td>
-                          <td className="text-right py-1.5 text-gray-900">{formatStockWeeks(cat.stock_weeks)}</td>
-                        </tr>
-                      );
-                    })}
+                    {/* 중분류 행 - 전체 박스는 모두 100% (정체+정상=100%) */}
+                    {categorySummaries.slice(1).map((cat) => (
+                      <tr key={cat.category} className="border-b border-gray-50">
+                        <td className="py-1.5 text-gray-700">{cat.category}</td>
+                        <td className="text-right py-1.5 text-gray-900">{formatAmountK(cat.stock_amt)}</td>
+                        <td className="text-right py-1.5 text-gray-500">100.0%</td>
+                        <td className="text-right py-1.5 text-gray-900">{formatNumber(cat.stock_qty)}</td>
+                        <td className="text-right py-1.5 text-gray-500">100.0%</td>
+                        <td className="text-right py-1.5 text-gray-900">{formatAmountK(cat.sales_amt)}</td>
+                        <td className="text-right py-1.5 text-gray-900">{formatStockWeeks(cat.stock_weeks)}</td>
+                      </tr>
+                    ))}
                   </tbody>
                 </table>
               </div>
