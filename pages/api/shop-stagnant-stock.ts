@@ -83,13 +83,14 @@ function buildShopStagnantStockQuery(
   
   return `
 WITH
--- 1. 전체 채널(OR+HQ+FR) 재고 집계 (상품단위 정체분석과 동일)
--- 시즌: SUBSTR(prdt_cd, 2, 3) 사용 (상품단위와 동일)
+-- 1. 전체 채널(OR+HQ+FR) 재고 집계 (prdt_scs_cd 단위)
+-- 시즌: sesn 컬럼 사용 (상품단위 분석과 동일)
 stock_all AS (
   SELECT 
-    a.prdt_cd,
+    a.prdt_scs_cd,
+    MAX(a.prdt_cd) AS prdt_cd,
     MAX(b.prdt_nm) AS prdt_nm,
-    MAX(SUBSTR(a.prdt_cd, 2, 3)) AS season,
+    MAX(a.sesn) AS season,
     MAX(CASE
       WHEN b.prdt_hrrc2_nm = 'Shoes' THEN '신발'
       WHEN b.prdt_hrrc2_nm = 'Headwear' THEN '모자'
@@ -101,16 +102,17 @@ stock_all AS (
     SUM(a.stock_qty_expected) AS stock_qty
   FROM fnf.chn.dw_stock_m a
   LEFT JOIN fnf.sap_fnf.mst_prdt b ON a.prdt_cd = b.prdt_cd
+  LEFT JOIN fnf.chn.dw_shop_wh_detail c ON a.shop_id = c.oa_map_shop_id
   WHERE a.yymm = '${targetMonth}'
     AND a.brd_cd = '${brand}'
     AND b.prdt_hrrc1_nm = 'ACC'
-  GROUP BY a.prdt_cd
+  GROUP BY a.prdt_scs_cd
 ),
 
--- 2. 전체 채널(OR+HQ+FR) 판매 집계 (상품단위 정체분석과 동일)
+-- 2. 전체 채널(OR+HQ+FR) 판매 집계 (prdt_scs_cd 단위)
 sales_all AS (
   SELECT 
-    s.prdt_cd,
+    s.prdt_scs_cd,
     SUM(s.tag_amt) AS sales_tag_amt
   FROM fnf.chn.dw_sale s
   LEFT JOIN fnf.sap_fnf.mst_prdt p ON s.prdt_cd = p.prdt_cd
@@ -119,7 +121,7 @@ sales_all AS (
     AND s.brd_cd = '${brand}'
     AND p.prdt_hrrc1_nm = 'ACC'
     AND d.fr_or_cls IN ('FR', 'OR', 'HQ')
-  GROUP BY s.prdt_cd
+  GROUP BY s.prdt_scs_cd
 ),
 
 -- 3. 중분류별 재고 합계 (정체 판정 분모) - 상품단위와 동일
@@ -132,9 +134,10 @@ mid_category_totals AS (
   GROUP BY mid_category_kr
 ),
 
--- 4. 상품별 정체/정상 판정 (상품단위 정체분석과 100% 동일한 로직)
+-- 4. 상품별 정체/정상 판정 (prdt_scs_cd 단위)
 product_status AS (
   SELECT 
+    st.prdt_scs_cd,
     st.prdt_cd,
     st.prdt_nm,
     st.season,
@@ -147,13 +150,13 @@ product_status AS (
       WHEN mt.stock_amt_total_mid > 0 THEN COALESCE(sa.sales_tag_amt, 0) / mt.stock_amt_total_mid
       ELSE 0
     END AS ratio,
-    -- 시즌 구분 (상품단위와 동일: season.startsWith(currentYear))
+    -- 시즌 구분
     CASE
       WHEN st.season IS NOT NULL AND st.season LIKE '${currentYear}%' THEN '당시즌'
       WHEN st.season IS NOT NULL AND st.season LIKE '${nextYear}%' THEN '차기시즌'
       ELSE '과시즌'
     END AS season_bucket,
-    -- 정체 판정: 과시즌 + ratio < threshold (상품단위와 동일)
+    -- 정체 판정: 과시즌 + ratio < threshold
     CASE
       WHEN (st.season IS NULL OR (NOT st.season LIKE '${currentYear}%' AND NOT st.season LIKE '${nextYear}%'))
         THEN CASE
@@ -164,7 +167,7 @@ product_status AS (
       ELSE 0
     END AS is_slow
   FROM stock_all st
-  LEFT JOIN sales_all sa ON st.prdt_cd = sa.prdt_cd
+  LEFT JOIN sales_all sa ON st.prdt_scs_cd = sa.prdt_scs_cd
   LEFT JOIN mid_category_totals mt ON st.mid_category_kr = mt.mid_category_kr
   WHERE st.mid_category_kr IN ('신발', '모자', '가방', '기타')
     AND st.stock_amt > 0
@@ -181,12 +184,13 @@ shop_or_hq AS (
   WHERE COALESCE(d.fr_or_cls, 'HQ') IN ('OR', 'HQ')
 ),
 
--- 6. OR+HQ 재고 (prdt_cd로 product_status와 조인)
+-- 6. OR+HQ 재고 (prdt_scs_cd로 product_status와 조인)
 -- LEFT JOIN으로 변경하여 product_status에 없는 상품도 포함
 or_stock_base AS (
   SELECT
     a.shop_id,
     COALESCE(m.shop_nm_en, a.shop_id) AS shop_nm_en,
+    a.prdt_scs_cd,
     a.prdt_cd,
     b.prdt_nm,
     CASE
@@ -196,7 +200,7 @@ or_stock_base AS (
       WHEN b.prdt_hrrc2_nm = 'Acc_etc' THEN '기타'
       ELSE b.prdt_hrrc2_nm
     END AS mid_category_kr,
-    SUBSTR(a.prdt_cd, 2, 3) AS season,
+    a.sesn AS season,
     a.stock_tag_amt_expected,
     a.stock_qty_expected
   FROM fnf.chn.dw_stock_m a
@@ -214,6 +218,7 @@ or_stock AS (
   SELECT
     os.shop_id,
     os.shop_nm_en,
+    os.prdt_scs_cd,
     os.prdt_cd,
     os.prdt_nm,
     os.mid_category_kr,
@@ -228,7 +233,7 @@ or_stock AS (
     os.stock_tag_amt_expected,
     os.stock_qty_expected
   FROM or_stock_base os
-  LEFT JOIN product_status ps ON os.prdt_cd = ps.prdt_cd
+  LEFT JOIN product_status ps ON os.prdt_scs_cd = ps.prdt_scs_cd
   WHERE os.mid_category_kr IN ('신발', '모자', '가방', '기타')
 ),
 
@@ -236,7 +241,7 @@ or_stock AS (
 or_sale AS (
   SELECT
     s.shop_id,
-    s.prdt_cd,
+    s.prdt_scs_cd,
     SUM(s.tag_amt) AS tag_sale_amt,
     SUM(s.sale_amt) AS sale_amt
   FROM fnf.chn.dw_sale s
@@ -246,7 +251,7 @@ or_sale AS (
     AND s.brd_cd = '${brand}'
     AND p.prdt_hrrc1_nm = 'ACC'
     AND COALESCE(d.fr_or_cls, 'HQ') IN ('OR', 'HQ')
-  GROUP BY s.shop_id, s.prdt_cd
+  GROUP BY s.shop_id, s.prdt_scs_cd
 ),
 
 -- 9. OR 매장별 재고+판매 조인
@@ -254,6 +259,7 @@ or_stock_sale AS (
   SELECT
     os.shop_id,
     os.shop_nm_en,
+    os.prdt_scs_cd,
     os.prdt_cd,
     os.prdt_nm,
     os.mid_category_kr,
@@ -264,7 +270,7 @@ or_stock_sale AS (
     COALESCE(osa.tag_sale_amt, 0) AS tag_sale_amt,
     COALESCE(osa.sale_amt, 0) AS sale_amt
   FROM or_stock os
-  LEFT JOIN or_sale osa ON os.shop_id = osa.shop_id AND os.prdt_cd = osa.prdt_cd
+  LEFT JOIN or_sale osa ON os.shop_id = osa.shop_id AND os.prdt_scs_cd = osa.prdt_scs_cd
 ),
 
 -- 10. 매장 + 시즌 + 중분류 단위로 집계
@@ -280,7 +286,7 @@ agg AS (
     SUM(stock_qty_expected) AS stock_qty,
     SUM(tag_sale_amt) AS tag_amt,
     SUM(sale_amt) AS sale_amt,
-    COUNT(DISTINCT prdt_cd) AS item_count
+    COUNT(DISTINCT prdt_scs_cd) AS item_count
   FROM or_stock_sale
   GROUP BY 
     shop_id, shop_nm_en,
@@ -381,12 +387,13 @@ function buildShopProductBreakdownQuery(
   
   return `
 WITH
--- 전체 채널 재고 집계
+-- 전체 채널 재고 집계 (prdt_scs_cd 단위)
 stock_all AS (
   SELECT 
-    a.prdt_cd,
+    a.prdt_scs_cd,
+    MAX(a.prdt_cd) AS prdt_cd,
     MAX(b.prdt_nm) AS prdt_nm,
-    MAX(SUBSTR(a.prdt_cd, 2, 3)) AS season,
+    MAX(a.sesn) AS season,
     MAX(CASE
       WHEN b.prdt_hrrc2_nm = 'Shoes' THEN '신발'
       WHEN b.prdt_hrrc2_nm = 'Headwear' THEN '모자'
@@ -398,16 +405,17 @@ stock_all AS (
     SUM(a.stock_qty_expected) AS stock_qty
   FROM fnf.chn.dw_stock_m a
   LEFT JOIN fnf.sap_fnf.mst_prdt b ON a.prdt_cd = b.prdt_cd
+  LEFT JOIN fnf.chn.dw_shop_wh_detail c ON a.shop_id = c.oa_map_shop_id
   WHERE a.yymm = '${targetMonth}'
     AND a.brd_cd = '${brand}'
     AND b.prdt_hrrc1_nm = 'ACC'
-  GROUP BY a.prdt_cd
+  GROUP BY a.prdt_scs_cd
 ),
 
--- 전체 채널 판매 집계
+-- 전체 채널 판매 집계 (prdt_scs_cd 단위)
 sales_all AS (
   SELECT 
-    s.prdt_cd,
+    s.prdt_scs_cd,
     SUM(s.tag_amt) AS sales_tag_amt
   FROM fnf.chn.dw_sale s
   LEFT JOIN fnf.sap_fnf.mst_prdt p ON s.prdt_cd = p.prdt_cd
@@ -416,7 +424,7 @@ sales_all AS (
     AND s.brd_cd = '${brand}'
     AND p.prdt_hrrc1_nm = 'ACC'
     AND d.fr_or_cls IN ('FR', 'OR', 'HQ')
-  GROUP BY s.prdt_cd
+  GROUP BY s.prdt_scs_cd
 ),
 
 -- 중분류별 재고 합계
@@ -429,9 +437,10 @@ mid_category_totals AS (
   GROUP BY mid_category_kr
 ),
 
--- 상품별 정체 판정
+-- 상품별 정체 판정 (prdt_scs_cd 단위)
 product_status AS (
   SELECT 
+    st.prdt_scs_cd,
     st.prdt_cd,
     st.prdt_nm,
     st.season,
@@ -451,17 +460,18 @@ product_status AS (
       ELSE 0
     END AS is_slow
   FROM stock_all st
-  LEFT JOIN sales_all sa ON st.prdt_cd = sa.prdt_cd
+  LEFT JOIN sales_all sa ON st.prdt_scs_cd = sa.prdt_scs_cd
   LEFT JOIN mid_category_totals mt ON st.mid_category_kr = mt.mid_category_kr
   WHERE st.mid_category_kr IN ('신발', '모자', '가방', '기타')
     AND st.stock_amt > 0
 ),
 
--- OR+HQ 매장별 재고
+-- OR+HQ 매장별 재고 (prdt_scs_cd 단위)
 or_stock AS (
   SELECT
     a.shop_id,
     COALESCE(m.shop_nm_en, a.shop_id) AS shop_nm_en,
+    a.prdt_scs_cd,
     a.prdt_cd,
     b.prdt_nm,
     CASE
@@ -471,7 +481,7 @@ or_stock AS (
       WHEN b.prdt_hrrc2_nm = 'Acc_etc' THEN '기타'
       ELSE b.prdt_hrrc2_nm
     END AS mid_category_kr,
-    SUBSTR(a.prdt_cd, 2, 3) AS season,
+    a.sesn AS season,
     a.stock_tag_amt_expected AS stock_amt,
     a.stock_qty_expected AS stock_qty
   FROM fnf.chn.dw_stock_m a
@@ -484,11 +494,11 @@ or_stock AS (
     AND COALESCE(d.fr_or_cls, 'HQ') IN ('OR', 'HQ')
 ),
 
--- OR+HQ 매장별 판매
+-- OR+HQ 매장별 판매 (prdt_scs_cd 단위)
 or_sale AS (
   SELECT
     s.shop_id,
-    s.prdt_cd,
+    s.prdt_scs_cd,
     SUM(s.tag_amt) AS tag_amt,
     SUM(s.sale_amt) AS sale_amt
   FROM fnf.chn.dw_sale s
@@ -498,13 +508,14 @@ or_sale AS (
     AND s.brd_cd = '${brand}'
     AND p.prdt_hrrc1_nm = 'ACC'
     AND COALESCE(d.fr_or_cls, 'HQ') IN ('OR', 'HQ')
-  GROUP BY s.shop_id, s.prdt_cd
+  GROUP BY s.shop_id, s.prdt_scs_cd
 )
 
--- 최종: 매장+상품 단위 데이터
+-- 최종: 매장+상품 단위 데이터 (prdt_scs_cd 단위)
 SELECT 
   os.shop_id,
   os.shop_nm_en,
+  os.prdt_scs_cd,
   os.prdt_cd,
   os.prdt_nm,
   os.season,
@@ -516,8 +527,8 @@ SELECT
   COALESCE(osa.sale_amt, 0) AS sale_amt,
   COALESCE(ps.is_slow, 0) AS is_slow
 FROM or_stock os
-LEFT JOIN product_status ps ON os.prdt_cd = ps.prdt_cd
-LEFT JOIN or_sale osa ON os.shop_id = osa.shop_id AND os.prdt_cd = osa.prdt_cd
+LEFT JOIN product_status ps ON os.prdt_scs_cd = ps.prdt_scs_cd
+LEFT JOIN or_sale osa ON os.shop_id = osa.shop_id AND os.prdt_scs_cd = osa.prdt_scs_cd
 WHERE os.mid_category_kr IN ('신발', '모자', '가방', '기타')
   AND os.stock_amt > 0
 ORDER BY os.shop_id, os.stock_amt DESC;
@@ -581,11 +592,11 @@ export default async function handler(
       item_count: Number(row.ITEM_COUNT) || 0,
     }));
 
-    // 5. 결과 매핑 - 상품 단위 데이터
+    // 5. 결과 매핑 - 상품 단위 데이터 (prdt_scs_cd 단위)
     const shopProductBreakdown: ShopProductBreakdownItem[] = productResult.map((row: any) => ({
       shop_id: row.SHOP_ID || "",
       shop_nm_en: row.SHOP_NM_EN || row.SHOP_ID || "",
-      prdt_cd: row.PRDT_CD || "",
+      prdt_cd: row.PRDT_SCS_CD || "",  // prdt_scs_cd를 prdt_cd 필드에 저장
       prdt_nm: row.PRDT_NM || "",
       season: row.SEASON || "",
       season_bucket: row.SEASON_BUCKET || "과시즌",

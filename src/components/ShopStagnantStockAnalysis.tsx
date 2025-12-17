@@ -223,7 +223,7 @@ function ProductDetailModal({
             <h3 className={`text-lg font-bold ${colors.text}`}>
               {shopName} - {seasonGroup}
             </h3>
-            <p className="text-sm text-gray-500">스타일(prdt_cd) 단위 상세 | {filteredProducts.length}개 품목</p>
+            <p className="text-sm text-gray-500">prdt_scs_cd 단위 상세 | {filteredProducts.length}개 품목</p>
           </div>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-2xl font-light">×</button>
         </div>
@@ -292,7 +292,7 @@ function ProductDetailModal({
           <table className="w-full text-sm">
             <thead className="sticky top-0 bg-gray-100 border-b border-gray-300">
               <tr>
-                <th className="text-left py-2 px-3 font-medium text-gray-600">스타일코드</th>
+                <th className="text-left py-2 px-3 font-medium text-gray-600">prdt_scs_cd</th>
                 <th className="text-left py-2 px-3 font-medium text-gray-600">품명</th>
                 <th className="text-center py-2 px-3 font-medium text-gray-600">시즌</th>
                 <th className="text-center py-2 px-3 font-medium text-gray-600">중분류</th>
@@ -771,7 +771,7 @@ export default function ShopStagnantStockAnalysis({
     }).filter(sd => sd.stock_amt > 0);
   }, [filteredShopBreakdown, daysInMonth]);
 
-  // Level 3: 상품 단위 상세 (prdt_cd 단위 - 대리상과 동일하게)
+  // Level 3: 상품 단위 상세 (prdt_scs_cd 단위 - 대리상과 동일하게)
   const productDetails = useMemo((): ShopProductDetail[] => {
     if (!selectedShop || !selectedSeasonGroup || !data?.shopProductBreakdown?.length) return [];
     
@@ -855,31 +855,30 @@ export default function ShopStagnantStockAnalysis({
         icon="🏬"
         iconColor="text-blue-500"
         defaultOpen={false}
+        titleExtra={
+          <div className="flex bg-gray-100 rounded-lg p-0.5">
+            {(['전체', '창고', '매장'] as ShopFilterTab[]).map(tab => (
+              <button
+                key={tab}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShopFilterTab(tab);
+                }}
+                className={`px-3 py-1 text-xs rounded-md transition-colors ${
+                  shopFilterTab === tab
+                    ? 'bg-white text-blue-600 shadow-sm font-medium'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                {tab}
+              </button>
+            ))}
+          </div>
+        }
         headerAction={
-          <div className="flex items-center gap-4">
-            {/* 탭 필터 */}
-            <div className="flex bg-gray-100 rounded-lg p-0.5">
-              {(['전체', '창고', '매장'] as ShopFilterTab[]).map(tab => (
-                <button
-                  key={tab}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setShopFilterTab(tab);
-                  }}
-                  className={`px-3 py-1 text-xs rounded-md transition-colors ${
-                    shopFilterTab === tab
-                      ? 'bg-white text-blue-600 shadow-sm font-medium'
-                      : 'text-gray-600 hover:text-gray-900'
-                  }`}
-                >
-                  {tab}
-                </button>
-              ))}
-            </div>
-            <div className="text-xs text-gray-500 text-right">
-              <div>OR 기준 | 전월말 수량 조건 미적용</div>
-              <div>정체재고: 과시즌 중 (당월판매 ÷ 중분류 기말재고) {"<"} {thresholdPct}%</div>
-            </div>
+          <div className="text-xs text-gray-500 text-right">
+            <div>OR 기준 | prdt_scs_cd 단위 | 전월말 수량 조건 미적용</div>
+            <div>정체재고: 과시즌 중 (당월판매 ÷ 중분류 기말재고) {"<"} {thresholdPct}%</div>
           </div>
         }
       >
@@ -915,7 +914,7 @@ export default function ShopStagnantStockAnalysis({
 
           <button
             onClick={fetchData}
-            className="px-4 py-1.5 bg-blue-500 hover:bg-blue-600 text-white rounded text-sm font-medium transition-colors"
+            className="px-4 py-1.5 bg-sky-200 hover:bg-sky-300 text-gray-700 rounded text-sm font-medium transition-colors"
           >
             새로고침
           </button>

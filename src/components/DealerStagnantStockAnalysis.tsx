@@ -843,7 +843,7 @@ export default function DealerStagnantStockAnalysis({
         defaultOpen={false}
         headerAction={
           <div className="text-xs text-gray-500 text-right">
-            <div>FR 기준 | 전월말 수량 조건 미적용</div>
+            <div>FR 기준 | prdt_scs_cd 단위 | 전월말 수량 조건 미적용</div>
             <div>정체재고: 과시즌 중 (당월판매 ÷ 중분류 기말재고) {"<"} {thresholdPct}%</div>
           </div>
         }

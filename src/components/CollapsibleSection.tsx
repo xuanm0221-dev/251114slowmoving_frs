@@ -10,6 +10,7 @@ interface CollapsibleSectionProps {
   defaultOpen?: boolean;
   legend?: ReactNode;
   headerAction?: ReactNode; // 헤더 우측에 표시할 액션 요소
+  titleExtra?: ReactNode; // 제목 옆에 표시할 추가 요소
 }
 
 export default function CollapsibleSection({
@@ -20,6 +21,7 @@ export default function CollapsibleSection({
   defaultOpen = true,
   legend,
   headerAction,
+  titleExtra,
 }: CollapsibleSectionProps) {
   const [isOpen, setIsOpen] = useState(defaultOpen);
 
@@ -36,6 +38,11 @@ export default function CollapsibleSection({
               <span className={iconColor}>{icon}</span>
               {title}
             </h2>
+            {titleExtra && (
+              <div onClick={(e) => e.stopPropagation()} className="ml-3">
+                {titleExtra}
+              </div>
+            )}
             <div className="flex items-center gap-2 ml-4">
               <span className="text-xs text-gray-400">
                 {isOpen ? "접기" : "펼치기"}
