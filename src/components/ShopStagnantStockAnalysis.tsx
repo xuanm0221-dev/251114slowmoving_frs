@@ -77,7 +77,7 @@ interface CategorySummary {
   stagnant_amt: number;
 }
 
-interface DealerStagnantStockAnalysisProps {
+interface ShopStagnantStockAnalysisProps {
   brand: Brand;
   thresholdPct?: number;
   onThresholdPctChange?: (pct: number) => void;
