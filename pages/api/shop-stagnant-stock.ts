@@ -544,7 +544,7 @@ export default async function handler(
       return res.status(400).json({ error: "brand and targetMonth are required" });
     }
 
-    const brand = BRAND_CODE_MAP[brandParam as string] || brandParam;
+    const brand = BRAND_CODE_MAP[brandParam as string] || (brandParam as string);
     const targetMonth = targetMonthParam as string;
     const thresholdPct = parseFloat(thresholdPctParam as string) || 0.01;
     const threshold = thresholdPct / 100; // % → 비율
