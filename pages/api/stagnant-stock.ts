@@ -153,7 +153,8 @@ function buildAccountBreakdownQuery(
       SELECT 
         d.account_id,
         ${dimConfig.salesKey} AS dimension_key,
-        SUM(s.tag_amt) AS sales_amt
+        SUM(s.tag_amt) AS tag_amt,
+        SUM(COALESCE(s.sale_amt, s.tag_amt)) AS sale_amt
       FROM fnf.chn.dw_sale s
       LEFT JOIN fnf.sap_fnf.mst_prdt p ON s.prdt_cd = p.prdt_cd
       LEFT JOIN fnf.chn.dw_shop_wh_detail d ON s.shop_id = d.oa_map_shop_id
@@ -170,7 +171,8 @@ function buildAccountBreakdownQuery(
       COALESCE(st.dimension_key, sa.dimension_key) AS dimension_key,
       COALESCE(st.stock_amt, 0) AS stock_amt,
       COALESCE(st.stock_qty, 0) AS stock_qty,
-      COALESCE(sa.sales_amt, 0) AS sales_amt
+      COALESCE(sa.tag_amt, 0) AS tag_amt,
+      COALESCE(sa.sale_amt, 0) AS sale_amt
     FROM fr_stock st
     FULL OUTER JOIN fr_sales sa 
       ON st.account_id = sa.account_id AND st.dimension_key = sa.dimension_key
@@ -609,7 +611,8 @@ export default async function handler(
         dimensionKey: row.DIMENSION_KEY || "",
         stock_amt: Number(row.STOCK_AMT) || 0,
         stock_qty: Number(row.STOCK_QTY) || 0,
-        sales_amt: Number(row.SALES_AMT) || 0,
+        tag_amt: Number(row.TAG_AMT) || 0,
+        sale_amt: Number(row.SALE_AMT) || 0,
       }));
     }
 

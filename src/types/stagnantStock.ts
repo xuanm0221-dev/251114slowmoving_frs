@@ -122,7 +122,8 @@ export interface AccountBreakdownItem {
   dimensionKey: string;     // 상품 키 (prdt_scs_cd 등)
   stock_amt: number;        // FR 재고금액
   stock_qty: number;        // FR 재고수량
-  sales_amt: number;        // FR 매출금액
+  tag_amt: number;          // FR TAG 기준 매출금액
+  sale_amt: number;         // FR 실제 판매금액
 }
 
 // API 요청 파라미터

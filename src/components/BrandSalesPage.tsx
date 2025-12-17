@@ -13,7 +13,6 @@ import {
   createDefaultStockWeeks,
   ForecastInventorySummaryData,
   ForecastInventoryData,
-  ActualArrivalSummaryData,
   ActualArrivalData,
   StockWeekWindow,
 } from "@/types/sales";
@@ -34,6 +33,7 @@ import InventoryStockSummaryTable from "./InventoryStockSummaryTable";
 import ActualArrivalTable from "./ActualArrivalTable";
 import StagnantStockAnalysis from "./StagnantStockAnalysis";
 import DealerStagnantStockAnalysis from "./DealerStagnantStockAnalysis";
+import ShopStagnantStockAnalysis from "./ShopStagnantStockAnalysis";
 import InventorySeasonChart from "./InventorySeasonChart";
 import { generateForecastForBrand } from "@/lib/forecast";
 import { buildInventoryForecastForTab } from "@/lib/inventoryForecast";
@@ -55,7 +55,7 @@ export default function BrandSalesPage({ brand, title }: BrandSalesPageProps) {
   const [channelTab, setChannelTab] = useState<ChannelTab>("ALL"); // 채널 탭 (ALL, FRS, 창고)
   const [growthRate, setGrowthRate] = useState<number>(105); // 성장률 (기본값 105%)
   const [forecastInventoryData, setForecastInventoryData] = useState<ForecastInventorySummaryData | null>(null);
-  const [actualArrivalData, setActualArrivalData] = useState<ActualArrivalSummaryData | null>(null);
+  const [actualArrivalData, setActualArrivalData] = useState<ActualArrivalData | null>(null);
   const [stockWeekWindow, setStockWeekWindow] = useState<StockWeekWindow>(1);
   const [productTypeTab, setProductTypeTab] = useState<ProductTypeTab>("전체"); // 상품 타입 탭 (전체/주력/아울렛)
   const [targetStockWeeks, setTargetStockWeeks] = useState<number>(40); // 목표재고주수 (기본값 40주)
@@ -103,11 +103,11 @@ export default function BrandSalesPage({ brand, title }: BrandSalesPageProps) {
           console.warn("입고예정 재고자산 데이터 로드 중 오류:", e);
         }
 
-        // 실제 입고 재고자산 데이터 로드
+        // 실제 입고 재고자산 데이터 로드 (Snowflake API)
         try {
-          const actualArrivalResponse = await fetch("/data/accessory_actual_arrival_summary.json");
+          const actualArrivalResponse = await fetch(`/api/actual-arrival?brand=${brand}`);
           if (actualArrivalResponse.ok) {
-            const actualArrivalJson: ActualArrivalSummaryData = await actualArrivalResponse.json();
+            const actualArrivalJson: ActualArrivalData = await actualArrivalResponse.json();
             setActualArrivalData(actualArrivalJson);
           } else {
             console.warn("재고자산입고(실적) 데이터를 불러오는데 실패했습니다.");
@@ -156,9 +156,11 @@ export default function BrandSalesPage({ brand, title }: BrandSalesPageProps) {
     forecastInventoryData?.brands[brand];
   const forecastInventoryMonths: string[] = forecastInventoryData?.months || [];
 
-  const actualArrivalBrandData: ActualArrivalData | undefined =
-    actualArrivalData?.brands[brand];
-  const actualArrivalMonths: string[] = actualArrivalData?.months || [];
+  const actualArrivalBrandData: ActualArrivalData | undefined = actualArrivalData ?? undefined;
+  // months는 데이터의 키에서 추출 (2025.01 ~ 2025.11)
+  const actualArrivalMonths: string[] = actualArrivalData 
+    ? Object.keys(actualArrivalData).sort()
+    : [];
 
   const allUnexpectedCategories = [
     ...(salesData?.unexpectedCategories || []),
@@ -471,6 +473,15 @@ export default function BrandSalesPage({ brand, title }: BrandSalesPageProps) {
               onMinQtyChange={setStagnantMinQty}
             />
 
+            {/* 1.10. 직영매장 단위 정체재고 분석 (OR 기준) */}
+            <ShopStagnantStockAnalysis 
+              brand={brand}
+              thresholdPct={stagnantThresholdPct}
+              onThresholdPctChange={setStagnantThresholdPct}
+              minQty={stagnantMinQty}
+              onMinQtyChange={setStagnantMinQty}
+            />
+
             {/* 2. 재고주수 히트맵 (2025년, 2024년) */}
             {salesTabData && inventoryTabDataWithForecast && inventoryData?.daysInMonth && (
               <div className="mb-4">
@@ -661,7 +672,7 @@ export default function BrandSalesPage({ brand, title }: BrandSalesPageProps) {
                   legend={
                     <>
                       <span className="text-gray-400">
-                        실제로 입고된 재고자산 (파일 존재 월만 표시)
+                        snowflake의 SAP 수불부 기준
                       </span>
                       <span className="text-gray-400">금액단위: 1위안</span>
                     </>
