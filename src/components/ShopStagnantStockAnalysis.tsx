@@ -33,7 +33,7 @@ interface ShopSummary {
 }
 
 // 시즌별 상세 데이터
-interface DealerSeasonDetail {
+interface ShopSeasonDetail {
   season_group: SeasonGroup | "정체재고";
   display_name: string;
   stock_weeks: number | null;
