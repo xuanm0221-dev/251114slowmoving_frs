@@ -6,6 +6,7 @@ import { BRAND_CODE_MAP } from "../../src/types/stagnantStock";
 export interface ShopBreakdownItem {
   shop_id: string;
   shop_nm_en: string;
+  onOffType: string | null;    // 온/오프라인 구분 (Online/Offline/null)
   dimensionKey: string;        // 빈 문자열 (집계 단위 변경으로 사용 안 함)
   prdt_nm_cn: string;          // 빈 문자열 (집계 단위 변경으로 사용 안 함)
   stock_amt: number;
@@ -24,6 +25,7 @@ export interface ShopBreakdownItem {
 export interface ShopProductBreakdownItem {
   shop_id: string;
   shop_nm_en: string;
+  onOffType: string | null;    // 온/오프라인 구분 (Online/Offline/null)
   prdt_cd: string;
   prdt_nm: string;
   season: string;
@@ -190,6 +192,7 @@ or_stock_base AS (
   SELECT
     a.shop_id,
     COALESCE(m.shop_nm_en, a.shop_id) AS shop_nm_en,
+    m.anlys_onoff_cls_nm,
     a.prdt_scs_cd,
     a.prdt_cd,
     b.prdt_nm,
@@ -218,6 +221,7 @@ or_stock AS (
   SELECT
     os.shop_id,
     os.shop_nm_en,
+    os.anlys_onoff_cls_nm,
     os.prdt_scs_cd,
     os.prdt_cd,
     os.prdt_nm,
@@ -259,6 +263,7 @@ or_stock_sale AS (
   SELECT
     os.shop_id,
     os.shop_nm_en,
+    os.anlys_onoff_cls_nm,
     os.prdt_scs_cd,
     os.prdt_cd,
     os.prdt_nm,
@@ -278,6 +283,7 @@ agg AS (
   SELECT
     shop_id,
     shop_nm_en,
+    anlys_onoff_cls_nm,
     CASE WHEN is_slow = 1 THEN '정체' ELSE '정상' END AS slow_cls,
     season_bucket,
     mid_category_kr AS mid_category,
@@ -289,7 +295,7 @@ agg AS (
     COUNT(DISTINCT prdt_scs_cd) AS item_count
   FROM or_stock_sale
   GROUP BY 
-    shop_id, shop_nm_en,
+    shop_id, shop_nm_en, anlys_onoff_cls_nm,
     is_slow, season_bucket, mid_category_kr
 ),
 
@@ -298,6 +304,7 @@ agg_all AS (
   SELECT
     shop_id,
     shop_nm_en,
+    anlys_onoff_cls_nm,
     '전체' AS slow_cls,
     season_bucket,
     mid_category,
@@ -309,7 +316,7 @@ agg_all AS (
     SUM(item_count) AS item_count
   FROM agg
   GROUP BY 
-    shop_id, shop_nm_en,
+    shop_id, shop_nm_en, anlys_onoff_cls_nm,
     season_bucket, mid_category, mid_category_kr
 ),
 
@@ -318,6 +325,7 @@ combined AS (
   SELECT
     shop_id,
     shop_nm_en,
+    anlys_onoff_cls_nm,
     slow_cls,
     season_bucket,
     mid_category,
@@ -338,6 +346,7 @@ combined AS (
   SELECT
     shop_id,
     shop_nm_en,
+    anlys_onoff_cls_nm,
     slow_cls,
     season_bucket,
     mid_category,
@@ -358,6 +367,7 @@ combined AS (
 SELECT 
   shop_id,
   shop_nm_en,
+  anlys_onoff_cls_nm AS onOffType,
   '' AS dimension_key,
   '' AS prdt_nm_cn,
   stock_amt,
@@ -471,6 +481,7 @@ or_stock AS (
   SELECT
     a.shop_id,
     COALESCE(m.shop_nm_en, a.shop_id) AS shop_nm_en,
+    m.anlys_onoff_cls_nm,
     a.prdt_scs_cd,
     a.prdt_cd,
     b.prdt_nm,
@@ -515,6 +526,7 @@ or_sale AS (
 SELECT 
   os.shop_id,
   os.shop_nm_en,
+  os.anlys_onoff_cls_nm AS onOffType,
   os.prdt_scs_cd,
   os.prdt_cd,
   os.prdt_nm,
@@ -578,6 +590,7 @@ export default async function handler(
     const shopBreakdown: ShopBreakdownItem[] = shopResult.map((row: any) => ({
       shop_id: row.SHOP_ID || "",
       shop_nm_en: row.SHOP_NM_EN || row.SHOP_ID || "",
+      onOffType: row.ONOFFTYPE || null,
       dimensionKey: row.DIMENSION_KEY || "",
       prdt_nm_cn: row.PRDT_NM_CN || "",
       stock_amt: Number(row.STOCK_AMT) || 0,
@@ -596,6 +609,7 @@ export default async function handler(
     const shopProductBreakdown: ShopProductBreakdownItem[] = productResult.map((row: any) => ({
       shop_id: row.SHOP_ID || "",
       shop_nm_en: row.SHOP_NM_EN || row.SHOP_ID || "",
+      onOffType: row.ONOFFTYPE || null,
       prdt_cd: row.PRDT_SCS_CD || "",  // prdt_scs_cd를 prdt_cd 필드에 저장
       prdt_nm: row.PRDT_NM || "",
       season: row.SEASON || "",

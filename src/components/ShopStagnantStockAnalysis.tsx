@@ -14,7 +14,7 @@ import CollapsibleSection from "./CollapsibleSection";
 const WAREHOUSE_SHOP_IDS = ['SF16', 'BZ19'];
 
 // 탭 필터 타입
-type ShopFilterTab = '전체' | '창고' | '매장';
+type ShopFilterTab = '전체' | '창고' | '온라인매장' | '오프라인매장';
 
 // 매장별 집계 데이터 (OR 직영매장 단위)
 interface ShopSummary {
@@ -384,8 +384,8 @@ export default function ShopStagnantStockAnalysis({
   // 펼친 매장 ID
   const [expandedShopId, setExpandedShopId] = useState<string | null>(null);
 
-  // 탭 필터 상태 (전체/창고/매장) - 기본값: 매장
-  const [shopFilterTab, setShopFilterTab] = useState<ShopFilterTab>('매장');
+  // 탭 필터 상태 (전체/창고/온라인매장/오프라인매장) - 기본값: 오프라인매장
+  const [shopFilterTab, setShopFilterTab] = useState<ShopFilterTab>('오프라인매장');
 
   // Level 3 모달 상태
   const [selectedShop, setSelectedShop] = useState<ShopSummary | null>(null);
@@ -473,10 +473,15 @@ export default function ShopStagnantStockAnalysis({
       return data.shopBreakdown.filter(sb => 
         WAREHOUSE_SHOP_IDS.includes(sb.shop_id)
       );
-    } else {
-      // 매장: 창고 제외
+    } else if (shopFilterTab === '온라인매장') {
       return data.shopBreakdown.filter(sb => 
-        !WAREHOUSE_SHOP_IDS.includes(sb.shop_id)
+        !WAREHOUSE_SHOP_IDS.includes(sb.shop_id) && 
+        sb.onOffType === 'Online'
+      );
+    } else { // 오프라인매장
+      return data.shopBreakdown.filter(sb => 
+        !WAREHOUSE_SHOP_IDS.includes(sb.shop_id) && 
+        (sb.onOffType === 'Offline' || sb.onOffType === null)
       );
     }
   }, [data?.shopBreakdown, shopFilterTab]);
@@ -783,8 +788,16 @@ export default function ShopStagnantStockAnalysis({
     let filteredProducts = data.shopProductBreakdown;
     if (shopFilterTab === '창고') {
       filteredProducts = filteredProducts.filter(p => WAREHOUSE_SHOP_IDS.includes(p.shop_id));
-    } else if (shopFilterTab === '매장') {
-      filteredProducts = filteredProducts.filter(p => !WAREHOUSE_SHOP_IDS.includes(p.shop_id));
+    } else if (shopFilterTab === '온라인매장') {
+      filteredProducts = filteredProducts.filter(p => 
+        !WAREHOUSE_SHOP_IDS.includes(p.shop_id) && 
+        p.onOffType === 'Online'
+      );
+    } else if (shopFilterTab === '오프라인매장') {
+      filteredProducts = filteredProducts.filter(p => 
+        !WAREHOUSE_SHOP_IDS.includes(p.shop_id) && 
+        (p.onOffType === 'Offline' || p.onOffType === null)
+      );
     }
     
     // 선택된 매장 + 시즌 + 정체여부 필터링
@@ -857,7 +870,7 @@ export default function ShopStagnantStockAnalysis({
         defaultOpen={false}
         titleExtra={
           <div className="flex bg-gray-100 rounded-lg p-0.5">
-            {(['전체', '창고', '매장'] as ShopFilterTab[]).map(tab => (
+            {(['전체', '창고', '온라인매장', '오프라인매장'] as ShopFilterTab[]).map(tab => (
               <button
                 key={tab}
                 onClick={(e) => {
