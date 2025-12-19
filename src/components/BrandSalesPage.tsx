@@ -38,6 +38,11 @@ import InventorySeasonChart from "./InventorySeasonChart";
 import { generateForecastForBrand } from "@/lib/forecast";
 import { buildInventoryForecastForTab } from "@/lib/inventoryForecast";
 import { computeStockWeeksForChart, StockWeeksChartPoint, ProductTypeTab, computeTargetInventoryDelta } from "@/utils/stockWeeks";
+import { 
+  loadForecastInventoryFromStorage, 
+  saveForecastInventoryToStorage,
+  buildEditableMonths 
+} from "@/lib/forecastInventoryStorage";
 
 interface BrandSalesPageProps {
   brand: Brand;
@@ -64,6 +69,7 @@ export default function BrandSalesPage({ brand, title }: BrandSalesPageProps) {
   const [stagnantMinQty, setStagnantMinQty] = useState<number>(10); // 정체재고 최소 수량 기준 (기본값 10) - 전월말 기준
   const [stagnantItemTab, setStagnantItemTab] = useState<"ACC합계" | "신발" | "모자" | "가방" | "기타">("ACC합계"); // 정체재고 아이템 필터
   const [stagnantCurrentMonthMinQty, setStagnantCurrentMonthMinQty] = useState<number>(10); // 당월수량 기준 (기본값 10)
+  const [editingForecastInventory, setEditingForecastInventory] = useState<ForecastInventoryData | null>(null); // 편집 중인 입고예정 데이터
   
   // 특정 아이템의 stockWeek 변경 핸들러
   const handleStockWeekChange = (itemTab: ItemTab, value: number) => {
@@ -90,12 +96,30 @@ export default function BrandSalesPage({ brand, title }: BrandSalesPageProps) {
         const inventoryJson: InventorySummaryData = await inventoryResponse.json();
         setInventoryData(inventoryJson);
 
-        // 입고예정 재고자산 데이터 로드 (실적 데이터와 동일하게 JSON 파일에서 읽기)
+        // 입고예정 재고자산 데이터 로드 (JSON 파일 + localStorage 병합)
         try {
           const forecastResponse = await fetch("/data/accessory_forecast_inventory_summary.json");
           if (forecastResponse.ok) {
             const forecastJson: ForecastInventorySummaryData = await forecastResponse.json();
-            setForecastInventoryData(forecastJson);
+            
+            // localStorage에서 저장된 데이터 로드
+            const storedData = loadForecastInventoryFromStorage(brand);
+            
+            // JSON 데이터와 localStorage 데이터 병합 (localStorage 우선)
+            const mergedBrandData = {
+              ...forecastJson.brands[brand],
+              ...storedData,
+            };
+            
+            const mergedForecastData: ForecastInventorySummaryData = {
+              ...forecastJson,
+              brands: {
+                ...forecastJson.brands,
+                [brand]: mergedBrandData,
+              },
+            };
+            
+            setForecastInventoryData(mergedForecastData);
           } else {
             console.warn("입고예정 재고자산 데이터를 불러오는데 실패했습니다.");
           }
@@ -136,7 +160,32 @@ export default function BrandSalesPage({ brand, title }: BrandSalesPageProps) {
     };
 
     fetchData();
-  }, []);
+  }, [brand]);
+
+  // 입고예정 데이터 저장 핸들러
+  const handleSaveForecastInventory = () => {
+    if (!editingForecastInventory) return;
+    
+    // localStorage에 저장
+    const success = saveForecastInventoryToStorage(brand, editingForecastInventory);
+    
+    if (success) {
+      // forecastInventoryData state 업데이트
+      if (forecastInventoryData) {
+        const updatedData: ForecastInventorySummaryData = {
+          ...forecastInventoryData,
+          brands: {
+            ...forecastInventoryData.brands,
+            [brand]: editingForecastInventory,
+          },
+        };
+        setForecastInventoryData(updatedData);
+      }
+      alert("입고예정 데이터가 저장되었습니다.");
+    } else {
+      alert("저장에 실패했습니다.");
+    }
+  };
 
   // 원본 브랜드 데이터
   const originalSalesBrandData: SalesBrandData | undefined = salesData?.brands[brand];
@@ -154,7 +203,23 @@ export default function BrandSalesPage({ brand, title }: BrandSalesPageProps) {
 
   const forecastInventoryBrandData: ForecastInventoryData | undefined =
     forecastInventoryData?.brands[brand];
-  const forecastInventoryMonths: string[] = forecastInventoryData?.months || [];
+  
+  // 기준월 계산 (inventoryData.months의 마지막 월)
+  const latestActualYm = useMemo(() => {
+    if (!inventoryData?.months || inventoryData.months.length === 0) return "2025.11";
+    const sortedMonths = [...inventoryData.months].sort((a, b) => {
+      const [yearA, monthA] = a.split(".").map(Number);
+      const [yearB, monthB] = b.split(".").map(Number);
+      if (yearA !== yearB) return yearA - yearB;
+      return monthA - monthB;
+    });
+    return sortedMonths[sortedMonths.length - 1];
+  }, [inventoryData?.months]);
+  
+  // 편집 가능한 월 목록 (기준월 + 1부터 6개월)
+  const forecastInventoryMonths: string[] = useMemo(() => {
+    return buildEditableMonths(latestActualYm, 6);
+  }, [latestActualYm]);
 
   const actualArrivalBrandData: ActualArrivalData | undefined = actualArrivalData ?? undefined;
   // months는 데이터의 키에서 추출 (2025.01 ~ 2025.11)
@@ -635,10 +700,34 @@ export default function BrandSalesPage({ brand, title }: BrandSalesPageProps) {
                   legend={
                     <>
                       <span className="text-gray-400">
-                        실적 이후 6개월 기준 입고예정 재고자산 (파일 존재 월만 표시)
+                        기준월 ({latestActualYm}) 이후 6개월 입고예정 (수기입력 가능)
                       </span>
                       <span className="text-gray-400">금액단위: 1위안</span>
                     </>
+                  }
+                  titleExtra={
+                    <button
+                      onClick={handleSaveForecastInventory}
+                      className="group relative px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-sm rounded-lg font-semibold shadow-lg shadow-blue-500/50 hover:shadow-xl hover:shadow-blue-600/60 transition-all duration-300 flex items-center gap-2 transform hover:scale-105 active:scale-95"
+                    >
+                      <svg 
+                        className="w-4 h-4 transition-transform duration-300 group-hover:rotate-12" 
+                        fill="none" 
+                        stroke="currentColor" 
+                        viewBox="0 0 24 24"
+                      >
+                        <path 
+                          strokeLinecap="round" 
+                          strokeLinejoin="round" 
+                          strokeWidth={2.5} 
+                          d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" 
+                        />
+                      </svg>
+                      <span className="relative">
+                        저장
+                        <span className="absolute -bottom-0.5 left-0 w-0 h-0.5 bg-white/50 group-hover:w-full transition-all duration-300"></span>
+                      </span>
+                    </button>
                   }
                 >
                   {forecastInventoryBrandData && forecastInventoryMonths.length > 0 ? (
@@ -654,6 +743,9 @@ export default function BrandSalesPage({ brand, title }: BrandSalesPageProps) {
                       <ForecastInventoryTable
                         data={forecastInventoryBrandData}
                         months={forecastInventoryMonths}
+                        brand={brand}
+                        onSave={handleSaveForecastInventory}
+                        onDataChange={setEditingForecastInventory}
                       />
                     </>
                   ) : (
