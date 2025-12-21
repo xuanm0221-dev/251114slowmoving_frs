@@ -6,12 +6,14 @@ import type { InventoryScsDetailResponse } from "../../src/types/sales";
 interface ErrorResponse {
   error: string;
   details?: string;
+  stack?: string;
   params?: {
     brand?: string;
     month?: string;
     itemTab?: string;
     scope?: string;
     segment?: string;
+    stockWeek?: number;
   };
 }
 
@@ -35,6 +37,15 @@ export default async function handler(
   const scopeType = String(scope) as 'total' | 'frs' | 'hqor' | 'warehouse' | 'retail';
   const segmentType = String(segment) as 'core' | 'outlet';
   const stockWeekNum = Number(stockWeek) || 25;
+
+  console.log('[inventory-scs-detail] Request params:', {
+    brand: brandCode,
+    month: monthYYYYMM,
+    itemTab: itemCategory,
+    scope: scopeType,
+    segment: segmentType,
+    stockWeek: stockWeekNum
+  });
 
   try {
     // 일수 계산
@@ -227,14 +238,21 @@ or_sales AS (
 )
 
 SELECT 
-  h.prdt_scs_cd,
-  h.prdt_nm_cn,
-  GREATEST(0, h.stock_amt - COALESCE((s.sales_amt / ${daysInMonth}) * 7 * ${stockWeekNum}, 0)) AS stock_amt,
-  0 AS stock_qty
-FROM hqor_stock h
-LEFT JOIN or_sales s ON h.prdt_scs_cd = s.prdt_scs_cd
-WHERE stock_amt > 0
-ORDER BY stock_amt DESC
+  prdt_scs_cd,
+  prdt_nm_cn,
+  stock_amt,
+  stock_qty
+FROM (
+  SELECT 
+    h.prdt_scs_cd,
+    h.prdt_nm_cn,
+    GREATEST(0, h.stock_amt - COALESCE((s.sales_amt / ${daysInMonth}) * 7 * ${stockWeekNum}, 0)) AS stock_amt,
+    0 AS stock_qty
+  FROM hqor_stock h
+  LEFT JOIN or_sales s ON h.prdt_scs_cd = s.prdt_scs_cd
+) sub
+WHERE sub.stock_amt > 0
+ORDER BY sub.stock_amt DESC
 LIMIT 100
         `;
       } else {
@@ -393,12 +411,16 @@ LIMIT 100
       `;
     }
 
+    console.log(`[inventory-scs-detail] Executing query for scope=${scopeType}, segment=${segmentType}`);
+    
     const rows = await runQuery(query) as {
       PRDT_SCS_CD: string;
       PRDT_NM_CN?: string;
       STOCK_AMT: number;
       STOCK_QTY: number;
     }[];
+
+    console.log(`[inventory-scs-detail] Query returned ${rows.length} rows`);
 
     const items = rows.map(row => ({
       prdt_scs_cd: row.PRDT_SCS_CD,
@@ -410,6 +432,8 @@ LIMIT 100
     const totalAmt = items.reduce((sum, item) => sum + item.stock_amt, 0);
     const totalQty = items.reduce((sum, item) => sum + item.stock_qty, 0);
 
+    console.log(`[inventory-scs-detail] Result: totalAmt=${totalAmt}, totalQty=${totalQty}, recordCount=${items.length}`);
+
     res.status(200).json({
       items,
       meta: {
@@ -419,12 +443,33 @@ LIMIT 100
       },
     });
   } catch (error) {
-    console.error("inventory-scs-detail error:", error);
+    console.error("[inventory-scs-detail] Error details:", {
+      error,
+      params: {
+        brand: brandCode,
+        month: monthYYYYMM,
+        itemTab: itemCategory,
+        scope: scopeType,
+        segment: segmentType,
+        stockWeek: stockWeekNum
+      }
+    });
+    
     const errorMessage = error instanceof Error ? error.message : String(error);
+    const errorStack = error instanceof Error ? error.stack : undefined;
+    
     res.status(500).json({ 
-      error: "Internal server error",
+      error: "데이터를 불러오는데 실패했습니다.",
       details: errorMessage,
-      params: { brand: brandCode, month: monthYYYYMM, itemTab: itemCategory, scope: scopeType, segment: segmentType }
+      stack: process.env.NODE_ENV === 'development' ? errorStack : undefined,
+      params: { 
+        brand: brandCode, 
+        month: monthYYYYMM, 
+        itemTab: itemCategory, 
+        scope: scopeType, 
+        segment: segmentType,
+        stockWeek: stockWeekNum
+      }
     });
   }
 }

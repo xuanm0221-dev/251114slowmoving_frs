@@ -193,3 +193,4 @@ ORDER BY status, key_type;
 
 -- 목표: UNMAPPED rows = 0 (또는 최소화)
 
+

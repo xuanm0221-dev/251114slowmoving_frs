@@ -61,7 +61,9 @@ export default function InventoryScsDetailModal({
 
         const response = await fetch(`/api/inventory-scs-detail?${queryParams}`);
         if (!response.ok) {
-          throw new Error("데이터를 불러오는데 실패했습니다.");
+          const errorData = await response.json().catch(() => ({}));
+          const errorMsg = errorData.details || errorData.error || "데이터를 불러오는데 실패했습니다.";
+          throw new Error(errorMsg);
         }
 
         const result: InventoryScsDetailResponse = await response.json();

@@ -141,3 +141,4 @@ export function toYYYYDotMM(month: string): string {
   return `${month.substring(0, 4)}.${month.substring(4, 6)}`;
 }
 
+
