@@ -1,20 +1,23 @@
 """
-악세사리 재고자산 데이터 전처리 스크립트
-- 청크 기반 CSV 로딩으로 대용량 파일 처리
+악세사리 재고자산 데이터 전처리 스크립트 (Snowflake 버전)
+- 기존 CSV 기반에서 Snowflake 직접 조회로 전환
 - 집계 결과를 JSON으로 저장
+- 프론트엔드 변경 없음 (JSON 구조 100% 동일)
 """
 
-import pandas as pd
 import json
-from collections import defaultdict
+import calendar
 from pathlib import Path
 from typing import Dict, Set, Tuple, Any
-import calendar
+
+# 프로젝트 루트로 경로 추가
+import sys
+sys.path.insert(0, str(Path(__file__).parent))
+
+from inventory_aggregation import aggregate_inventory_from_snowflake
+from sales_aggregation import aggregate_sales_from_snowflake
 
 # ========== 설정 ==========
-CHUNK_SIZE = 200_000
-INVENTORY_DATA_PATH = Path(r"D:\data\inventory")
-SALES_JSON_PATH = Path(__file__).parent.parent / "public" / "data" / "accessory_sales_summary.json"
 OUTPUT_PATH = Path(__file__).parent.parent / "public" / "data"
 
 ANALYSIS_MONTHS = [
@@ -25,38 +28,7 @@ ANALYSIS_MONTHS = [
 ]
 
 VALID_BRANDS = {"MLB", "MLB KIDS", "DISCOVERY"}
-TARGET_CATEGORY = "饰品"
 VALID_ITEM_CATEGORIES = {"Shoes", "Headwear", "Bag", "Acc_etc"}
-CORE_SEASONS = ["24FW", "25SS", "25FW", "26SS"]
-
-INVENTORY_COLUMNS = [
-    "Channel 2", "产品品牌", "产品大分类", "产品中分类",
-    "运营基准", "产品季节", "预计库存金额"
-]
-
-
-def determine_operation_group(op_basis: str, season: str) -> str:
-    """
-    주력/아울렛 상품 구분
-    1. 운영기준이 INTRO, FOCUS, 26SS면 → 주력
-    2. 운영기준이 미지정("")이면 → 시즌코드(24FW, 25SS, 25FW, 26SS)로 판단
-    3. 그 외 → 아울렛
-    """
-    op_basis = str(op_basis).strip() if pd.notna(op_basis) else ""
-    season = str(season).strip() if pd.notna(season) else ""
-    
-    # 1. 운영기준이 INTRO/FOCUS/26SS면 → 주력
-    if op_basis in ["INTRO", "FOCUS", "26SS"]:
-        return "core"
-    
-    # 2. 운영기준이 미지정("")이면 → 시즌코드로 판단
-    if op_basis == "":
-        for core_season in CORE_SEASONS:
-            if core_season in season:
-                return "core"
-    
-    # 3. 그 외 → 아울렛
-    return "outlet"
 
 
 def get_days_in_month(year: int, month: int) -> int:
@@ -64,108 +36,55 @@ def get_days_in_month(year: int, month: int) -> int:
 
 
 def load_sales_or_data() -> Dict[Tuple, float]:
-    """판매 JSON에서 OR 매출 데이터 추출 (원 단위로 저장되어 있음)"""
+    """
+    Snowflake에서 OR 판매 매출 데이터 조회
+    (재고 JSON에서 OR_sales 필드에 사용)
+    """
+    print("[재고] OR 판매 데이터 조회 중...")
+    
+    start_month = ANALYSIS_MONTHS[0].replace('.', '')
+    end_month = ANALYSIS_MONTHS[-1].replace('.', '')
+    
+    sales_agg_dict, _ = aggregate_sales_from_snowflake(start_month, end_month)
+    
+    # OR 채널 데이터만 추출
     sales_or_dict: Dict[Tuple, float] = {}
+    for key, value in sales_agg_dict.items():
+        brand, item_tab, month, channel, product_type = key
+        if channel == 'OR':
+            sales_or_dict[key] = value
     
-    if not SALES_JSON_PATH.exists():
-        print(f"[WARNING] 판매 JSON 파일이 없습니다: {SALES_JSON_PATH}")
-        return sales_or_dict
-    
-    with open(SALES_JSON_PATH, 'r', encoding='utf-8') as f:
-        sales_data = json.load(f)
-    
-    for brand in VALID_BRANDS:
-        if brand not in sales_data.get("brands", {}):
-            continue
-        for item_tab in ["전체", "Shoes", "Headwear", "Bag", "Acc_etc"]:
-            if item_tab not in sales_data["brands"][brand]:
-                continue
-            for month in ANALYSIS_MONTHS:
-                if month not in sales_data["brands"][brand][item_tab]:
-                    continue
-                month_data = sales_data["brands"][brand][item_tab][month]
-                # 이미 원 단위로 저장되어 있음
-                for op_group in ["core", "outlet"]:
-                    key = (brand, item_tab, month, "OR", op_group)
-                    amount_won = month_data.get(f"OR_{op_group}", 0)
-                    sales_or_dict[key] = amount_won
-    
+    print(f"[재고] OR 판매 데이터 추출 완료: {len(sales_or_dict):,}개 키")
     return sales_or_dict
 
 
 def process_inventory_data() -> Tuple[Dict[Tuple, float], Set[str]]:
-    agg_dict: Dict[Tuple, float] = defaultdict(float)
-    unexpected_categories: Set[str] = set()
+    """
+    Snowflake에서 재고 데이터 조회 및 집계
+    (기존 CSV 기반 로직을 Snowflake로 완전 대체)
+    """
+    print("=" * 60)
+    print("재고 데이터 Snowflake 조회 시작")
+    print("=" * 60)
     
-    for month in ANALYSIS_MONTHS:
-        file_path = INVENTORY_DATA_PATH / f"{month}.csv"
+    try:
+        # Snowflake에서 전체 기간 데이터 조회
+        start_month = ANALYSIS_MONTHS[0].replace('.', '')  # "2024.01" → "202401"
+        end_month = ANALYSIS_MONTHS[-1].replace('.', '')   # "2025.11" → "202511"
         
-        if not file_path.exists():
-            print(f"[WARNING] 파일 없음: {file_path}")
-            continue
+        agg_dict, unexpected_categories = aggregate_inventory_from_snowflake(
+            start_month=start_month,
+            end_month=end_month
+        )
         
-        print(f"처리 중: {file_path}")
-        
-        try:
-            for chunk in pd.read_csv(
-                file_path,
-                chunksize=CHUNK_SIZE,
-                encoding='utf-8-sig',
-                usecols=INVENTORY_COLUMNS,
-                dtype={
-                    "Channel 2": str, "产品品牌": str, "产品大分类": str,
-                    "产品中分类": str, "运营基准": str, "产品季节": str,
-                    "预计库存金额": float
-                }
-            ):
-                chunk = chunk[chunk["产品品牌"].isin(VALID_BRANDS)]
-                if chunk.empty:
-                    continue
-                
-                chunk = chunk[chunk["产品大分类"] == TARGET_CATEGORY]
-                if chunk.empty:
-                    continue
-                
-                for cat in set(chunk["产品中分类"].dropna().unique()):
-                    if cat not in VALID_ITEM_CATEGORIES:
-                        unexpected_categories.add(cat)
-                
-                chunk["operation_group"] = chunk.apply(
-                    lambda row: determine_operation_group(row["运营基准"], row["产品季节"]), 
-                    axis=1
-                )
-                
-                year_month = f"{month[:4]}.{month[5:7]}"
-                
-                for _, row in chunk.iterrows():
-                    brand = row["产品品牌"]
-                    item_cat = row["产品中分类"]
-                    channel = row["Channel 2"]
-                    op_group = row["operation_group"]
-                    amount = row["预计库存金额"] if pd.notna(row["预计库存金额"]) else 0.0
-                    
-                    if channel not in ["FRS", "HQ", "OR"]:
-                        continue
-                    
-                    item_tabs = ["전체", item_cat] if item_cat in VALID_ITEM_CATEGORIES else ["전체"]
-                    
-                    for item_tab in item_tabs:
-                        key_total = (brand, item_tab, year_month, "전체", op_group)
-                        agg_dict[key_total] += amount
-                        
-                        if channel == "FRS":
-                            key_frs = (brand, item_tab, year_month, "FRS", op_group)
-                            agg_dict[key_frs] += amount
-                        
-                        if channel in ["HQ", "OR"]:
-                            key_hq_or = (brand, item_tab, year_month, "HQ_OR", op_group)
-                            agg_dict[key_hq_or] += amount
-        
-        except Exception as e:
-            print(f"[ERROR] {file_path}: {e}")
-            continue
+        print(f"[완료] 재고 데이터 집계 완료: {len(agg_dict):,}개 키")
+        return agg_dict, unexpected_categories
     
-    return dict(agg_dict), unexpected_categories
+    except Exception as e:
+        print(f"[ERROR] Snowflake 조회 실패: {e}")
+        import traceback
+        traceback.print_exc()
+        raise
 
 
 def convert_to_json(inv_agg: Dict, sales_or: Dict, unexpected: Set) -> Dict:
@@ -198,16 +117,18 @@ def convert_to_json(inv_agg: Dict, sales_or: Dict, unexpected: Set) -> Dict:
 
 def main():
     print("=" * 60)
-    print("재고자산 데이터 전처리 시작")
+    print("재고자산 데이터 전처리 시작 (Snowflake 버전)")
     print("=" * 60)
+    print(f"출력 경로: {OUTPUT_PATH}")
+    print(f"분석 기간: {ANALYSIS_MONTHS[0]} ~ {ANALYSIS_MONTHS[-1]}")
     
     OUTPUT_PATH.mkdir(parents=True, exist_ok=True)
     
-    print("\n판매 OR 데이터 로드 중...")
+    print("\n판매 OR 데이터 로드 중 (Snowflake)...")
     sales_or_dict = load_sales_or_data()
     print(f"OR 판매 키 수: {len(sales_or_dict):,}")
     
-    print("\n재고 데이터 처리 중...")
+    print("\n재고 데이터 처리 중 (Snowflake)...")
     inv_agg, unexpected = process_inventory_data()
     
     if unexpected:
@@ -222,6 +143,7 @@ def main():
     
     print(f"\n[DONE] 저장 완료: {output_file}")
     print(f"재고 집계 키 수: {len(inv_agg):,}")
+    print()
 
 
 def merge_inventory_month(months_to_merge: list, new_inventory_path: str = None):

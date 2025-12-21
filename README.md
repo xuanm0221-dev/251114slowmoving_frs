@@ -83,8 +83,7 @@ python scripts/preprocess_inventory.py
 # 입고예정 재고자산 데이터 전처리
 python scripts/preprocess_forecast_inventory.py
 
-# 실제 입고 데이터 전처리
-python scripts/preprocess_actual_arrival.py
+# 실제 입고 데이터는 Snowflake API에서 자동 조회됩니다.
 ```
 
 ### 4. 개발 서버 실행
@@ -121,8 +120,7 @@ npm run dev
 ├── scripts/                      # Python 전처리 스크립트
 │   ├── preprocess_sales.py
 │   ├── preprocess_inventory.py
-│   ├── preprocess_forecast_inventory.py
-│   └── preprocess_actual_arrival.py
+│   └── preprocess_forecast_inventory.py
 └── public/data/                  # 전처리된 JSON 데이터
 ```
 
@@ -130,8 +128,9 @@ npm run dev
 
 - **분석 기간**: 2024.01 ~ 2025.11 (23개월)
 - **전체판매**: FRS(대리상) + OR(직영) 합계
-- **주력상품**: INTRO/FOCUS 또는 24FW~26SS 시즌
-- **아울렛상품**: OUTLET/CARE/DONE 또는 기타
+- **주력상품**: INTRO/FOCUS 또는 해당 연도 시즌 이상
+- **아울렛상품**: OUTLET/CARE/DONE 또는 해당 연도 이전 시즌
+- **분류 기준 관리**: `src/constants/businessRules.ts`에서 통합 관리
 - **금액 단위**: M (백만 위안, 吊牌金额 기준)
 
 ## 📝 주요 계산식

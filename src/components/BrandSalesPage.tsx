@@ -43,6 +43,7 @@ import {
   saveForecastInventoryToStorage,
   buildEditableMonths 
 } from "@/lib/forecastInventoryStorage";
+import { PRODUCT_TYPE_RULES } from "@/constants/businessRules";
 
 interface BrandSalesPageProps {
   brand: Brand;
@@ -598,12 +599,12 @@ export default function BrandSalesPage({ brand, title }: BrandSalesPageProps) {
                     <div className="mt-4 pt-3 border-t border-gray-300">
                       <div className="grid md:grid-cols-2 gap-4 text-xs">
                         <div>
-                          <span className="text-gray-500 font-medium">주력상품 분류 기준:</span>{" "}
-                          <span className="text-gray-600">INTRO/FOCUS 또는 24FW~26SS 시즌</span>
+                          <span className="text-gray-500 font-medium">{PRODUCT_TYPE_RULES.core.label} 분류 기준:</span>{" "}
+                          <span className="text-gray-600">{PRODUCT_TYPE_RULES.core.criteria}</span>
                         </div>
                         <div>
-                          <span className="text-gray-500 font-medium">아울렛 상품 분류 기준:</span>{" "}
-                          <span className="text-gray-600">OUTLET/CARE/DONE 또는 미지정에서 24FW이전시즌</span>
+                          <span className="text-gray-500 font-medium">{PRODUCT_TYPE_RULES.outlet.label} 분류 기준:</span>{" "}
+                          <span className="text-gray-600">{PRODUCT_TYPE_RULES.outlet.criteria}</span>
                         </div>
                       </div>
                     </div>

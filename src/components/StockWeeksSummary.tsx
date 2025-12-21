@@ -14,6 +14,7 @@ import {
 } from "@/types/sales";
 import { cn } from "@/lib/utils";
 import { computeStockWeeksForRowType, getWindowMonths } from "@/utils/stockWeeks";
+import { PRODUCT_TYPE_RULES } from "@/constants/businessRules";
 
 interface StockWeeksSummaryProps {
   brand: Brand;
@@ -394,8 +395,8 @@ export default function StockWeeksSummary({
             <span>= 감소 (전년 대비 ↓)</span>
           </div>
           <div className="border-l border-gray-300 pl-4 ml-2 flex items-center gap-1">
-            <span className="font-medium">주력상품:</span>
-            <span>INTRO, FOCUS, 26SS</span>
+            <span className="font-medium">{PRODUCT_TYPE_RULES.core.label}:</span>
+            <span>{PRODUCT_TYPE_RULES.core.shortDescription}</span>
           </div>
           <div className="flex items-center gap-1">
             <span className="font-medium">아울렛상품:</span>
