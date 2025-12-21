@@ -22,7 +22,7 @@ export interface SalesItemTabData {
   [month: string]: SalesMonthData;
 }
 
-// 판매 브랜드별 데이터 구조
+// 판매 브랜드별 데이터 구조 (영문 키로 통일)
 export interface SalesBrandData {
   전체: SalesItemTabData;
   Shoes: SalesItemTabData;
@@ -76,7 +76,7 @@ export interface InventoryItemTabData {
   [month: string]: InventoryMonthData;
 }
 
-// 재고 브랜드별 데이터 구조
+// 재고 브랜드별 데이터 구조 (영문 키로 통일)
 export interface InventoryBrandData {
   전체: InventoryItemTabData;
   Shoes: InventoryItemTabData;
