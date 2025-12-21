@@ -269,7 +269,7 @@ sales_classified AS (
     fr_or_cls,
     tag_amt,
     is_unmapped,
-    ${getProductTypeCase('op_std', 'sesn', 'RIGHT(sale_yyyymm, 2)')} AS product_type
+    ${getProductTypeCase('op_std', 'sesn', 'SUBSTRING(sale_yyyymm, 3, 2)')} AS product_type
   FROM sales_with_remark
   WHERE fr_or_cls IN ('FR', 'OR')  -- HQ 제외, mapped만
 ),
@@ -406,7 +406,7 @@ stock_classified AS (
     fr_or_cls,
     stock_tag_amt_expected,
     stock_qty_expected,
-    ${getProductTypeCase('op_std', 'sesn', 'RIGHT(yymm, 2)')} AS product_type
+    ${getProductTypeCase('op_std', 'sesn', 'SUBSTRING(yymm, 3, 2)')} AS product_type
   FROM stock_with_remark
 ),
 
@@ -482,7 +482,7 @@ or_sales_classified AS (
     brd_cd,
     prdt_kind_nm_en,
     tag_amt,
-    ${getProductTypeCase('op_std', 'sesn', 'RIGHT(sale_yymm, 2)')} AS product_type
+    ${getProductTypeCase('op_std', 'sesn', 'SUBSTRING(sale_yymm, 3, 2)')} AS product_type
   FROM or_sales_with_remark
 ),
 
