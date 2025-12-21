@@ -73,7 +73,7 @@ or_sales_raw AS (
     s.tag_amt
   FROM CHN.DW_SALE s
   INNER JOIN FNF.CHN.MST_PRDT_SCS p ON s.prdt_scs_cd = p.prdt_scs_cd
-  WHERE s.sale_ym = '${monthYYYYMM}'
+  WHERE TO_CHAR(s.sale_dt, 'YYYYMM') = '${monthYYYYMM}'
     AND s.brd_cd = '${brandCode}'
     AND p.parent_prdt_kind_cd = 'A'
     AND ${itemFilter}
@@ -212,7 +212,7 @@ or_sales_raw AS (
     s.tag_amt
   FROM CHN.DW_SALE s
   INNER JOIN FNF.CHN.MST_PRDT_SCS p ON s.prdt_scs_cd = p.prdt_scs_cd
-  WHERE s.sale_ym = '${monthYYYYMM}'
+  WHERE TO_CHAR(s.sale_dt, 'YYYYMM') = '${monthYYYYMM}'
     AND s.brd_cd = '${brandCode}'
     AND p.parent_prdt_kind_cd = 'A'
     AND ${itemFilter}
