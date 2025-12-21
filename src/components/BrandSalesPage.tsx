@@ -35,6 +35,8 @@ import StagnantStockAnalysis from "./StagnantStockAnalysis";
 import DealerStagnantStockAnalysis from "./DealerStagnantStockAnalysis";
 import ShopStagnantStockAnalysis from "./ShopStagnantStockAnalysis";
 import InventorySeasonChart from "./InventorySeasonChart";
+import CoreOutletInventorySection from "./CoreOutletInventorySection";
+import InventoryScsDetailModal from "./InventoryScsDetailModal";
 import { generateForecastForBrand } from "@/lib/forecast";
 import { buildInventoryForecastForTab } from "@/lib/inventoryForecast";
 import { computeStockWeeksForChart, StockWeeksChartPoint, ProductTypeTab, computeTargetInventoryDelta } from "@/utils/stockWeeks";
@@ -71,6 +73,15 @@ export default function BrandSalesPage({ brand, title }: BrandSalesPageProps) {
   const [stagnantItemTab, setStagnantItemTab] = useState<"ACC합계" | "신발" | "모자" | "가방" | "기타">("ACC합계"); // 정체재고 아이템 필터
   const [stagnantCurrentMonthMinQty, setStagnantCurrentMonthMinQty] = useState<number>(10); // 당월수량 기준 (기본값 10)
   const [editingForecastInventory, setEditingForecastInventory] = useState<ForecastInventoryData | null>(null); // 편집 중인 입고예정 데이터
+  
+  // 주력/아울렛 재고 분석용 state
+  const [selectedMonth, setSelectedMonth] = useState<string>('2025.11'); // 카드 섹션 기준월
+  const [coreOutletModal, setCoreOutletModal] = useState<{
+    isOpen: boolean;
+    scope: 'total' | 'frs' | 'warehouse' | 'retail';
+    segment: 'core' | 'outlet';
+    title: string;
+  } | null>(null);
   
   // 특정 아이템의 stockWeek 변경 핸들러
   const handleStockWeekChange = (itemTab: ItemTab, value: number) => {
@@ -180,6 +191,14 @@ export default function BrandSalesPage({ brand, title }: BrandSalesPageProps) {
 
     fetchData();
   }, [brand]);
+
+  // 최신 월로 selectedMonth 자동 설정
+  useEffect(() => {
+    if (inventoryData?.months && inventoryData.months.length > 0) {
+      const latestMonth = inventoryData.months[inventoryData.months.length - 1];
+      setSelectedMonth(latestMonth);
+    }
+  }, [inventoryData]);
 
   // 입고예정 데이터 저장 핸들러
   const handleSaveForecastInventory = () => {
@@ -479,6 +498,41 @@ export default function BrandSalesPage({ brand, title }: BrandSalesPageProps) {
                 daysInMonth={inventoryData.daysInMonth}
                 stockWeekWindow={stockWeekWindow}
                 stockWeek={stockWeeks[selectedTab]}
+              />
+            )}
+
+            {/* 1.65. 주력/아울렛 재고 분석 */}
+            {inventoryTabData && selectedMonth && inventoryData?.daysInMonth && (
+              <CoreOutletInventorySection
+                brand={brand}
+                selectedMonth={selectedMonth}
+                selectedTab={selectedTab}
+                inventoryTabData={inventoryTabData}
+                daysInMonth={inventoryData.daysInMonth}
+                stockWeek={stockWeeks[selectedTab]}
+                onCardClick={(scope, segment, title) => {
+                  setCoreOutletModal({
+                    isOpen: true,
+                    scope,
+                    segment,
+                    title,
+                  });
+                }}
+              />
+            )}
+
+            {/* 모달 렌더링 */}
+            {coreOutletModal && (
+              <InventoryScsDetailModal
+                isOpen={coreOutletModal.isOpen}
+                onClose={() => setCoreOutletModal(null)}
+                brand={brand}
+                month={selectedMonth}
+                itemTab={selectedTab}
+                scope={coreOutletModal.scope}
+                segment={coreOutletModal.segment}
+                stockWeek={stockWeeks[selectedTab]}
+                title={coreOutletModal.title}
               />
             )}
 

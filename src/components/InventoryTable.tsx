@@ -2,6 +2,7 @@
 
 import { InventoryItemTabData, InventoryMonthData, INVENTORY_TABLE_ROWS } from "@/types/sales";
 import { formatAmountWon, formatMonth, cn } from "@/lib/utils";
+import { getDaysInMonth, calcRetailPlannedCore, calcWarehouseCore } from "@/lib/inventoryCalculations";
 
 interface InventoryTableProps {
   data: InventoryItemTabData;
@@ -11,32 +12,25 @@ interface InventoryTableProps {
 }
 
 export default function InventoryTable({ data, months, daysInMonth, stockWeek }: InventoryTableProps) {
-  const calculateRetailStock = (orSales: number, days: number): number => {
-    if (days === 0) return 0;
-    // OR_sales는 이미 원 단위로 저장되어 있음
-    const stockAmount = (orSales / days) * 7 * stockWeek;
-    return Math.round(stockAmount);
-  };
-
   const getCellValue = (month: string, dataKey: string): number => {
     const monthData: InventoryMonthData | undefined = data[month];
     if (!monthData) return 0;
 
-    const days = daysInMonth[month] || 30;
+    const days = getDaysInMonth(month, daysInMonth);
 
     // 모든 재고 데이터는 원 단위로 저장되어 있음
     const hqOrCoreWon = monthData.HQ_OR_core || 0;
     const hqOrOutletWon = monthData.HQ_OR_outlet || 0;
 
-    // 직영재고 계산
+    // 직영재고 계산 (util 함수 사용)
     // 주력: OR판매 기반으로 계산 (stockWeek 적용)
-    const retailStockCore = calculateRetailStock(monthData.OR_sales_core || 0, days);
+    const retailStockCore = calcRetailPlannedCore(monthData, days, stockWeek);
     // 아울렛: 0 (아울렛은 버퍼 개념 없음, stockWeek 미적용)
     const retailStockOutlet = 0;
 
-    // 창고재고 계산 (본사재고 - 직영재고)
+    // 창고재고 계산 (util 함수 사용)
     // 주력: 본사재고 - 직영판매예정 = 창고재고
-    const warehouseStockCore = hqOrCoreWon - retailStockCore;
+    const warehouseStockCore = calcWarehouseCore(monthData, days, stockWeek);
     // 아울렛: 본사 아울렛 재고 전체 = 창고재고 (버퍼 개념 없이 전량 창고)
     const warehouseStockOutlet = hqOrOutletWon;
 

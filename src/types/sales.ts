@@ -167,6 +167,23 @@ export const CHANNEL_TABS: ChannelTab[] = ["ALL", "FRS", "창고"];
 // 브랜드 타입
 export type Brand = "MLB" | "MLB KIDS" | "DISCOVERY";
 
+// 상세 품번(SCS) 재고 데이터
+export interface InventoryScsItem {
+  prdt_scs_cd: string;
+  prdt_nm_cn?: string;
+  stock_amt: number;   // 원 단위
+  stock_qty: number;
+}
+
+export interface InventoryScsDetailResponse {
+  items: InventoryScsItem[];
+  meta: {
+    totalAmt: number;    // 원 단위
+    totalQty: number;
+    recordCount: number;
+  };
+}
+
 // 판매 표 행 데이터 타입
 export interface TableRow {
   label: string;
