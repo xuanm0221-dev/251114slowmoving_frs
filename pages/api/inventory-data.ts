@@ -4,10 +4,10 @@ import {
   buildInventoryAggregationQuery,
   BRAND_CODE_MAP,
   BRAND_NAME_TO_CODE,
-  ITEM_CATEGORY_MAP,
   generateMonths,
   getDaysInMonth
 } from "../../lib/snowflakeQueries";
+import type { ItemTab, InventoryBrandData } from "../../src/types/sales";
 
 interface InventoryMonthData {
   전체_core: number;
@@ -24,13 +24,7 @@ interface InventoryItemTabData {
   [month: string]: InventoryMonthData;
 }
 
-interface InventoryBrandData {
-  전체: InventoryItemTabData;
-  신발: InventoryItemTabData;
-  모자: InventoryItemTabData;
-  가방: InventoryItemTabData;
-  기타악세: InventoryItemTabData;
-}
+// InventoryBrandData는 src/types/sales.ts에서 import
 
 interface InventoryAPIResponse {
   brands: {
@@ -141,7 +135,9 @@ function transformInventoryData(
         FRS_core: 0,
         FRS_outlet: 0,
         HQ_OR_core: 0,
-        HQ_OR_outlet: 0
+        HQ_OR_outlet: 0,
+        OR_sales_core: 0,
+        OR_sales_outlet: 0
       };
     });
   });
@@ -170,7 +166,7 @@ function transformInventoryData(
   rows.forEach(row => {
     const month = row.YYMM.substring(0, 4) + '.' + row.YYMM.substring(4, 6);
     const itemCategoryEn = row.ITEM_CATEGORY;
-    const itemTab = itemCategoryEn;  // 'Shoes', 'Headwear', 'Bag', 'Acc_etc' 그대로 사용
+    const itemTab = itemCategoryEn as ItemTab;  // 영문 키 그대로: 'Shoes' | 'Headwear' | 'Bag' | 'Acc_etc'
     const key = `${month}_${itemTab}`;
     
     if (!orSalesByKey[key]) {
@@ -185,7 +181,7 @@ function transformInventoryData(
   rows.forEach(row => {
     const month = row.YYMM.substring(0, 4) + '.' + row.YYMM.substring(4, 6);  // 202511 → 2025.11
     const itemCategoryEn = row.ITEM_CATEGORY;
-    const itemTab = itemCategoryEn;  // 'Shoes', 'Headwear', 'Bag', 'Acc_etc' 그대로 사용
+    const itemTab = itemCategoryEn as ItemTab;  // 영문 키 그대로: 'Shoes' | 'Headwear' | 'Bag' | 'Acc_etc'
     const channel = row.CHANNEL;  // 'FR', 'OR', 'HQ'
     const productType = row.PRODUCT_TYPE;  // 'core' or 'outlet'
     const amount = Math.round(row.TOTAL_AMT);
@@ -201,7 +197,9 @@ function transformInventoryData(
         FRS_core: 0,
         FRS_outlet: 0,
         HQ_OR_core: 0,
-        HQ_OR_outlet: 0
+        HQ_OR_outlet: 0,
+        OR_sales_core: 0,
+        OR_sales_outlet: 0
       };
     }
 
@@ -235,7 +233,9 @@ function transformInventoryData(
           FRS_core: 0,
           FRS_outlet: 0,
           HQ_OR_core: 0,
-          HQ_OR_outlet: 0
+          HQ_OR_outlet: 0,
+          OR_sales_core: 0,
+          OR_sales_outlet: 0
         };
       }
       
@@ -256,7 +256,7 @@ function transformInventoryData(
     let totalCore = 0;
     let totalOutlet = 0;
     
-    ['Shoes', 'Headwear', 'Bag', 'Acc_etc'].forEach(tab => {
+    (['Shoes', 'Headwear', 'Bag', 'Acc_etc'] as const).forEach((tab: ItemTab) => {
       totalCore += brandData[tab][month].OR_sales_core || 0;
       totalOutlet += brandData[tab][month].OR_sales_outlet || 0;
     });
@@ -290,13 +290,14 @@ function transformInventoryData(
       totalRecords,
       unmappedRecords,
       unmappedAmount,
-      // 검증용 추가 (202511 MLB만)
-      verification_202511: brandName === 'MLB' ? {
-        sql_total_amt: Math.round(sqlTotalAmt202511),
-        json_total_amt: jsonTotalAmt202511,
-        delta: jsonTotalAmt202511 - Math.round(sqlTotalAmt202511),
-        target: 4170201461
-      } : undefined
+      ...(brandName === 'MLB' ? {
+        verification_202511: {
+          sql_total_amt: Math.round(sqlTotalAmt202511),
+          json_total_amt: jsonTotalAmt202511,
+          delta: jsonTotalAmt202511 - Math.round(sqlTotalAmt202511),
+          target: 4170201461
+        }
+      } : {})
     }
   };
 }

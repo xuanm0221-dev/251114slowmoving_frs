@@ -22,14 +22,8 @@ export interface SalesItemTabData {
   [month: string]: SalesMonthData;
 }
 
-// 판매 브랜드별 데이터 구조 (영문 키로 통일)
-export interface SalesBrandData {
-  전체: SalesItemTabData;
-  Shoes: SalesItemTabData;
-  Headwear: SalesItemTabData;
-  Bag: SalesItemTabData;
-  Acc_etc: SalesItemTabData;
-}
+// 판매 브랜드별 데이터 구조 (Record로 타입 안전하게 고정)
+export type SalesBrandData = Record<ItemTab, SalesItemTabData>;
 
 // 전체 판매 요약 데이터 구조
 export interface SalesSummaryData {
@@ -76,14 +70,8 @@ export interface InventoryItemTabData {
   [month: string]: InventoryMonthData;
 }
 
-// 재고 브랜드별 데이터 구조 (영문 키로 통일)
-export interface InventoryBrandData {
-  전체: InventoryItemTabData;
-  Shoes: InventoryItemTabData;
-  Headwear: InventoryItemTabData;
-  Bag: InventoryItemTabData;
-  Acc_etc: InventoryItemTabData;
-}
+// 재고 브랜드별 데이터 구조 (Record로 타입 안전하게 고정)
+export type InventoryBrandData = Record<ItemTab, InventoryItemTabData>;
 
 // 전체 재고 요약 데이터 구조
 export interface InventorySummaryData {

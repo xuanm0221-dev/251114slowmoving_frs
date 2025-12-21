@@ -92,10 +92,10 @@ export default function BrandSalesPage({ brand, title }: BrandSalesPageProps) {
         setSalesData(salesJson);
         
         // 디버그: unmapped 정보 로그
-        if (salesJson.meta?.unmappedRecords > 0) {
+        if (salesJson.meta?.unmappedRecords && salesJson.meta.unmappedRecords > 0) {
           console.warn(
             `[sales-data] Unmapped records: ${salesJson.meta.unmappedRecords}, ` +
-            `Amount: ${salesJson.meta.unmappedAmount}`
+            `Amount: ${salesJson.meta.unmappedAmount ?? 0}`
           );
         }
 
@@ -108,10 +108,10 @@ export default function BrandSalesPage({ brand, title }: BrandSalesPageProps) {
         setInventoryData(inventoryJson);
         
         // 디버그: unmapped 정보 로그
-        if (inventoryJson.meta?.unmappedRecords > 0) {
+        if (inventoryJson.meta?.unmappedRecords && inventoryJson.meta.unmappedRecords > 0) {
           console.warn(
             `[inventory-data] Unmapped records: ${inventoryJson.meta.unmappedRecords}, ` +
-            `Amount: ${inventoryJson.meta.unmappedAmount}`
+            `Amount: ${inventoryJson.meta.unmappedAmount ?? 0}`
           );
         }
 
@@ -159,13 +159,13 @@ export default function BrandSalesPage({ brand, title }: BrandSalesPageProps) {
           console.warn("재고자산입고(실적) 데이터 로드 중 오류:", e);
         }
 
-        if (salesJson.unexpectedCategories?.length > 0) {
+        if (salesJson.unexpectedCategories && salesJson.unexpectedCategories.length > 0) {
           console.warn(
             "⚠ 판매 데이터 - 제품중분류에 예상치 못한 값이 포함되어 있습니다:",
             salesJson.unexpectedCategories
           );
         }
-        if (inventoryJson.unexpectedCategories?.length > 0) {
+        if (inventoryJson.unexpectedCategories && inventoryJson.unexpectedCategories.length > 0) {
           console.warn(
             "⚠ 재고 데이터 - 제품중분류에 예상치 못한 값이 포함되어 있습니다:",
             inventoryJson.unexpectedCategories

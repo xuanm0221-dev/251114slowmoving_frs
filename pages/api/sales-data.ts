@@ -4,10 +4,10 @@ import {
   buildSalesAggregationQuery,
   BRAND_CODE_MAP,
   BRAND_NAME_TO_CODE,
-  ITEM_CATEGORY_MAP,
   generateMonths,
   getDaysInMonth
 } from "../../lib/snowflakeQueries";
+import type { ItemTab, SalesBrandData } from "../../src/types/sales";
 
 interface SalesMonthData {
   전체_core: number;
@@ -22,13 +22,7 @@ interface SalesItemTabData {
   [month: string]: SalesMonthData;
 }
 
-interface SalesBrandData {
-  전체: SalesItemTabData;
-  신발: SalesItemTabData;
-  모자: SalesItemTabData;
-  가방: SalesItemTabData;
-  기타악세: SalesItemTabData;
-}
+// SalesBrandData는 src/types/sales.ts에서 import
 
 interface SalesAPIResponse {
   brands: {
@@ -150,7 +144,7 @@ function transformSalesData(
   rows.forEach(row => {
     const month = row.SALE_YM;
     const itemCategoryEn = row.ITEM_CATEGORY;
-    const itemTab = itemCategoryEn;  // 'Shoes', 'Headwear', 'Bag', 'Acc_etc' 그대로 사용
+    const itemTab = itemCategoryEn as ItemTab;  // 영문 키 그대로: 'Shoes' | 'Headwear' | 'Bag' | 'Acc_etc'
     const channel = row.CHANNEL === 'FR' ? 'FRS' : row.CHANNEL;  // FR → FRS 매핑
     const productType = row.PRODUCT_TYPE;  // 'core' or 'outlet'
     const amount = Math.round(row.TOTAL_AMT);
