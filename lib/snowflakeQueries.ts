@@ -173,16 +173,16 @@ export function getProductTypeCase(opStdColumn: string, sesnColumn: string, year
       -- 1. FOCUS/INTRO는 무조건 주력
       WHEN ${opStdColumn} IN ('FOCUS', 'INTRO') THEN 'core'
       
-      -- 2. op_std가 있고 숫자로 시작하면 연도 비교
+      -- 2. op_std가 있고 앞 2자리가 숫자이면 연도 비교 (26SS, 25FW 등 형식 지원)
       WHEN ${opStdColumn} IS NOT NULL 
-        AND REGEXP_LIKE(${opStdColumn}, '^[0-9]{2}')
+        AND TRY_TO_NUMBER(LEFT(${opStdColumn}, 2)) IS NOT NULL
         AND TRY_TO_NUMBER(LEFT(${opStdColumn}, 2)) >= TRY_TO_NUMBER(${yearColumn})
       THEN 'core'
       
-      -- 3. op_std가 NULL이면 sesn으로 판단
+      -- 3. op_std가 NULL이면 sesn으로 판단 (앞 2자리가 숫자인 경우)
       WHEN ${opStdColumn} IS NULL
         AND ${sesnColumn} IS NOT NULL
-        AND REGEXP_LIKE(${sesnColumn}, '^[0-9]{2}')
+        AND TRY_TO_NUMBER(LEFT(${sesnColumn}, 2)) IS NOT NULL
         AND TRY_TO_NUMBER(LEFT(${sesnColumn}, 2)) >= TRY_TO_NUMBER(${yearColumn})
       THEN 'core'
       
