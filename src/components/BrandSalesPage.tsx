@@ -83,19 +83,37 @@ export default function BrandSalesPage({ brand, title }: BrandSalesPageProps) {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const salesResponse = await fetch("/data/accessory_sales_summary.json");
+        // Snowflake API에서 판매 데이터 가져오기
+        const salesResponse = await fetch(`/api/sales-data?brand=${brand}`);
         if (!salesResponse.ok) {
           throw new Error("판매 데이터를 불러오는데 실패했습니다.");
         }
         const salesJson: SalesSummaryData = await salesResponse.json();
         setSalesData(salesJson);
+        
+        // 디버그: unmapped 정보 로그
+        if (salesJson.meta?.unmappedRecords > 0) {
+          console.warn(
+            `[sales-data] Unmapped records: ${salesJson.meta.unmappedRecords}, ` +
+            `Amount: ${salesJson.meta.unmappedAmount}`
+          );
+        }
 
-        const inventoryResponse = await fetch("/data/accessory_inventory_summary.json");
+        // Snowflake API에서 재고 데이터 가져오기
+        const inventoryResponse = await fetch(`/api/inventory-data?brand=${brand}`);
         if (!inventoryResponse.ok) {
           throw new Error("재고 데이터를 불러오는데 실패했습니다.");
         }
         const inventoryJson: InventorySummaryData = await inventoryResponse.json();
         setInventoryData(inventoryJson);
+        
+        // 디버그: unmapped 정보 로그
+        if (inventoryJson.meta?.unmappedRecords > 0) {
+          console.warn(
+            `[inventory-data] Unmapped records: ${inventoryJson.meta.unmappedRecords}, ` +
+            `Amount: ${inventoryJson.meta.unmappedAmount}`
+          );
+        }
 
         // 입고예정 재고자산 데이터 로드 (JSON 파일 + localStorage 병합)
         try {
@@ -645,10 +663,28 @@ export default function BrandSalesPage({ brand, title }: BrandSalesPageProps) {
                   defaultOpen={false}
                   legend={
                     <>
-                      <span><span className="text-gray-400">전체판매:</span> FRS + OR</span>
-                      <span><span className="text-gray-400">대리상판매:</span> Channel 2 = FRS</span>
-                      <span><span className="text-gray-400">직영판매:</span> Channel 2 = OR</span>
-                      <span><span className="text-gray-400">금액단위:</span> 1위안</span>
+                      <div className="flex flex-col gap-2">
+                        <div className="flex flex-wrap gap-4">
+                          <span><span className="text-gray-400">전체판매:</span> FRS + OR</span>
+                          <span><span className="text-gray-400">대리상판매:</span> Channel 2 = FRS</span>
+                          <span><span className="text-gray-400">직영판매:</span> Channel 2 = OR</span>
+                          <span><span className="text-gray-400">금액단위:</span> 1위안</span>
+                        </div>
+                        <div className="pt-2 border-t border-gray-300">
+                          <div className="text-xs text-gray-500">
+                            <span className="font-semibold">📦 데이터 소스:</span>
+                            <span className="ml-2">Snowflake 테이블 - CHN.DW_SALE (매출), CHN.DW_SHOP_WH_DETAIL (매장), FNF.CHN.MST_PRDT_SCS (상품마스터)</span>
+                          </div>
+                          <div className="text-xs text-gray-500 mt-1">
+                            <span className="font-semibold">🔧 주요 컬럼:</span>
+                            <span className="ml-2">sale_amt (판매금액), shop_id (매장ID), fr_or_cls (채널), prdt_cd (상품코드), parent_prdt_kind_cd (상위제품분류), prdt_kind_nm_en (제품분류영문명), brd_cd (브랜드), remark1~8 (운영기준), sesn (시즌)</span>
+                          </div>
+                          <div className="text-xs text-gray-500 mt-1">
+                            <span className="font-semibold">⚙️ 처리방식:</span>
+                            <span className="ml-2">Python 스크립트 (scripts/sales_aggregation.py)로 월별/채널별/품목별 집계 → JSON 파일 생성</span>
+                          </div>
+                        </div>
+                      </div>
                     </>
                   }
                 >
@@ -669,10 +705,28 @@ export default function BrandSalesPage({ brand, title }: BrandSalesPageProps) {
                   defaultOpen={false}
                   legend={
                     <>
-                      <span><span className="text-gray-400">전체재고:</span> FRS + HQ + OR</span>
-                      <span><span className="text-gray-400">본사재고:</span> HQ + OR</span>
-                      <span><span className="text-gray-400">직영재고:</span> OR판매 ÷ 일수 × 7 × {stockWeeks[selectedTab]}주</span>
-                      <span><span className="text-gray-400">창고재고:</span> 본사재고 - 직영재고</span>
+                      <div className="flex flex-col gap-2">
+                        <div className="flex flex-wrap gap-4">
+                          <span><span className="text-gray-400">전체재고:</span> FRS + HQ + OR</span>
+                          <span><span className="text-gray-400">본사재고:</span> HQ + OR</span>
+                          <span><span className="text-gray-400">직영재고:</span> OR판매 ÷ 일수 × 7 × {stockWeeks[selectedTab]}주</span>
+                          <span><span className="text-gray-400">창고재고:</span> 본사재고 - 직영재고</span>
+                        </div>
+                        <div className="pt-2 border-t border-gray-300">
+                          <div className="text-xs text-gray-500">
+                            <span className="font-semibold">📦 데이터 소스:</span>
+                            <span className="ml-2">Snowflake 테이블 - CHN.DW_STOCK_M (재고), CHN.DW_SHOP_WH_DETAIL (매장), FNF.CHN.MST_PRDT_SCS (상품마스터)</span>
+                          </div>
+                          <div className="text-xs text-gray-500 mt-1">
+                            <span className="font-semibold">🔧 주요 컬럼:</span>
+                            <span className="ml-2">stock_amt (재고금액), shop_id (매장ID), fr_or_cls (채널), prdt_cd (상품코드), parent_prdt_kind_cd (상위제품분류), prdt_kind_nm_en (제품분류영문명), brd_cd (브랜드), remark1~8 (운영기준), sesn (시즌)</span>
+                          </div>
+                          <div className="text-xs text-gray-500 mt-1">
+                            <span className="font-semibold">⚙️ 처리방식:</span>
+                            <span className="ml-2">Python 스크립트 (scripts/inventory_aggregation.py)로 월별/채널별/품목별 집계 → JSON 파일 생성</span>
+                          </div>
+                        </div>
+                      </div>
                     </>
                   }
                 >
@@ -700,10 +754,28 @@ export default function BrandSalesPage({ brand, title }: BrandSalesPageProps) {
                   defaultOpen={false}
                   legend={
                     <>
-                      <span className="text-gray-400">
-                        기준월 ({latestActualYm}) 이후 6개월 입고예정 (수기입력 가능)
-                      </span>
-                      <span className="text-gray-400">금액단위: 1위안</span>
+                      <div className="flex flex-col gap-2">
+                        <div className="flex flex-wrap gap-4">
+                          <span className="text-gray-400">
+                            기준월 ({latestActualYm}) 이후 6개월 입고예정 (수기입력 가능)
+                          </span>
+                          <span className="text-gray-400">금액단위: 1위안</span>
+                        </div>
+                        <div className="pt-2 border-t border-gray-300">
+                          <div className="text-xs text-gray-500">
+                            <span className="font-semibold">📦 데이터 소스:</span>
+                            <span className="ml-2">로컬 스토리지 (브라우저 localStorage에 저장된 사용자 입력 데이터)</span>
+                          </div>
+                          <div className="text-xs text-gray-500 mt-1">
+                            <span className="font-semibold">🔧 초기 데이터:</span>
+                            <span className="ml-2">public/data/accessory_forecast_inventory_summary.json (최초 로드 시 기본값)</span>
+                          </div>
+                          <div className="text-xs text-gray-500 mt-1">
+                            <span className="font-semibold">⚙️ 처리방식:</span>
+                            <span className="ml-2">대시보드에서 직접 수정 가능, 저장 버튼 클릭 시 브라우저 localStorage에 저장</span>
+                          </div>
+                        </div>
+                      </div>
                     </>
                   }
                   titleExtra={
@@ -764,10 +836,28 @@ export default function BrandSalesPage({ brand, title }: BrandSalesPageProps) {
                   defaultOpen={false}
                   legend={
                     <>
-                      <span className="text-gray-400">
-                        snowflake의 SAP 수불부 기준
-                      </span>
-                      <span className="text-gray-400">금액단위: 1위안</span>
+                      <div className="flex flex-col gap-2">
+                        <div className="flex flex-wrap gap-4">
+                          <span className="text-gray-400">
+                            snowflake의 SAP 수불부 기준
+                          </span>
+                          <span className="text-gray-400">금액단위: 1위안</span>
+                        </div>
+                        <div className="pt-2 border-t border-gray-300">
+                          <div className="text-xs text-gray-500">
+                            <span className="font-semibold">📦 데이터 소스:</span>
+                            <span className="ml-2">Snowflake 테이블 - sap_fnf.dw_cn_ivtr_prdt_m (수불부), sap_fnf.mst_prdt (상품마스터)</span>
+                          </div>
+                          <div className="text-xs text-gray-500 mt-1">
+                            <span className="font-semibold">🔧 주요 컬럼:</span>
+                            <span className="ml-2">trns_cls_cd (거래구분코드, '10'=입고), stock_amt (재고금액), prdt_cd (상품코드), prdt_kind_nm_en (제품분류영문명), brd_cd (브랜드)</span>
+                          </div>
+                          <div className="text-xs text-gray-500 mt-1">
+                            <span className="font-semibold">⚙️ 처리방식:</span>
+                            <span className="ml-2">API 실시간 조회 (/api/actual-arrival) - 페이지 로드 시 Snowflake에서 직접 조회</span>
+                          </div>
+                        </div>
+                      </div>
                     </>
                   }
                 >

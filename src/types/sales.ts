@@ -38,8 +38,17 @@ export interface SalesSummaryData {
     "MLB KIDS": SalesBrandData;
     DISCOVERY: SalesBrandData;
   };
-  unexpectedCategories: string[];
+  unexpectedCategories?: string[];
   months: string[];
+  meta?: {
+    brand?: string;
+    startMonth?: string;
+    endMonth?: string;
+    queryTimestamp?: string;
+    totalRecords?: number;
+    unmappedRecords?: number;
+    unmappedAmount?: number;
+  };
 }
 
 // ========== 재고 데이터 타입 ==========
@@ -83,9 +92,24 @@ export interface InventorySummaryData {
     "MLB KIDS": InventoryBrandData;
     DISCOVERY: InventoryBrandData;
   };
-  unexpectedCategories: string[];
+  unexpectedCategories?: string[];
   months: string[];
   daysInMonth: { [month: string]: number };
+  meta?: {
+    brand?: string;
+    startMonth?: string;
+    endMonth?: string;
+    queryTimestamp?: string;
+    totalRecords?: number;
+    unmappedRecords?: number;
+    unmappedAmount?: number;
+    verification_202511?: {
+      sql_total_amt: number;
+      json_total_amt: number;
+      delta: number;
+      target: number;
+    };
+  };
 }
 
 // ========== 입고예정 재고자산(Forecast Inventory) 타입 ==========
