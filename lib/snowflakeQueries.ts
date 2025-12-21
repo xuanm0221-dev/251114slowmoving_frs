@@ -170,34 +170,23 @@ export const REMARK_SELECTION_CTE = `
 export function getProductTypeCase(opStdColumn: string, sesnColumn: string, yearColumn: string): string {
   return `
     CASE
-      -- 1. op_std가 FOCUS/INTRO면 무조건 주력
+      -- 1. FOCUS/INTRO는 무조건 주력
       WHEN ${opStdColumn} IN ('FOCUS', 'INTRO') THEN 'core'
       
-      -- 2. op_std가 OUTLET/CARE/DONE이면 무조건 아울렛
-      WHEN ${opStdColumn} IN ('OUTLET', 'CARE', 'DONE') THEN 'outlet'
-      
-      -- 3. op_std가 숫자+시즌 형태 (예: 24FW, 25SS)면 연도 비교
+      -- 2. op_std가 있고 숫자로 시작하면 연도 비교
       WHEN ${opStdColumn} IS NOT NULL 
-        AND ${opStdColumn} NOT IN ('FOCUS', 'INTRO', 'OUTLET', 'CARE', 'DONE')
         AND REGEXP_LIKE(${opStdColumn}, '^[0-9]{2}')
-      THEN
-        CASE 
-          WHEN TRY_TO_NUMBER(LEFT(${opStdColumn}, 2)) >= TRY_TO_NUMBER(${yearColumn}) 
-          THEN 'core'
-          ELSE 'outlet'
-        END
+        AND TRY_TO_NUMBER(LEFT(${opStdColumn}, 2)) >= TRY_TO_NUMBER(${yearColumn})
+      THEN 'core'
       
-      -- 4. op_std가 NULL이면 sesn으로 판단
-      WHEN ${sesnColumn} IS NOT NULL 
+      -- 3. op_std가 NULL이면 sesn으로 판단
+      WHEN ${opStdColumn} IS NULL
+        AND ${sesnColumn} IS NOT NULL
         AND REGEXP_LIKE(${sesnColumn}, '^[0-9]{2}')
-      THEN
-        CASE 
-          WHEN TRY_TO_NUMBER(LEFT(${sesnColumn}, 2)) >= TRY_TO_NUMBER(${yearColumn})
-          THEN 'core'
-          ELSE 'outlet'
-        END
+        AND TRY_TO_NUMBER(LEFT(${sesnColumn}, 2)) >= TRY_TO_NUMBER(${yearColumn})
+      THEN 'core'
       
-      -- 5. 그 외 모두 아울렛
+      -- 4. 그 외 모두 아울렛
       ELSE 'outlet'
     END
   `;

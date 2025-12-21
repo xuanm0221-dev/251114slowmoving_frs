@@ -108,10 +108,23 @@ product_type_calc AS (
   SELECT
     prdt_scs_cd,
     CASE
+      -- 1. FOCUS/INTRO는 무조건 주력
       WHEN op_std IN ('FOCUS', 'INTRO') THEN 'core'
-      WHEN NULLIF(COALESCE(op_std, sesn), '') IS NOT NULL 
-        AND TRY_CAST(SUBSTRING(NULLIF(COALESCE(op_std, sesn), ''), 1, 2) AS INT) >= SUBSTRING('${monthYYYYMM}', 3, 2)::INT
+      
+      -- 2. op_std가 있고 숫자로 시작하면 연도 비교
+      WHEN op_std IS NOT NULL 
+        AND REGEXP_LIKE(op_std, '^[0-9]{2}')
+        AND TRY_TO_NUMBER(LEFT(op_std, 2)) >= SUBSTRING('${monthYYYYMM}', 3, 2)::INT
       THEN 'core'
+      
+      -- 3. op_std가 NULL이면 sesn으로 판단
+      WHEN op_std IS NULL
+        AND sesn IS NOT NULL
+        AND REGEXP_LIKE(sesn, '^[0-9]{2}')
+        AND TRY_TO_NUMBER(LEFT(sesn, 2)) >= SUBSTRING('${monthYYYYMM}', 3, 2)::INT
+      THEN 'core'
+      
+      -- 4. 그 외 모두 아울렛
       ELSE 'outlet'
     END AS product_type
   FROM remark_map
@@ -183,10 +196,23 @@ product_type_calc AS (
   SELECT
     prdt_scs_cd,
     CASE
+      -- 1. FOCUS/INTRO는 무조건 주력
       WHEN op_std IN ('FOCUS', 'INTRO') THEN 'core'
-      WHEN NULLIF(COALESCE(op_std, sesn), '') IS NOT NULL 
-        AND TRY_CAST(SUBSTRING(NULLIF(COALESCE(op_std, sesn), ''), 1, 2) AS INT) >= SUBSTRING('${monthYYYYMM}', 3, 2)::INT
+      
+      -- 2. op_std가 있고 숫자로 시작하면 연도 비교
+      WHEN op_std IS NOT NULL 
+        AND REGEXP_LIKE(op_std, '^[0-9]{2}')
+        AND TRY_TO_NUMBER(LEFT(op_std, 2)) >= SUBSTRING('${monthYYYYMM}', 3, 2)::INT
       THEN 'core'
+      
+      -- 3. op_std가 NULL이면 sesn으로 판단
+      WHEN op_std IS NULL
+        AND sesn IS NOT NULL
+        AND REGEXP_LIKE(sesn, '^[0-9]{2}')
+        AND TRY_TO_NUMBER(LEFT(sesn, 2)) >= SUBSTRING('${monthYYYYMM}', 3, 2)::INT
+      THEN 'core'
+      
+      -- 4. 그 외 모두 아울렛
       ELSE 'outlet'
     END AS product_type
   FROM remark_map
@@ -305,10 +331,23 @@ product_type_calc AS (
   SELECT
     prdt_scs_cd,
     CASE
+      -- 1. FOCUS/INTRO는 무조건 주력
       WHEN op_std IN ('FOCUS', 'INTRO') THEN 'core'
-      WHEN NULLIF(COALESCE(op_std, sesn), '') IS NOT NULL 
-        AND TRY_CAST(SUBSTRING(NULLIF(COALESCE(op_std, sesn), ''), 1, 2) AS INT) >= SUBSTRING('${monthYYYYMM}', 3, 2)::INT
+      
+      -- 2. op_std가 있고 숫자로 시작하면 연도 비교
+      WHEN op_std IS NOT NULL 
+        AND REGEXP_LIKE(op_std, '^[0-9]{2}')
+        AND TRY_TO_NUMBER(LEFT(op_std, 2)) >= SUBSTRING('${monthYYYYMM}', 3, 2)::INT
       THEN 'core'
+      
+      -- 3. op_std가 NULL이면 sesn으로 판단
+      WHEN op_std IS NULL
+        AND sesn IS NOT NULL
+        AND REGEXP_LIKE(sesn, '^[0-9]{2}')
+        AND TRY_TO_NUMBER(LEFT(sesn, 2)) >= SUBSTRING('${monthYYYYMM}', 3, 2)::INT
+      THEN 'core'
+      
+      -- 4. 그 외 모두 아울렛
       ELSE 'outlet'
     END AS product_type
   FROM remark_map
@@ -387,10 +426,23 @@ product_type_calc AS (
   SELECT
     prdt_scs_cd,
     CASE
+      -- 1. FOCUS/INTRO는 무조건 주력
       WHEN op_std IN ('FOCUS', 'INTRO') THEN 'core'
-      WHEN NULLIF(COALESCE(op_std, sesn), '') IS NOT NULL 
-        AND TRY_CAST(SUBSTRING(NULLIF(COALESCE(op_std, sesn), ''), 1, 2) AS INT) >= SUBSTRING('${monthYYYYMM}', 3, 2)::INT
+      
+      -- 2. op_std가 있고 숫자로 시작하면 연도 비교
+      WHEN op_std IS NOT NULL 
+        AND REGEXP_LIKE(op_std, '^[0-9]{2}')
+        AND TRY_TO_NUMBER(LEFT(op_std, 2)) >= SUBSTRING('${monthYYYYMM}', 3, 2)::INT
       THEN 'core'
+      
+      -- 3. op_std가 NULL이면 sesn으로 판단
+      WHEN op_std IS NULL
+        AND sesn IS NOT NULL
+        AND REGEXP_LIKE(sesn, '^[0-9]{2}')
+        AND TRY_TO_NUMBER(LEFT(sesn, 2)) >= SUBSTRING('${monthYYYYMM}', 3, 2)::INT
+      THEN 'core'
+      
+      -- 4. 그 외 모두 아울렛
       ELSE 'outlet'
     END AS product_type
   FROM remark_map
