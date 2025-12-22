@@ -222,6 +222,15 @@ const MONTHS_2025 = Array.from({ length: 12 }, (_, i) => ({
   label: `${i + 1}월`,
 }));
 
+// 카테고리 옵션
+const CATEGORY_OPTIONS = [
+  { value: 'all', label: '전체' },
+  { value: 'shoes', label: '신발' },
+  { value: 'headwear', label: '모자' },
+  { value: 'bag', label: '가방' },
+  { value: 'acc_etc', label: '기타' },
+];
+
 export default function DealerCoreOutletAnalysis({
   brand,
 }: DealerCoreOutletAnalysisProps) {
@@ -231,12 +240,14 @@ export default function DealerCoreOutletAnalysis({
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<ApiResponse | null>(null);
   const [selectedMonth, setSelectedMonth] = useState<string>("202511"); // YYYYMM 형식
-  
-  // 펼친 대리상 ID
-  const [expandedDealerId, setExpandedDealerId] = useState<string | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
   
   // 전체 합계 펼침 상태
-  const [expandedTotalSummary, setExpandedTotalSummary] = useState(false);
+  const [expandedTotalSummary, setExpandedTotalSummary] = useState(true);
+  
+  // 정렬 상태
+  const [sortField, setSortField] = useState<string | null>(null);
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   
   // 모달 상태
   const [modalOpen, setModalOpen] = useState(false);
@@ -260,12 +271,12 @@ export default function DealerCoreOutletAnalysis({
     console.log('[DealerCoreOutlet] Fetching data:', { brand: brandCode, baseMonth: selectedMonth });
     setLoading(true);
     setError(null);
-    setExpandedDealerId(null);
     
     try {
       const params = new URLSearchParams({
         brand: brandCode,
         baseMonth: selectedMonth,
+        category: selectedCategory,
       });
       
       const url = `/api/dealer-core-outlet?${params}`;
@@ -289,24 +300,83 @@ export default function DealerCoreOutletAnalysis({
     } finally {
       setLoading(false);
     }
-  }, [brandCode, selectedMonth]);
+  }, [brandCode, selectedMonth, selectedCategory]);
 
   useEffect(() => {
-    console.log('[DealerCoreOutlet] useEffect triggered:', { selectedMonth, brandCode });
+    console.log('[DealerCoreOutlet] useEffect triggered:', { selectedMonth, brandCode, selectedCategory });
     if (selectedMonth) {
       fetchData();
     } else {
       console.log('[DealerCoreOutlet] selectedMonth is empty, not fetching');
     }
-  }, [fetchData, selectedMonth, brandCode]);
+  }, [fetchData, selectedMonth, brandCode, selectedCategory]);
 
-  const handleDealerClick = (dealer: DealerData) => {
-    if (expandedDealerId === dealer.account_id) {
-      setExpandedDealerId(null);
+  // 정렬 핸들러
+  const handleSort = (field: string) => {
+    if (sortField === field) {
+      // 같은 필드 클릭 시 방향 전환
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
     } else {
-      setExpandedDealerId(dealer.account_id);
+      // 새로운 필드 클릭 시 내림차순으로 시작
+      setSortField(field);
+      setSortDirection('desc');
     }
   };
+
+  // 정렬 아이콘 표시
+  const renderSortIcon = (field: string) => {
+    if (sortField !== field) {
+      return <span className="text-gray-400 ml-1">▼</span>;
+    }
+    return (
+      <span className="ml-1">
+        {sortDirection === 'asc' ? '▲' : '▼'}
+      </span>
+    );
+  };
+
+  // 정렬된 대리상 데이터
+  const sortedDealers = useMemo(() => {
+    if (!data || !sortField) return data?.dealers || [];
+    
+    const dealers = [...data.dealers];
+    
+    dealers.sort((a, b) => {
+      let aVal: number | string = 0;
+      let bVal: number | string = 0;
+      
+      // 대리상명으로 정렬
+      if (sortField === 'dealer_name') {
+        aVal = a.account_nm_en;
+        bVal = b.account_nm_en;
+        return sortDirection === 'asc' 
+          ? aVal.localeCompare(bVal)
+          : bVal.localeCompare(aVal);
+      }
+      
+      // 주력상품/아울렛상품 공통 데이터로 정렬
+      const segment = sortField.startsWith('core_') ? 'core' : 'outlet';
+      const field = sortField.replace(/^(core_|outlet_)/, '');
+      
+      if (field === 'stock_amt') {
+        aVal = a.current[segment].stock_amt;
+        bVal = b.current[segment].stock_amt;
+      } else if (field === 'sales_amt') {
+        aVal = a.current[segment].sales_amt;
+        bVal = b.current[segment].sales_amt;
+      } else if (field === 'current_stock_weeks') {
+        aVal = a.current[segment].stock_weeks ?? -1;
+        bVal = b.current[segment].stock_weeks ?? -1;
+      } else if (field === 'prior_stock_weeks') {
+        aVal = a.prior[segment].stock_weeks ?? -1;
+        bVal = b.prior[segment].stock_weeks ?? -1;
+      }
+      
+      return sortDirection === 'asc' ? Number(aVal) - Number(bVal) : Number(bVal) - Number(aVal);
+    });
+    
+    return dealers;
+  }, [data, sortField, sortDirection]);
 
   const handleSegmentClick = (dealer: DealerData, segment: 'core' | 'outlet') => {
     setSelectedDealer(dealer);
@@ -381,6 +451,26 @@ export default function DealerCoreOutletAnalysis({
         iconColor="text-indigo-500"
         defaultOpen={false}
       >
+        {/* 카테고리 탭 */}
+        <div className="mb-4 flex items-center gap-2 border-b border-gray-200">
+          {CATEGORY_OPTIONS.map((option) => (
+            <button
+              key={option.value}
+              onClick={() => {
+                setSelectedCategory(option.value);
+                setSortField(null); // 카테고리 변경 시 정렬 초기화
+              }}
+              className={`px-4 py-2 font-medium text-sm transition-colors border-b-2 ${
+                selectedCategory === option.value
+                  ? 'border-indigo-500 text-indigo-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
+
         {/* 컨트롤 영역 */}
         <div className="mb-4 p-3 bg-gray-50 rounded-lg border border-gray-200 flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-4">
@@ -423,201 +513,199 @@ export default function DealerCoreOutletAnalysis({
 
         {!loading && !error && data && (
           <div className="rounded-lg border border-gray-200 overflow-hidden">
-            <div className="max-h-[600px] overflow-y-auto">
-              <table className="w-full text-sm">
-                <thead className="bg-indigo-50 sticky top-0 z-10">
+            {/* 헤더 + 전체 합계 테이블 */}
+            <table className="w-full text-sm" style={{ tableLayout: 'fixed' }}>
+              <thead className="bg-indigo-50">
                 <tr className="border-b border-indigo-100">
-                  <th className="w-8 py-2 px-2" rowSpan={2}></th>
-                  <th className="text-left py-2 px-2 font-medium text-indigo-700" rowSpan={2}>대리상</th>
-                  <th className="text-center py-2 px-3 font-medium text-indigo-700 border-l border-indigo-200" colSpan={3}>
+                  <th className="text-left py-2 px-2 font-medium text-indigo-700" rowSpan={2} style={{ width: '200px' }}>대리상</th>
+                  <th className="text-center py-2 px-3 font-medium text-indigo-700 border-l border-indigo-200" colSpan={4} style={{ width: '400px' }}>
                     당월 ({formatMonth(data.meta.baseMonth)})
                   </th>
-                  <th className="text-center py-2 px-3 font-medium text-indigo-700 border-l border-indigo-200" colSpan={3}>
-                    전년동월 ({formatMonth(data.meta.priorMonth)})
-                  </th>
-                  <th className="text-center py-2 px-3 font-medium text-indigo-700 border-l border-indigo-200" colSpan={3}>
+                  <th className="text-center py-2 px-3 font-medium text-indigo-700 border-l border-indigo-200" colSpan={3} style={{ width: '300px' }}>
                     YOY
                   </th>
                 </tr>
                 <tr className="border-b border-indigo-100">
-                  <th className="text-right py-2 px-3 font-medium text-indigo-700 border-l border-indigo-200">기말재고(K)</th>
-                  <th className="text-right py-2 px-3 font-medium text-indigo-700">판매매출(K)</th>
-                  <th className="text-right py-2 px-3 font-medium text-indigo-700">재고주수</th>
-                  <th className="text-right py-2 px-3 font-medium text-indigo-700 border-l border-indigo-200">기말재고(K)</th>
-                  <th className="text-right py-2 px-3 font-medium text-indigo-700">판매매출(K)</th>
-                  <th className="text-right py-2 px-3 font-medium text-indigo-700">재고주수</th>
-                  <th className="text-right py-2 px-3 font-medium text-indigo-700 border-l border-indigo-200">기말재고</th>
-                  <th className="text-right py-2 px-3 font-medium text-indigo-700">판매매출</th>
-                  <th className="text-right py-2 px-3 font-medium text-indigo-700">재고주수</th>
+                  <th 
+                    className="text-right py-2 px-3 font-medium text-indigo-700 border-l border-indigo-200 cursor-pointer hover:bg-indigo-100 select-none" 
+                    style={{ width: '100px' }}
+                    onClick={() => handleSort('core_stock_amt')}
+                  >
+                    기말재고(K){renderSortIcon('core_stock_amt')}
+                  </th>
+                  <th 
+                    className="text-right py-2 px-3 font-medium text-indigo-700 cursor-pointer hover:bg-indigo-100 select-none" 
+                    style={{ width: '100px' }}
+                    onClick={() => handleSort('core_sales_amt')}
+                  >
+                    판매매출(K){renderSortIcon('core_sales_amt')}
+                  </th>
+                  <th 
+                    className="text-right py-2 px-3 font-medium text-indigo-700 cursor-pointer hover:bg-indigo-100 select-none" 
+                    style={{ width: '100px' }}
+                    onClick={() => handleSort('core_current_stock_weeks')}
+                  >
+                    당년재고주수{renderSortIcon('core_current_stock_weeks')}
+                  </th>
+                  <th 
+                    className="text-right py-2 px-3 font-medium text-indigo-700 cursor-pointer hover:bg-indigo-100 select-none" 
+                    style={{ width: '100px' }}
+                    onClick={() => handleSort('core_prior_stock_weeks')}
+                  >
+                    전년재고주수{renderSortIcon('core_prior_stock_weeks')}
+                  </th>
+                  <th 
+                    className="text-right py-2 px-3 font-medium text-indigo-700 border-l border-indigo-200 cursor-pointer hover:bg-indigo-100 select-none" 
+                    style={{ width: '100px' }}
+                    onClick={() => handleSort('core_stock_amt')}
+                  >
+                    기말재고{renderSortIcon('core_stock_amt')}
+                  </th>
+                  <th 
+                    className="text-right py-2 px-3 font-medium text-indigo-700 cursor-pointer hover:bg-indigo-100 select-none" 
+                    style={{ width: '100px' }}
+                    onClick={() => handleSort('core_sales_amt')}
+                  >
+                    판매매출{renderSortIcon('core_sales_amt')}
+                  </th>
+                  <th 
+                    className="text-right py-2 px-3 font-medium text-indigo-700 cursor-pointer hover:bg-indigo-100 select-none" 
+                    style={{ width: '100px' }}
+                    onClick={() => handleSort('core_current_stock_weeks')}
+                  >
+                    재고주수{renderSortIcon('core_current_stock_weeks')}
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 {data.dealers.length === 0 ? (
-                  <tr><td colSpan={11} className="text-center py-8 text-gray-500">데이터가 없습니다.</td></tr>
+                  <tr><td colSpan={8} className="text-center py-8 text-gray-500">데이터가 없습니다.</td></tr>
                 ) : (
                   <>
                     {/* 전체 합계 행 */}
                     {totals && (
-                      <>
                         <tr 
-                          className={`sticky top-[76px] z-[9] bg-yellow-50 border-b-2 border-yellow-300 font-bold cursor-pointer transition-colors ${
-                            expandedTotalSummary ? "bg-yellow-100" : "hover:bg-yellow-100"
+                        className={`border-b-2 border-yellow-300 font-bold cursor-pointer transition-colors ${
+                          expandedTotalSummary ? "bg-yellow-100" : "bg-yellow-50 hover:bg-yellow-100"
                           }`}
                           onClick={() => setExpandedTotalSummary(!expandedTotalSummary)}
                         >
-                          <td className="py-2 px-2 text-center">
+                        <td className={`py-2 px-2 text-gray-800 ${expandedTotalSummary ? "bg-yellow-100" : "bg-yellow-50"}`}>
+                          <div className="flex items-center gap-2">
                             <span className={`text-gray-400 transition-transform inline-block ${expandedTotalSummary ? "rotate-90" : ""}`}>
                               ▶
                             </span>
+                            전체 합계
+                          </div>
                           </td>
-                          <td className="py-2 px-2 text-gray-800">전체 합계</td>
-                          <td className="text-right py-2 px-3 text-gray-900 border-l border-yellow-300">{formatAmountK(totals.current_stock_total)}</td>
-                          <td className="text-right py-2 px-3 text-gray-900">{formatAmountK(totals.current_sales_total)}</td>
-                          <td className="text-right py-2 px-3 text-gray-900">{formatStockWeeks(totals.current_stock_weeks)}</td>
-                          <td className="text-right py-2 px-3 text-gray-900 border-l border-yellow-300">{formatAmountK(totals.prior_stock_total)}</td>
-                          <td className="text-right py-2 px-3 text-gray-900">{formatAmountK(totals.prior_sales_total)}</td>
-                          <td className="text-right py-2 px-3 text-gray-900">{formatStockWeeks(totals.prior_stock_weeks)}</td>
-                          <td className="text-right py-2 px-3 text-gray-900 border-l border-yellow-300">{formatYoyPercent(totals.current_stock_total, totals.prior_stock_total)}</td>
-                          <td className="text-right py-2 px-3 text-gray-900">{formatYoyPercent(totals.current_sales_total, totals.prior_sales_total)}</td>
-                          <td className="text-right py-2 px-3 text-gray-900">{formatYoyWeeks(totals.current_stock_weeks, totals.prior_stock_weeks)}</td>
-                        </tr>
-                        
-                        {/* 주력상품 합계 행 */}
-                        {expandedTotalSummary && (
-                          <tr className="sticky top-[116px] z-[8] border-b border-blue-100 bg-blue-50 font-semibold">
-                            <td className="py-1.5 px-2"></td>
-                            <td className="py-1.5 px-2 pl-8 text-blue-700">ㄴ 주력상품 합계</td>
-                            <td className="text-right py-1.5 px-3 text-gray-700 border-l border-gray-200">{formatAmountK(totals.current_stock_core)}</td>
-                            <td className="text-right py-1.5 px-3 text-gray-700">{formatAmountK(totals.current_sales_core)}</td>
-                            <td className="text-right py-1.5 px-3 text-gray-700">{formatStockWeeks(totals.current_stock_weeks_core)}</td>
-                            <td className="text-right py-1.5 px-3 text-gray-700 border-l border-gray-200">{formatAmountK(totals.prior_stock_core)}</td>
-                            <td className="text-right py-1.5 px-3 text-gray-700">{formatAmountK(totals.prior_sales_core)}</td>
-                            <td className="text-right py-1.5 px-3 text-gray-700">{formatStockWeeks(totals.prior_stock_weeks_core)}</td>
-                            <td className="text-right py-1.5 px-3 text-gray-700 border-l border-gray-200">{formatYoyPercent(totals.current_stock_core, totals.prior_stock_core)}</td>
-                            <td className="text-right py-1.5 px-3 text-gray-700">{formatYoyPercent(totals.current_sales_core, totals.prior_sales_core)}</td>
-                            <td className="text-right py-1.5 px-3 text-gray-700">{formatYoyWeeks(totals.current_stock_weeks_core, totals.prior_stock_weeks_core)}</td>
-                          </tr>
-                        )}
-                        
-                        {/* 아울렛상품 합계 행 */}
-                        {expandedTotalSummary && (
-                          <tr className="sticky top-[152px] z-[7] border-b border-amber-100 bg-amber-50 font-semibold">
-                            <td className="py-1.5 px-2"></td>
-                            <td className="py-1.5 px-2 pl-8 text-amber-700">ㄴ 아울렛상품 합계</td>
-                            <td className="text-right py-1.5 px-3 text-gray-700 border-l border-gray-200">{formatAmountK(totals.current_stock_outlet)}</td>
-                            <td className="text-right py-1.5 px-3 text-gray-700">{formatAmountK(totals.current_sales_outlet)}</td>
-                            <td className="text-right py-1.5 px-3 text-gray-700">{formatStockWeeks(totals.current_stock_weeks_outlet)}</td>
-                            <td className="text-right py-1.5 px-3 text-gray-700 border-l border-gray-200">{formatAmountK(totals.prior_stock_outlet)}</td>
-                            <td className="text-right py-1.5 px-3 text-gray-700">{formatAmountK(totals.prior_sales_outlet)}</td>
-                            <td className="text-right py-1.5 px-3 text-gray-700">{formatStockWeeks(totals.prior_stock_weeks_outlet)}</td>
-                            <td className="text-right py-1.5 px-3 text-gray-700 border-l border-gray-200">{formatYoyPercent(totals.current_stock_outlet, totals.prior_stock_outlet)}</td>
-                            <td className="text-right py-1.5 px-3 text-gray-700">{formatYoyPercent(totals.current_sales_outlet, totals.prior_sales_outlet)}</td>
-                            <td className="text-right py-1.5 px-3 text-gray-700">{formatYoyWeeks(totals.current_stock_weeks_outlet, totals.prior_stock_weeks_outlet)}</td>
+                        <td className={`text-right py-2 px-3 text-gray-900 border-l border-yellow-300 ${expandedTotalSummary ? "bg-yellow-100" : "bg-yellow-50"}`}>{formatAmountK(totals.current_stock_total)}</td>
+                        <td className={`text-right py-2 px-3 text-gray-900 ${expandedTotalSummary ? "bg-yellow-100" : "bg-yellow-50"}`}>{formatAmountK(totals.current_sales_total)}</td>
+                        <td className={`text-right py-2 px-3 text-gray-900 ${expandedTotalSummary ? "bg-yellow-100" : "bg-yellow-50"}`}>{formatStockWeeks(totals.current_stock_weeks)}</td>
+                        <td className={`text-right py-2 px-3 text-gray-900 ${expandedTotalSummary ? "bg-yellow-100" : "bg-yellow-50"}`}>{formatStockWeeks(totals.prior_stock_weeks)}</td>
+                        <td className={`text-right py-2 px-3 text-gray-900 border-l border-yellow-300 ${expandedTotalSummary ? "bg-yellow-100" : "bg-yellow-50"}`}>{formatYoyPercent(totals.current_stock_total, totals.prior_stock_total)}</td>
+                        <td className={`text-right py-2 px-3 text-gray-900 ${expandedTotalSummary ? "bg-yellow-100" : "bg-yellow-50"}`}>{formatYoyPercent(totals.current_sales_total, totals.prior_sales_total)}</td>
+                        <td className={`text-right py-2 px-3 text-gray-900 ${expandedTotalSummary ? "bg-yellow-100" : "bg-yellow-50"}`}>{formatYoyWeeks(totals.current_stock_weeks, totals.prior_stock_weeks)}</td>
                           </tr>
                         )}
                       </>
                     )}
-                    
-                    {/* 대리상 목록 */}
-                    {data.dealers.map((dealer) => {
-                    const isExpanded = expandedDealerId === dealer.account_id;
-                    const products = isExpanded ? getProductsForDealer(dealer.account_id) : [];
-                    const hasCoreProducts = products.some(p => p.segment === 'core');
-                    const hasOutletProducts = products.some(p => p.segment === 'outlet');
-                    
-                    return (
-                      <>
-                        {/* 대리상 행 */}
+              </tbody>
+            </table>
+
+            {/* 주력상품 섹션 */}
+            {expandedTotalSummary && totals && (
+              <>
+                {/* 주력상품 합계 */}
+                <table className="w-full text-sm" style={{ tableLayout: 'fixed' }}>
+                  <tbody>
+                    <tr className="border-b-2 border-teal-200 bg-teal-50 font-bold">
+                      <td className="py-2 px-2 pl-8 text-teal-700 bg-teal-50" style={{ width: '200px' }}>주력상품 합계</td>
+                      <td className="text-right py-2 px-3 text-gray-900 border-l border-gray-200 bg-teal-50" style={{ width: '100px' }}>{formatAmountK(totals.current_stock_core)}</td>
+                      <td className="text-right py-2 px-3 text-gray-900 bg-teal-50" style={{ width: '100px' }}>{formatAmountK(totals.current_sales_core)}</td>
+                      <td className="text-right py-2 px-3 text-gray-900 bg-teal-50" style={{ width: '100px' }}>{formatStockWeeks(totals.current_stock_weeks_core)}</td>
+                      <td className="text-right py-2 px-3 text-gray-900 bg-teal-50" style={{ width: '100px' }}>{formatStockWeeks(totals.prior_stock_weeks_core)}</td>
+                      <td className="text-right py-2 px-3 text-gray-900 border-l border-gray-200 bg-teal-50" style={{ width: '100px' }}>{formatYoyPercent(totals.current_stock_core, totals.prior_stock_core)}</td>
+                      <td className="text-right py-2 px-3 text-gray-900 bg-teal-50" style={{ width: '100px' }}>{formatYoyPercent(totals.current_sales_core, totals.prior_sales_core)}</td>
+                      <td className="text-right py-2 px-3 text-gray-900 bg-teal-50" style={{ width: '100px' }}>{formatYoyWeeks(totals.current_stock_weeks_core, totals.prior_stock_weeks_core)}</td>
+                    </tr>
+                  </tbody>
+                </table>
+
+                {/* 주력상품 대리상 목록 - 스크롤 */}
+                <div className="overflow-y-auto" style={{ maxHeight: '280px' }}>
+                  <table className="w-full text-sm" style={{ tableLayout: 'fixed' }}>
+                    <tbody>
+                      {sortedDealers.map((dealer) => (
                         <tr
-                          key={dealer.account_id}
-                          className={`border-b border-gray-100 cursor-pointer transition-colors ${
-                            isExpanded ? "bg-gray-100" : "hover:bg-gray-50"
-                          }`}
-                          onClick={() => handleDealerClick(dealer)}
+                          key={`core-${dealer.account_id}`}
+                          className="border-b border-gray-100 hover:bg-teal-50 cursor-pointer transition-colors"
+                          onClick={() => handleSegmentClick(dealer, 'core')}
                         >
-                          <td className="py-2 px-2 text-center">
-                            <span className={`text-gray-400 transition-transform inline-block ${isExpanded ? "rotate-90" : ""}`}>
-                              ▶
-                            </span>
-                          </td>
-                          <td className="py-2 px-2">
+                          <td className="py-2 px-2 pl-10" style={{ width: '200px' }}>
                             <div className="font-medium text-gray-800">{dealer.account_nm_en}</div>
                             <div className="text-xs text-gray-500">
                               {dealer.account_id} · {dealer.account_nm_kr}
                             </div>
                           </td>
-                          <td className="text-right py-2 px-3 text-gray-900 border-l border-gray-200">{formatAmountK(dealer.current.total.stock_amt)}</td>
-                          <td className="text-right py-2 px-3 text-gray-900">{formatAmountK(dealer.current.total.sales_amt)}</td>
-                          <td className="text-right py-2 px-3 text-gray-900">{formatStockWeeks(dealer.current.total.stock_weeks)}</td>
-                          <td className="text-right py-2 px-3 text-gray-900 border-l border-gray-200">{formatAmountK(dealer.prior.total.stock_amt)}</td>
-                          <td className="text-right py-2 px-3 text-gray-900">{formatAmountK(dealer.prior.total.sales_amt)}</td>
-                          <td className="text-right py-2 px-3 text-gray-900">{formatStockWeeks(dealer.prior.total.stock_weeks)}</td>
-                          <td className="text-right py-2 px-3 text-gray-900 border-l border-gray-200">{formatYoyPercent(dealer.current.total.stock_amt, dealer.prior.total.stock_amt)}</td>
-                          <td className="text-right py-2 px-3 text-gray-900">{formatYoyPercent(dealer.current.total.sales_amt, dealer.prior.total.sales_amt)}</td>
-                          <td className="text-right py-2 px-3 text-gray-900">{formatYoyWeeks(dealer.current.total.stock_weeks, dealer.prior.total.stock_weeks)}</td>
+                          <td className="text-right py-2 px-3 text-gray-900 border-l border-gray-200" style={{ width: '100px' }}>{formatAmountK(dealer.current.core.stock_amt)}</td>
+                          <td className="text-right py-2 px-3 text-gray-900" style={{ width: '100px' }}>{formatAmountK(dealer.current.core.sales_amt)}</td>
+                          <td className="text-right py-2 px-3 text-gray-900" style={{ width: '100px' }}>{formatStockWeeks(dealer.current.core.stock_weeks)}</td>
+                          <td className="text-right py-2 px-3 text-gray-900" style={{ width: '100px' }}>{formatStockWeeks(dealer.prior.core.stock_weeks)}</td>
+                          <td className="text-right py-2 px-3 text-gray-900 border-l border-gray-200" style={{ width: '100px' }}>{formatYoyPercent(dealer.current.core.stock_amt, dealer.prior.core.stock_amt)}</td>
+                          <td className="text-right py-2 px-3 text-gray-900" style={{ width: '100px' }}>{formatYoyPercent(dealer.current.core.sales_amt, dealer.prior.core.sales_amt)}</td>
+                          <td className="text-right py-2 px-3 text-gray-900" style={{ width: '100px' }}>{formatYoyWeeks(dealer.current.core.stock_weeks, dealer.prior.core.stock_weeks)}</td>
                         </tr>
-                        
-                        {/* 주력상품 행 (펼쳐진 경우) */}
-                        {isExpanded && hasCoreProducts && (
-                          <tr
-                            key={`${dealer.account_id}-core`}
-                            className="border-b border-blue-100 bg-blue-50 hover:bg-blue-100 cursor-pointer"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleSegmentClick(dealer, 'core');
-                            }}
-                          >
-                            <td className="py-1.5 px-2"></td>
-                            <td className="py-1.5 px-2 pl-8 text-blue-700 font-medium flex items-center gap-1">
-                              ㄴ 주력상품
-                              <span className="text-xs">▶</span>
-                            </td>
-                            <td className="text-right py-1.5 px-3 text-gray-700 border-l border-gray-200">{formatAmountK(dealer.current.core.stock_amt)}</td>
-                            <td className="text-right py-1.5 px-3 text-gray-700">{formatAmountK(dealer.current.core.sales_amt)}</td>
-                            <td className="text-right py-1.5 px-3 text-gray-700">{formatStockWeeks(dealer.current.core.stock_weeks)}</td>
-                            <td className="text-right py-1.5 px-3 text-gray-700 border-l border-gray-200">{formatAmountK(dealer.prior.core.stock_amt)}</td>
-                            <td className="text-right py-1.5 px-3 text-gray-700">{formatAmountK(dealer.prior.core.sales_amt)}</td>
-                            <td className="text-right py-1.5 px-3 text-gray-700">{formatStockWeeks(dealer.prior.core.stock_weeks)}</td>
-                            <td className="text-right py-1.5 px-3 text-gray-700 border-l border-gray-200">{formatYoyPercent(dealer.current.core.stock_amt, dealer.prior.core.stock_amt)}</td>
-                            <td className="text-right py-1.5 px-3 text-gray-700">{formatYoyPercent(dealer.current.core.sales_amt, dealer.prior.core.sales_amt)}</td>
-                            <td className="text-right py-1.5 px-3 text-gray-700">{formatYoyWeeks(dealer.current.core.stock_weeks, dealer.prior.core.stock_weeks)}</td>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* 아울렛상품 합계 */}
+                <table className="w-full text-sm" style={{ tableLayout: 'fixed' }}>
+                  <tbody>
+                    <tr className="border-b-2 border-teal-200 bg-teal-50 font-bold">
+                      <td className="py-2 px-2 pl-8 text-teal-700 bg-teal-50" style={{ width: '200px' }}>아울렛상품 합계</td>
+                      <td className="text-right py-2 px-3 text-gray-900 border-l border-gray-200 bg-teal-50" style={{ width: '100px' }}>{formatAmountK(totals.current_stock_outlet)}</td>
+                      <td className="text-right py-2 px-3 text-gray-900 bg-teal-50" style={{ width: '100px' }}>{formatAmountK(totals.current_sales_outlet)}</td>
+                      <td className="text-right py-2 px-3 text-gray-900 bg-teal-50" style={{ width: '100px' }}>{formatStockWeeks(totals.current_stock_weeks_outlet)}</td>
+                      <td className="text-right py-2 px-3 text-gray-900 bg-teal-50" style={{ width: '100px' }}>{formatStockWeeks(totals.prior_stock_weeks_outlet)}</td>
+                      <td className="text-right py-2 px-3 text-gray-900 border-l border-gray-200 bg-teal-50" style={{ width: '100px' }}>{formatYoyPercent(totals.current_stock_outlet, totals.prior_stock_outlet)}</td>
+                      <td className="text-right py-2 px-3 text-gray-900 bg-teal-50" style={{ width: '100px' }}>{formatYoyPercent(totals.current_sales_outlet, totals.prior_sales_outlet)}</td>
+                      <td className="text-right py-2 px-3 text-gray-900 bg-teal-50" style={{ width: '100px' }}>{formatYoyWeeks(totals.current_stock_weeks_outlet, totals.prior_stock_weeks_outlet)}</td>
                           </tr>
-                        )}
-                        
-                        {/* 아울렛상품 행 (펼쳐진 경우) */}
-                        {isExpanded && hasOutletProducts && (
-                          <tr
-                            key={`${dealer.account_id}-outlet`}
-                            className="border-b border-amber-100 bg-amber-50 hover:bg-amber-100 cursor-pointer"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleSegmentClick(dealer, 'outlet');
-                            }}
-                          >
-                            <td className="py-1.5 px-2"></td>
-                            <td className="py-1.5 px-2 pl-8 text-amber-700 font-medium flex items-center gap-1">
-                              ㄴ 아울렛상품
-                              <span className="text-xs">▶</span>
+                  </tbody>
+                </table>
+
+                {/* 아울렛상품 대리상 목록 - 스크롤 */}
+                <div className="overflow-y-auto" style={{ maxHeight: '280px' }}>
+                  <table className="w-full text-sm" style={{ tableLayout: 'fixed' }}>
+                    <tbody>
+                      {sortedDealers.map((dealer) => (
+                        <tr
+                          key={`outlet-${dealer.account_id}`}
+                          className="border-b border-gray-100 hover:bg-teal-50 cursor-pointer transition-colors"
+                          onClick={() => handleSegmentClick(dealer, 'outlet')}
+                        >
+                          <td className="py-2 px-2 pl-10" style={{ width: '200px' }}>
+                            <div className="font-medium text-gray-800">{dealer.account_nm_en}</div>
+                            <div className="text-xs text-gray-500">
+                              {dealer.account_id} · {dealer.account_nm_kr}
+                            </div>
                             </td>
-                            <td className="text-right py-1.5 px-3 text-gray-700 border-l border-gray-200">{formatAmountK(dealer.current.outlet.stock_amt)}</td>
-                            <td className="text-right py-1.5 px-3 text-gray-700">{formatAmountK(dealer.current.outlet.sales_amt)}</td>
-                            <td className="text-right py-1.5 px-3 text-gray-700">{formatStockWeeks(dealer.current.outlet.stock_weeks)}</td>
-                            <td className="text-right py-1.5 px-3 text-gray-700 border-l border-gray-200">{formatAmountK(dealer.prior.outlet.stock_amt)}</td>
-                            <td className="text-right py-1.5 px-3 text-gray-700">{formatAmountK(dealer.prior.outlet.sales_amt)}</td>
-                            <td className="text-right py-1.5 px-3 text-gray-700">{formatStockWeeks(dealer.prior.outlet.stock_weeks)}</td>
-                            <td className="text-right py-1.5 px-3 text-gray-700 border-l border-gray-200">{formatYoyPercent(dealer.current.outlet.stock_amt, dealer.prior.outlet.stock_amt)}</td>
-                            <td className="text-right py-1.5 px-3 text-gray-700">{formatYoyPercent(dealer.current.outlet.sales_amt, dealer.prior.outlet.sales_amt)}</td>
-                            <td className="text-right py-1.5 px-3 text-gray-700">{formatYoyWeeks(dealer.current.outlet.stock_weeks, dealer.prior.outlet.stock_weeks)}</td>
+                          <td className="text-right py-2 px-3 text-gray-900 border-l border-gray-200" style={{ width: '100px' }}>{formatAmountK(dealer.current.outlet.stock_amt)}</td>
+                          <td className="text-right py-2 px-3 text-gray-900" style={{ width: '100px' }}>{formatAmountK(dealer.current.outlet.sales_amt)}</td>
+                          <td className="text-right py-2 px-3 text-gray-900" style={{ width: '100px' }}>{formatStockWeeks(dealer.current.outlet.stock_weeks)}</td>
+                          <td className="text-right py-2 px-3 text-gray-900" style={{ width: '100px' }}>{formatStockWeeks(dealer.prior.outlet.stock_weeks)}</td>
+                          <td className="text-right py-2 px-3 text-gray-900 border-l border-gray-200" style={{ width: '100px' }}>{formatYoyPercent(dealer.current.outlet.stock_amt, dealer.prior.outlet.stock_amt)}</td>
+                          <td className="text-right py-2 px-3 text-gray-900" style={{ width: '100px' }}>{formatYoyPercent(dealer.current.outlet.sales_amt, dealer.prior.outlet.sales_amt)}</td>
+                          <td className="text-right py-2 px-3 text-gray-900" style={{ width: '100px' }}>{formatYoyWeeks(dealer.current.outlet.stock_weeks, dealer.prior.outlet.stock_weeks)}</td>
                           </tr>
-                        )}
-                      </>
-                    );
-                  })}
-                  </>
-                )}
+                      ))}
               </tbody>
             </table>
             </div>
+              </>
+            )}
           </div>
         )}
 

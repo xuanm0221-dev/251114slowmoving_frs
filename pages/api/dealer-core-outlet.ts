@@ -99,12 +99,26 @@ function getProductTypeCase(opStdColumn: string, sesnColumn: string, yearColumn:
   `;
 }
 
+// 카테고리 필터 조건 생성 함수
+function getCategoryFilter(category: string): string {
+  if (category === 'all') return "AND p.prdt_kind_nm_en IN ('Shoes', 'Headwear', 'Bag', 'Acc_etc')";
+  
+  const categoryMap: Record<string, string> = {
+    shoes: 'Shoes',
+    headwear: 'Headwear',
+    bag: 'Bag',
+    acc_etc: 'Acc_etc',
+  };
+  
+  return `AND p.prdt_kind_nm_en = '${categoryMap[category]}'`;
+}
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== "GET") {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  const { brand, baseMonth } = req.query;
+  const { brand, baseMonth, category } = req.query;
 
   if (!brand || typeof brand !== "string") {
     return res.status(400).json({ error: "brand parameter is required" });
@@ -113,6 +127,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (!baseMonth || typeof baseMonth !== "string" || !/^\d{6}$/.test(baseMonth)) {
     return res.status(400).json({ error: "baseMonth must be YYYYMM format" });
   }
+
+  // category 검증
+  const validCategories = ['all', 'shoes', 'headwear', 'bag', 'acc_etc'];
+  const selectedCategory = category && typeof category === 'string' && validCategories.includes(category) 
+    ? category 
+    : 'all';
 
   const brandCode = BRAND_CODE_MAP[brand as keyof typeof BRAND_CODE_MAP] || brand;
   
@@ -184,7 +204,7 @@ stock_raw AS (
   WHERE s.yymm IN ('${baseMonth}', '${priorMonth}')
     AND s.brd_cd = '${brandCode}'
     AND p.parent_prdt_kind_cd = 'A'
-    AND p.prdt_kind_nm_en IN ('Shoes', 'Headwear', 'Bag', 'Acc_etc')
+    ${getCategoryFilter(selectedCategory)}
 ),
 
 -- 재고 + 대리상 매핑 + remark 적용
@@ -239,7 +259,7 @@ sales_raw AS (
   WHERE TO_CHAR(s.sale_dt, 'YYYYMM') IN ('${baseMonth}', '${priorMonth}')
     AND s.brd_cd = '${brandCode}'
     AND p.parent_prdt_kind_cd = 'A'
-    AND p.prdt_kind_nm_en IN ('Shoes', 'Headwear', 'Bag', 'Acc_etc')
+    ${getCategoryFilter(selectedCategory)}
 ),
 
 -- 판매 + 대리상 매핑 + remark 적용
