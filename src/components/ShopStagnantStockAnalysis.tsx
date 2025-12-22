@@ -1101,8 +1101,9 @@ export default function ShopStagnantStockAnalysis({
 
             {/* 매장별 테이블 (아코디언) */}
             <div className="rounded-lg border border-gray-200 overflow-hidden">
-              <table className="w-full text-sm">
-                <thead className="bg-blue-50 sticky top-0 z-10">
+              <div className="max-h-[600px] overflow-y-auto">
+                <table className="w-full text-sm">
+                  <thead className="bg-blue-50 sticky top-0 z-10">
                   <tr className="border-b border-blue-100">
                     <th className="w-8 py-2 px-2"></th>
                     <th className="text-left py-2 px-2 font-medium text-blue-700">매장</th>
@@ -1208,6 +1209,7 @@ export default function ShopStagnantStockAnalysis({
                 </tbody>
               </table>
             </div>
+          </div>
           </>
         )}
 

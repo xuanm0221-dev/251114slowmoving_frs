@@ -22,6 +22,7 @@ interface DealerMaster {
 // 대리상별 집계 데이터
 interface DealerSummary {
   account_id: string;
+  dealer_nm_en: string;
   dealer_nm_kr: string;
   stock_weeks: number | null;
   stock_qty: number;
@@ -557,7 +558,8 @@ export default function DealerStagnantStockAnalysis({
       
       return {
         account_id: accountId,
-        dealer_nm_kr: dealer?.account_nm_kr || accountId,
+        dealer_nm_en: dealer?.account_nm_en || accountId,
+        dealer_nm_kr: dealer?.account_nm_kr || '',
         stock_weeks: stockWeeks,
         stock_qty: agg.stock_qty,
         stock_amt: agg.stock_amt,
@@ -1054,8 +1056,9 @@ export default function DealerStagnantStockAnalysis({
 
             {/* 대리상별 테이블 (아코디언) */}
             <div className="rounded-lg border border-gray-200 overflow-hidden">
-              <table className="w-full text-sm">
-                <thead className="bg-purple-50 sticky top-0 z-10">
+              <div className="max-h-[600px] overflow-y-auto">
+                <table className="w-full text-sm">
+                  <thead className="bg-purple-50 sticky top-0 z-10">
                   <tr className="border-b border-purple-100">
                     <th className="w-8 py-2 px-2"></th>
                     <th className="text-left py-2 px-2 font-medium text-purple-700">대리상</th>
@@ -1109,8 +1112,10 @@ export default function DealerStagnantStockAnalysis({
                               </span>
                             </td>
                             <td className="py-2 px-2">
-                              <div className="font-medium text-gray-800">{dealer.dealer_nm_kr}</div>
-                              <div className="text-xs text-gray-500">{dealer.account_id}</div>
+                              <div className="font-medium text-gray-800">{dealer.dealer_nm_en}</div>
+                              <div className="text-xs text-gray-500">
+                                {dealer.account_id} · {dealer.dealer_nm_kr}
+                              </div>
                             </td>
                             <td className="text-right py-2 px-3 text-gray-900">{formatAmountK(dealer.stock_amt)}</td>
                             <td className="text-right py-2 px-3 text-gray-900">{formatNumber(dealer.stock_qty)}</td>
@@ -1161,6 +1166,7 @@ export default function DealerStagnantStockAnalysis({
                 </tbody>
               </table>
             </div>
+          </div>
           </>
         )}
 
@@ -1177,7 +1183,7 @@ export default function DealerStagnantStockAnalysis({
           setSelectedSeasonGroup(null);
         }}
         products={productDetails}
-        dealerName={selectedDealer?.dealer_nm_kr || ""}
+        dealerName={selectedDealer ? `${selectedDealer.dealer_nm_en} (${selectedDealer.dealer_nm_kr})` : ""}
         seasonGroup={selectedSeasonGroup || ""}
         searchQuery={productSearchQuery}
         onSearchChange={setProductSearchQuery}

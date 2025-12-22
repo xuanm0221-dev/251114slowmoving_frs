@@ -35,8 +35,8 @@ import StagnantStockAnalysis from "./StagnantStockAnalysis";
 import DealerStagnantStockAnalysis from "./DealerStagnantStockAnalysis";
 import ShopStagnantStockAnalysis from "./ShopStagnantStockAnalysis";
 import InventorySeasonChart from "./InventorySeasonChart";
-import CoreOutletInventorySection from "./CoreOutletInventorySection";
-import InventoryScsDetailModal from "./InventoryScsDetailModal";
+import DealerCoreOutletAnalysis from "./DealerCoreOutletAnalysis";
+import SectionTitle from "./SectionTitle";
 import { generateForecastForBrand } from "@/lib/forecast";
 import { buildInventoryForecastForTab } from "@/lib/inventoryForecast";
 import { computeStockWeeksForChart, StockWeeksChartPoint, ProductTypeTab, computeTargetInventoryDelta } from "@/utils/stockWeeks";
@@ -73,15 +73,6 @@ export default function BrandSalesPage({ brand, title }: BrandSalesPageProps) {
   const [stagnantItemTab, setStagnantItemTab] = useState<"ACC합계" | "신발" | "모자" | "가방" | "기타">("ACC합계"); // 정체재고 아이템 필터
   const [stagnantCurrentMonthMinQty, setStagnantCurrentMonthMinQty] = useState<number>(10); // 당월수량 기준 (기본값 10)
   const [editingForecastInventory, setEditingForecastInventory] = useState<ForecastInventoryData | null>(null); // 편집 중인 입고예정 데이터
-  
-  // 주력/아울렛 재고 분석용 state
-  const [selectedMonth, setSelectedMonth] = useState<string>('2025.11'); // 카드 섹션 기준월
-  const [coreOutletModal, setCoreOutletModal] = useState<{
-    isOpen: boolean;
-    scope: 'total' | 'frs' | 'warehouse' | 'retail';
-    segment: 'core' | 'outlet';
-    title: string;
-  } | null>(null);
   
   // 특정 아이템의 stockWeek 변경 핸들러
   const handleStockWeekChange = (itemTab: ItemTab, value: number) => {
@@ -191,14 +182,6 @@ export default function BrandSalesPage({ brand, title }: BrandSalesPageProps) {
 
     fetchData();
   }, [brand]);
-
-  // 최신 월로 selectedMonth 자동 설정
-  useEffect(() => {
-    if (inventoryData?.months && inventoryData.months.length > 0) {
-      const latestMonth = inventoryData.months[inventoryData.months.length - 1];
-      setSelectedMonth(latestMonth);
-    }
-  }, [inventoryData]);
 
   // 입고예정 데이터 저장 핸들러
   const handleSaveForecastInventory = () => {
@@ -438,6 +421,9 @@ export default function BrandSalesPage({ brand, title }: BrandSalesPageProps) {
           </div>
         ) : (
           <>
+            {/* 재고주수 분석 섹션 제목 */}
+            <SectionTitle title="1. 재고주수 분석" colorClass="bg-blue-500" />
+
             {/* 0. 재고주수 Summary 섹션 */}
             {inventoryBrandData && salesBrandData && inventoryData?.daysInMonth && (
               <StockWeeksSummary
@@ -501,41 +487,6 @@ export default function BrandSalesPage({ brand, title }: BrandSalesPageProps) {
               />
             )}
 
-            {/* 1.65. 주력/아울렛 재고 분석 */}
-            {inventoryTabData && selectedMonth && inventoryData?.daysInMonth && (
-              <CoreOutletInventorySection
-                brand={brand}
-                selectedMonth={selectedMonth}
-                selectedTab={selectedTab}
-                inventoryTabData={inventoryTabData}
-                daysInMonth={inventoryData.daysInMonth}
-                stockWeek={stockWeeks[selectedTab]}
-                onCardClick={(scope, segment, title) => {
-                  setCoreOutletModal({
-                    isOpen: true,
-                    scope,
-                    segment,
-                    title,
-                  });
-                }}
-              />
-            )}
-
-            {/* 모달 렌더링 */}
-            {coreOutletModal && (
-              <InventoryScsDetailModal
-                isOpen={coreOutletModal.isOpen}
-                onClose={() => setCoreOutletModal(null)}
-                brand={brand}
-                month={selectedMonth}
-                itemTab={selectedTab}
-                scope={coreOutletModal.scope}
-                segment={coreOutletModal.segment}
-                stockWeek={stockWeeks[selectedTab]}
-                title={coreOutletModal.title}
-              />
-            )}
-
             {/* 1.7. 재고,판매,입고 추이 표 */}
             {inventoryTabDataWithForecast && salesTabData && (
               <div className="card mb-4">
@@ -575,140 +526,98 @@ export default function BrandSalesPage({ brand, title }: BrandSalesPageProps) {
               </div>
             )}
 
-            {/* 1.75. 재고택금액 추이 (시즌별) - 전년대비/매출액대비 전환 차트 */}
-            <InventorySeasonChart 
-              brand={brand} 
-              dimensionTab={stagnantDimensionTab} 
-              onDimensionTabChange={setStagnantDimensionTab}
-              thresholdPct={stagnantThresholdPct}
-              minQty={stagnantMinQty}
-              currentMonthMinQty={stagnantCurrentMonthMinQty}
-              itemTab={stagnantItemTab}
-              onItemTabChange={setStagnantItemTab}
-            />
-
-            {/* 1.8. 정체재고 분석 */}
-            <StagnantStockAnalysis 
-              brand={brand} 
-              dimensionTab={stagnantDimensionTab}
-              onDimensionTabChange={setStagnantDimensionTab}
-              thresholdPct={stagnantThresholdPct}
-              onThresholdPctChange={setStagnantThresholdPct}
-              minQty={stagnantMinQty}
-              onMinQtyChange={setStagnantMinQty}
-              currentMonthMinQty={stagnantCurrentMonthMinQty}
-              onCurrentMonthMinQtyChange={setStagnantCurrentMonthMinQty}
-              itemTab={stagnantItemTab}
-              onItemTabChange={setStagnantItemTab}
-            />
-
-            {/* 1.9. 대리상 단위 정체재고 분석 (FR 기준) */}
-            <DealerStagnantStockAnalysis 
+            {/* 1.72. 대리상 주력/아울렛 분석 */}
+            <DealerCoreOutletAnalysis 
               brand={brand}
-              thresholdPct={stagnantThresholdPct}
-              onThresholdPctChange={setStagnantThresholdPct}
-              minQty={stagnantMinQty}
-              onMinQtyChange={setStagnantMinQty}
             />
 
-            {/* 1.10. 직영매장 단위 정체재고 분석 (OR 기준) */}
-            <ShopStagnantStockAnalysis 
-              brand={brand}
-              thresholdPct={stagnantThresholdPct}
-              onThresholdPctChange={setStagnantThresholdPct}
-              minQty={stagnantMinQty}
-              onMinQtyChange={setStagnantMinQty}
-            />
-
-            {/* 2. 재고주수 히트맵 (2025년, 2024년) */}
-            {salesTabData && inventoryTabDataWithForecast && inventoryData?.daysInMonth && (
-              <div className="mb-4">
-                <CollapsibleSection
-                  title="재고주수 히트맵"
-                  icon="📅"
-                  iconColor="text-yellow-500"
-                  defaultOpen={false}
-                >
-                  {/* 2025년 재고주수 */}
-                  <div className="mb-6">
-                    <h3 className="text-lg font-semibold text-gray-700 mb-3">2025년 재고주수</h3>
-                    <StockWeeksTable
-                      inventoryData={inventoryTabDataWithForecast}
-                      salesData={salesTabData}
-                      daysInMonth={inventoryData.daysInMonth}
-                      stockWeek={stockWeeks[selectedTab]}
-                      year="2025"
-                      stockWeekWindow={stockWeekWindow}
-                      productTypeTab={productTypeTab}
-                    />
-                  </div>
-
-                  {/* 재고주수 계산식 범례 */}
-                  <div className="mt-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
-                    <h3 className="text-xs font-medium text-yellow-600 mb-2">📅 재고주수 계산식</h3>
-                    <div className="grid md:grid-cols-3 gap-4 text-xs">
-                      <div className="space-y-2">
-                        <div>
-                          <span className="text-gray-600">1. 전체주수 = 전체재고 ÷ (전체판매 ÷ 일수 × 7)</span>
-                        </div>
-                        <div>
-                          <span className="text-gray-600">2. 대리상주수 = 대리상재고 ÷ (대리상판매 ÷ 일수 × 7)</span>
-                        </div>
-                      </div>
-                      <div>
-                        <div className="text-gray-600 space-y-1">
-                          <div>3. 직영주력상품 = stockWeek (직영판매예정재고 주수, 주력만 적용)</div>
-                        </div>
-                      </div>
-                      <div>
-                        <div className="text-gray-600 space-y-1">
-                          <div>4. 창고주수(전체) = 창고재고(전체) ÷ [(주력 대리상판매 + 주력 직영판매 + 아울렛 직영판매) ÷ 일수 × 7]</div>
-                          <div className="pl-2">ㄴ 주력 = 창고 주력재고 ÷ [(주력 대리상판매 + 주력 직영판매) ÷ 일수 × 7]</div>
-                          <div className="pl-2">ㄴ 아울렛 = 본사아울렛재고 ÷ (아울렛 직영판매 ÷ 일수 × 7)</div>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="mt-4 pt-3 border-t border-gray-300">
-                      <div className="grid md:grid-cols-2 gap-4 text-xs">
-                        <div>
-                          <span className="text-gray-500 font-medium">{PRODUCT_TYPE_RULES.core.label} 분류 기준:</span>{" "}
-                          <span className="text-gray-600">{PRODUCT_TYPE_RULES.core.criteria}</span>
-                        </div>
-                        <div>
-                          <span className="text-gray-500 font-medium">{PRODUCT_TYPE_RULES.outlet.label} 분류 기준:</span>{" "}
-                          <span className="text-gray-600">{PRODUCT_TYPE_RULES.outlet.criteria}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* 2024년 재고주수 */}
-                  {salesTabData && inventoryTabData && inventoryData?.daysInMonth && (
-                    <div className="mt-6">
-                      <h3 className="text-lg font-semibold text-gray-700 mb-3">2024년 재고주수</h3>
-                      <StockWeeksTable
-                        inventoryData={inventoryTabData}
-                        salesData={salesTabData}
-                        daysInMonth={inventoryData.daysInMonth}
-                        stockWeek={stockWeeks[selectedTab]}
-                        year="2024"
-                        stockWeekWindow={stockWeekWindow}
-                        productTypeTab={productTypeTab}
-                      />
-                    </div>
-                  )}
-                </CollapsibleSection>
-              </div>
-            )}
-
-            {/* 4~7. 재고,판매 데이터 (참고용) - 4개 섹션을 하나로 묶음 */}
+            {/* 4~7. 재고,판매, 재고주수 히트맵 (참고용) - MOVED HERE */}
             <CollapsibleSection
-              title="재고,판매 데이터 (참고용)"
+              title="재고,판매, 재고주수 히트맵 (참고용)"
               icon="📋"
               iconColor="text-gray-500"
               defaultOpen={false}
             >
               <div className="space-y-4">
+                {/* 1. 재고주수 히트맵 (2025년, 2024년) */}
+                {salesTabData && inventoryTabDataWithForecast && inventoryData?.daysInMonth && (
+                  <CollapsibleSection
+                    title="재고주수 히트맵"
+                    icon="📅"
+                    iconColor="text-yellow-500"
+                    defaultOpen={false}
+                  >
+                    {/* 2025년 재고주수 */}
+                    <div className="mb-6">
+                      <h3 className="text-lg font-semibold text-gray-700 mb-3">2025년 재고주수</h3>
+                      <StockWeeksTable
+                        inventoryData={inventoryTabDataWithForecast}
+                        salesData={salesTabData}
+                        daysInMonth={inventoryData.daysInMonth}
+                        stockWeek={stockWeeks[selectedTab]}
+                        year="2025"
+                        stockWeekWindow={stockWeekWindow}
+                        productTypeTab={productTypeTab}
+                      />
+                    </div>
+
+                    {/* 재고주수 계산식 범례 */}
+                    <div className="mt-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                      <h3 className="text-xs font-medium text-yellow-600 mb-2">📅 재고주수 계산식</h3>
+                      <div className="grid md:grid-cols-3 gap-4 text-xs">
+                        <div className="space-y-2">
+                          <div>
+                            <span className="text-gray-600">1. 전체주수 = 전체재고 ÷ (전체판매 ÷ 일수 × 7)</span>
+                          </div>
+                          <div>
+                            <span className="text-gray-600">2. 대리상주수 = 대리상재고 ÷ (대리상판매 ÷ 일수 × 7)</span>
+                          </div>
+                        </div>
+                        <div>
+                          <div className="text-gray-600 space-y-1">
+                            <div>3. 직영주력상품 = stockWeek (직영판매예정재고 주수, 주력만 적용)</div>
+                          </div>
+                        </div>
+                        <div>
+                          <div className="text-gray-600 space-y-1">
+                            <div>4. 창고주수(전체) = 창고재고(전체) ÷ [(주력 대리상판매 + 주력 직영판매 + 아울렛 직영판매) ÷ 일수 × 7]</div>
+                            <div className="pl-2">ㄴ 주력 = 창고 주력재고 ÷ [(주력 대리상판매 + 주력 직영판매) ÷ 일수 × 7]</div>
+                            <div className="pl-2">ㄴ 아울렛 = 본사아울렛재고 ÷ (아울렛 직영판매 ÷ 일수 × 7)</div>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="mt-4 pt-3 border-t border-gray-300">
+                        <div className="grid md:grid-cols-2 gap-4 text-xs">
+                          <div>
+                            <span className="text-gray-500 font-medium">{PRODUCT_TYPE_RULES.core.label} 분류 기준:</span>{" "}
+                            <span className="text-gray-600">{PRODUCT_TYPE_RULES.core.criteria}</span>
+                          </div>
+                          <div>
+                            <span className="text-gray-500 font-medium">{PRODUCT_TYPE_RULES.outlet.label} 분류 기준:</span>{" "}
+                            <span className="text-gray-600">{PRODUCT_TYPE_RULES.outlet.criteria}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* 2024년 재고주수 */}
+                    {salesTabData && inventoryTabData && inventoryData?.daysInMonth && (
+                      <div className="mt-6">
+                        <h3 className="text-lg font-semibold text-gray-700 mb-3">2024년 재고주수</h3>
+                        <StockWeeksTable
+                          inventoryData={inventoryTabData}
+                          salesData={salesTabData}
+                          daysInMonth={inventoryData.daysInMonth}
+                          stockWeek={stockWeeks[selectedTab]}
+                          year="2024"
+                          stockWeekWindow={stockWeekWindow}
+                          productTypeTab={productTypeTab}
+                        />
+                      </div>
+                    )}
+                  </CollapsibleSection>
+                )}
+
                 {/* 판매매출 */}
                 <CollapsibleSection
                   title="판매매출"
@@ -938,6 +847,54 @@ export default function BrandSalesPage({ brand, title }: BrandSalesPageProps) {
                 </CollapsibleSection>
               </div>
             </CollapsibleSection>
+
+            {/* 정체재고 분석 섹션 제목 */}
+            <SectionTitle title="2. 정체재고 분석" colorClass="bg-orange-500" />
+
+            {/* 1.75. 재고택금액 추이 (시즌별) - 전년대비/매출액대비 전환 차트 */}
+            <InventorySeasonChart 
+              brand={brand} 
+              dimensionTab={stagnantDimensionTab} 
+              onDimensionTabChange={setStagnantDimensionTab}
+              thresholdPct={stagnantThresholdPct}
+              minQty={stagnantMinQty}
+              currentMonthMinQty={stagnantCurrentMonthMinQty}
+              itemTab={stagnantItemTab}
+              onItemTabChange={setStagnantItemTab}
+            />
+
+            {/* 1.8. 정체재고 분석 */}
+            <StagnantStockAnalysis 
+              brand={brand} 
+              dimensionTab={stagnantDimensionTab}
+              onDimensionTabChange={setStagnantDimensionTab}
+              thresholdPct={stagnantThresholdPct}
+              onThresholdPctChange={setStagnantThresholdPct}
+              minQty={stagnantMinQty}
+              onMinQtyChange={setStagnantMinQty}
+              currentMonthMinQty={stagnantCurrentMonthMinQty}
+              onCurrentMonthMinQtyChange={setStagnantCurrentMonthMinQty}
+              itemTab={stagnantItemTab}
+              onItemTabChange={setStagnantItemTab}
+            />
+
+            {/* 1.9. 대리상 단위 정체재고 분석 (FR 기준) */}
+            <DealerStagnantStockAnalysis 
+              brand={brand}
+              thresholdPct={stagnantThresholdPct}
+              onThresholdPctChange={setStagnantThresholdPct}
+              minQty={stagnantMinQty}
+              onMinQtyChange={setStagnantMinQty}
+            />
+
+            {/* 1.10. 직영매장 단위 정체재고 분석 (OR 기준) */}
+            <ShopStagnantStockAnalysis 
+              brand={brand}
+              thresholdPct={stagnantThresholdPct}
+              onThresholdPctChange={setStagnantThresholdPct}
+              minQty={stagnantMinQty}
+              onMinQtyChange={setStagnantMinQty}
+            />
           </>
         )}
       </main>
