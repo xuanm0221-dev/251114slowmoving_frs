@@ -216,6 +216,211 @@ function ProductDetailModal({
   );
 }
 
+// 통합 모달 컴포넌트 (주력 + 아울렛 병렬)
+function DealerDetailModal({
+  isOpen,
+  onClose,
+  dealer,
+  products,
+  baseMonth,
+  priorMonth,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  dealer: DealerData;
+  products: ProductData[];
+  baseMonth: string;
+  priorMonth: string;
+}) {
+  if (!isOpen) return null;
+
+  const coreProducts = products.filter(p => p.segment === 'core');
+  const outletProducts = products.filter(p => p.segment === 'outlet');
+  
+  // 당월 일수 계산
+  const year = parseInt(baseMonth.substring(0, 4));
+  const month = parseInt(baseMonth.substring(4, 6));
+  const daysInMonth = new Date(year, month, 0).getDate();
+  
+  // 재고주수 계산 함수
+  const calcStockWeeks = (stock: number, sales: number) => {
+    if (sales <= 0) return null;
+    const weekSales = (sales / daysInMonth) * 7;
+    return weekSales > 0 ? stock / weekSales : null;
+  };
+
+  // 주력 합계 계산
+  const coreTotals = useMemo(() => {
+    const currentStock = coreProducts.reduce((sum, p) => sum + p.current.stock_amt, 0);
+    const currentSales = coreProducts.reduce((sum, p) => sum + p.current.sales_amt, 0);
+    const priorStock = coreProducts.reduce((sum, p) => sum + p.prior.stock_amt, 0);
+    const priorSales = coreProducts.reduce((sum, p) => sum + p.prior.sales_amt, 0);
+    
+    return {
+      currentStock,
+      currentSales,
+      currentWeeks: calcStockWeeks(currentStock, currentSales),
+      priorStock,
+      priorSales,
+      priorWeeks: calcStockWeeks(priorStock, priorSales),
+    };
+  }, [coreProducts, daysInMonth]);
+
+  // 아울렛 합계 계산
+  const outletTotals = useMemo(() => {
+    const currentStock = outletProducts.reduce((sum, p) => sum + p.current.stock_amt, 0);
+    const currentSales = outletProducts.reduce((sum, p) => sum + p.current.sales_amt, 0);
+    const priorStock = outletProducts.reduce((sum, p) => sum + p.prior.stock_amt, 0);
+    const priorSales = outletProducts.reduce((sum, p) => sum + p.prior.sales_amt, 0);
+    
+    return {
+      currentStock,
+      currentSales,
+      currentWeeks: calcStockWeeks(currentStock, currentSales),
+      priorStock,
+      priorSales,
+      priorWeeks: calcStockWeeks(priorStock, priorSales),
+    };
+  }, [outletProducts, daysInMonth]);
+
+  // 모든 상품 (주력 + 아울렛)
+  const allProducts = [...coreProducts, ...outletProducts];
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg shadow-xl w-[95vw] max-w-7xl max-h-[90vh] flex flex-col">
+        {/* 헤더 */}
+        <div className="p-4 border-b border-gray-200 bg-gray-50 rounded-t-lg flex items-center justify-between">
+          <div>
+            <h3 className="text-lg font-bold text-gray-800">
+              {dealer.account_nm_en} ({dealer.account_id})
+            </h3>
+            <p className="text-sm text-gray-500">
+              prdt_scs_cd 단위 상세 | 주력 {coreProducts.length}개 · 아울렛 {outletProducts.length}개 품목
+            </p>
+          </div>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-2xl font-light">×</button>
+        </div>
+
+        {/* 테이블 */}
+        <div className="flex-1 overflow-auto">
+          <table className="w-full text-xs">
+            <thead className="sticky top-0 bg-indigo-50 border-b border-indigo-200">
+              <tr>
+                <th className="text-left py-2 px-2 font-medium text-indigo-700" rowSpan={2}>prdt_scs_cd</th>
+                <th className="text-left py-2 px-2 font-medium text-indigo-700" rowSpan={2}>품명</th>
+                <th className="text-center py-2 px-2 font-medium text-indigo-700 border-l border-indigo-200" colSpan={4}>
+                  주력상품
+                </th>
+                <th className="text-center py-2 px-2 font-medium text-indigo-700 border-l border-indigo-200" colSpan={4}>
+                  아울렛상품
+                </th>
+                <th className="text-center py-2 px-2 font-medium text-indigo-700 border-l border-indigo-200" colSpan={6}>
+                  YOY
+                </th>
+              </tr>
+              <tr>
+                {/* 주력상품 */}
+                <th className="text-right py-2 px-2 font-medium text-indigo-700 border-l border-indigo-200">기말재고(K)</th>
+                <th className="text-right py-2 px-2 font-medium text-indigo-700">판매매출(K)</th>
+                <th className="text-right py-2 px-2 font-medium text-indigo-700">당년주수</th>
+                <th className="text-right py-2 px-2 font-medium text-indigo-700">전년주수</th>
+                
+                {/* 아울렛상품 */}
+                <th className="text-right py-2 px-2 font-medium text-indigo-700 border-l border-indigo-200">기말재고(K)</th>
+                <th className="text-right py-2 px-2 font-medium text-indigo-700">판매매출(K)</th>
+                <th className="text-right py-2 px-2 font-medium text-indigo-700">당년주수</th>
+                <th className="text-right py-2 px-2 font-medium text-indigo-700">전년주수</th>
+                
+                {/* YOY */}
+                <th className="text-right py-2 px-2 font-medium text-indigo-700 border-l border-indigo-200">주력재고</th>
+                <th className="text-right py-2 px-2 font-medium text-indigo-700">아울렛재고</th>
+                <th className="text-right py-2 px-2 font-medium text-indigo-700">주력매출</th>
+                <th className="text-right py-2 px-2 font-medium text-indigo-700">아울렛매출</th>
+                <th className="text-right py-2 px-2 font-medium text-indigo-700">주력주수</th>
+                <th className="text-right py-2 px-2 font-medium text-indigo-700">아울렛주수</th>
+              </tr>
+            </thead>
+            <tbody>
+              {allProducts.length === 0 ? (
+                <tr><td colSpan={16} className="text-center py-8 text-gray-500">데이터가 없습니다.</td></tr>
+              ) : (
+                <>
+                  {/* 합계 행 */}
+                  <tr className="bg-yellow-50 border-b-2 border-yellow-300 font-bold">
+                    <td className="py-2 px-2 text-gray-800" colSpan={2}>합계</td>
+                    
+                    {/* 주력 합계 */}
+                    <td className="text-right py-2 px-2 text-gray-900 border-l border-yellow-300">{formatAmountK(coreTotals.currentStock)}</td>
+                    <td className="text-right py-2 px-2 text-gray-900">{formatAmountK(coreTotals.currentSales)}</td>
+                    <td className="text-right py-2 px-2 text-gray-900">{formatStockWeeks(coreTotals.currentWeeks)}</td>
+                    <td className="text-right py-2 px-2 text-gray-900">{formatStockWeeks(coreTotals.priorWeeks)}</td>
+                    
+                    {/* 아울렛 합계 */}
+                    <td className="text-right py-2 px-2 text-gray-900 border-l border-yellow-300">{formatAmountK(outletTotals.currentStock)}</td>
+                    <td className="text-right py-2 px-2 text-gray-900">{formatAmountK(outletTotals.currentSales)}</td>
+                    <td className="text-right py-2 px-2 text-gray-900">{formatStockWeeks(outletTotals.currentWeeks)}</td>
+                    <td className="text-right py-2 px-2 text-gray-900">{formatStockWeeks(outletTotals.priorWeeks)}</td>
+                    
+                    {/* YOY */}
+                    <td className="text-right py-2 px-2 text-gray-900 border-l border-yellow-300">{formatYoyPercent(coreTotals.currentStock, coreTotals.priorStock)}</td>
+                    <td className="text-right py-2 px-2 text-gray-900">{formatYoyPercent(outletTotals.currentStock, outletTotals.priorStock)}</td>
+                    <td className="text-right py-2 px-2 text-gray-900">{formatYoyPercent(coreTotals.currentSales, coreTotals.priorSales)}</td>
+                    <td className="text-right py-2 px-2 text-gray-900">{formatYoyPercent(outletTotals.currentSales, outletTotals.priorSales)}</td>
+                    <td className="text-right py-2 px-2 text-gray-900">{formatYoyWeeks(coreTotals.currentWeeks, coreTotals.priorWeeks)}</td>
+                    <td className="text-right py-2 px-2 text-gray-900">{formatYoyWeeks(outletTotals.currentWeeks, outletTotals.priorWeeks)}</td>
+                  </tr>
+                  
+                  {/* 상품 목록 */}
+                  {allProducts.map((product, idx) => {
+                    const isCore = product.segment === 'core';
+                    const coreData = isCore ? product : { current: { stock_amt: 0, sales_amt: 0, stock_weeks: null }, prior: { stock_amt: 0, sales_amt: 0, stock_weeks: null } };
+                    const outletData = !isCore ? product : { current: { stock_amt: 0, sales_amt: 0, stock_weeks: null }, prior: { stock_amt: 0, sales_amt: 0, stock_weeks: null } };
+                    
+                    return (
+                      <tr key={product.prdt_scs_cd + idx} className="border-b border-gray-100 hover:bg-gray-50">
+                        <td className="py-2 px-2 font-mono text-xs text-gray-700">{product.prdt_scs_cd}</td>
+                        <td className="py-2 px-2 text-gray-700 max-w-[200px] truncate" title={product.prdt_nm_cn}>{product.prdt_nm_cn}</td>
+                        
+                        {/* 주력상품 데이터 */}
+                        <td className="text-right py-2 px-2 text-gray-900 border-l border-gray-200">{isCore ? formatAmountK(coreData.current.stock_amt) : '-'}</td>
+                        <td className="text-right py-2 px-2 text-gray-900">{isCore ? formatAmountK(coreData.current.sales_amt) : '-'}</td>
+                        <td className="text-right py-2 px-2 text-gray-900">{isCore ? formatStockWeeks(coreData.current.stock_weeks) : '-'}</td>
+                        <td className="text-right py-2 px-2 text-gray-900">{isCore ? formatStockWeeks(coreData.prior.stock_weeks) : '-'}</td>
+                        
+                        {/* 아울렛상품 데이터 */}
+                        <td className="text-right py-2 px-2 text-gray-900 border-l border-gray-200">{!isCore ? formatAmountK(outletData.current.stock_amt) : '-'}</td>
+                        <td className="text-right py-2 px-2 text-gray-900">{!isCore ? formatAmountK(outletData.current.sales_amt) : '-'}</td>
+                        <td className="text-right py-2 px-2 text-gray-900">{!isCore ? formatStockWeeks(outletData.current.stock_weeks) : '-'}</td>
+                        <td className="text-right py-2 px-2 text-gray-900">{!isCore ? formatStockWeeks(outletData.prior.stock_weeks) : '-'}</td>
+                        
+                        {/* YOY 데이터 */}
+                        <td className="text-right py-2 px-2 text-gray-900 border-l border-gray-200">{isCore ? formatYoyPercent(product.current.stock_amt, product.prior.stock_amt) : '-'}</td>
+                        <td className="text-right py-2 px-2 text-gray-900">{!isCore ? formatYoyPercent(product.current.stock_amt, product.prior.stock_amt) : '-'}</td>
+                        <td className="text-right py-2 px-2 text-gray-900">{isCore ? formatYoyPercent(product.current.sales_amt, product.prior.sales_amt) : '-'}</td>
+                        <td className="text-right py-2 px-2 text-gray-900">{!isCore ? formatYoyPercent(product.current.sales_amt, product.prior.sales_amt) : '-'}</td>
+                        <td className="text-right py-2 px-2 text-gray-900">{isCore ? formatYoyWeeks(product.current.stock_weeks, product.prior.stock_weeks) : '-'}</td>
+                        <td className="text-right py-2 px-2 text-gray-900">{!isCore ? formatYoyWeeks(product.current.stock_weeks, product.prior.stock_weeks) : '-'}</td>
+                      </tr>
+                    );
+                  })}
+                </>
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {/* 푸터 */}
+        <div className="p-3 border-t border-gray-200 bg-gray-50 flex items-center justify-end rounded-b-lg">
+          <button onClick={onClose} className="px-4 py-1.5 bg-gray-600 hover:bg-gray-700 text-white rounded text-sm font-medium">
+            닫기
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // 2025년 월 옵션
 const MONTHS_2025 = Array.from({ length: 12 }, (_, i) => ({
   value: `2025${String(i + 1).padStart(2, "0")}`,
@@ -249,7 +454,6 @@ export default function DealerCoreOutletAnalysis({
   // 모달 상태
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedDealer, setSelectedDealer] = useState<DealerData | null>(null);
-  const [selectedSegment, setSelectedSegment] = useState<'core' | 'outlet' | null>(null);
 
   const brandCode = BRAND_CODE_MAP[brand] || "M";
   
@@ -375,9 +579,8 @@ export default function DealerCoreOutletAnalysis({
     return dealers;
   }, [data, sortField, sortDirection]);
 
-  const handleSegmentClick = (dealer: DealerData, segment: 'core' | 'outlet') => {
+  const handleDealerClick = (dealer: DealerData) => {
     setSelectedDealer(dealer);
-    setSelectedSegment(segment);
     setModalOpen(true);
   };
 
@@ -667,7 +870,8 @@ export default function DealerCoreOutletAnalysis({
                     {sortedDealers.map((dealer) => (
                       <tr
                         key={dealer.account_id}
-                        className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
+                        className="border-b border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors"
+                        onClick={() => handleDealerClick(dealer)}
                       >
                         <td className="py-2 px-2" style={{ width: '200px' }}>
                           <div className="font-medium text-gray-800">{dealer.account_nm_en}</div>
@@ -710,16 +914,15 @@ export default function DealerCoreOutletAnalysis({
       </CollapsibleSection>
 
       {/* 상품 상세 모달 */}
-      {selectedDealer && selectedSegment && data && (
-        <ProductDetailModal
+      {selectedDealer && data && (
+        <DealerDetailModal
           isOpen={modalOpen}
           onClose={() => {
             setModalOpen(false);
-            setSelectedSegment(null);
+            setSelectedDealer(null);
           }}
+          dealer={selectedDealer}
           products={getProductsForDealer(selectedDealer.account_id)}
-          dealerName={selectedDealer.account_nm_en}
-          segment={selectedSegment}
           baseMonth={data.meta.baseMonth}
           priorMonth={data.meta.priorMonth}
         />
