@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import type { Brand } from "@/types/sales";
 import { BRAND_CODE_MAP } from "@/types/stagnantStock";
 import CollapsibleSection from "./CollapsibleSection";
+import BilingualLabel from "./BilingualLabel";
 
 interface DealerSegmentData {
   stock_amt: number;
@@ -429,11 +430,11 @@ const MONTHS_2025 = Array.from({ length: 12 }, (_, i) => ({
 
 // 카테고리 옵션
 const CATEGORY_OPTIONS = [
-  { value: 'all', label: '전체' },
-  { value: 'shoes', label: '신발' },
-  { value: 'headwear', label: '모자' },
-  { value: 'bag', label: '가방' },
-  { value: 'acc_etc', label: '기타' },
+  { value: 'all', label: '전체', secondary: 'Total' },
+  { value: 'shoes', label: '신발', secondary: 'Shoes' },
+  { value: 'headwear', label: '모자', secondary: 'Headwear' },
+  { value: 'bag', label: '가방', secondary: 'Bag' },
+  { value: 'acc_etc', label: '기타', secondary: 'Acc_etc' },
 ];
 
 export default function DealerCoreOutletAnalysis({
@@ -671,7 +672,11 @@ export default function DealerCoreOutletAnalysis({
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
               }`}
             >
-              {option.label}
+              <BilingualLabel 
+                primary={option.label} 
+                secondary={option.secondary}
+                align="center"
+              />
             </button>
           ))}
         </div>
@@ -722,12 +727,14 @@ export default function DealerCoreOutletAnalysis({
             <table className="w-full text-sm" style={{ tableLayout: 'fixed' }}>
               <thead className="bg-indigo-50">
                 <tr className="border-b border-indigo-100">
-                  <th className="text-left py-2 px-2 font-medium text-indigo-700" rowSpan={2} style={{ width: '200px' }}>대리상</th>
-                  <th className="text-center py-2 px-3 font-medium text-indigo-700 border-l border-indigo-200" colSpan={4} style={{ width: '320px' }}>
-                    주력상품
+                  <th className="text-left py-2 px-2 font-medium text-indigo-700" rowSpan={2} style={{ width: '200px' }}>
+                    <BilingualLabel primary="대리상" secondary="FR" align="left" />
                   </th>
                   <th className="text-center py-2 px-3 font-medium text-indigo-700 border-l border-indigo-200" colSpan={4} style={{ width: '320px' }}>
-                    아울렛상품
+                    <BilingualLabel primary="주력상품" secondary="主力商品" align="center" />
+                  </th>
+                  <th className="text-center py-2 px-3 font-medium text-indigo-700 border-l border-indigo-200" colSpan={4} style={{ width: '320px' }}>
+                    <BilingualLabel primary="아울렛상품" secondary="奥莱商品" align="center" />
                   </th>
                   <th className="text-center py-2 px-3 font-medium text-indigo-700 border-l border-indigo-200" colSpan={6} style={{ width: '420px' }}>
                     YOY
@@ -740,28 +747,40 @@ export default function DealerCoreOutletAnalysis({
                     style={{ width: '80px' }}
                     onClick={() => handleSort('core_stock_amt')}
                   >
-                    기말재고(K){renderSortIcon('core_stock_amt')}
+                    <div className="flex flex-col items-end">
+                      <span>기말재고(K){renderSortIcon('core_stock_amt')}</span>
+                      <span className="text-gray-400 text-[11px] leading-tight">期末库存(K)</span>
+                    </div>
                   </th>
                   <th 
                     className="text-right py-2 px-3 font-medium text-indigo-700 cursor-pointer hover:bg-indigo-100 select-none" 
                     style={{ width: '80px' }}
                     onClick={() => handleSort('core_sales_amt')}
                   >
-                    판매매출(K){renderSortIcon('core_sales_amt')}
+                    <div className="flex flex-col items-end">
+                      <span>판매매출(K){renderSortIcon('core_sales_amt')}</span>
+                      <span className="text-gray-400 text-[11px] leading-tight">零售额(K)</span>
+                    </div>
                   </th>
                   <th 
                     className="text-right py-2 px-3 font-medium text-indigo-700 cursor-pointer hover:bg-indigo-100 select-none" 
                     style={{ width: '80px' }}
                     onClick={() => handleSort('core_current_stock_weeks')}
                   >
-                    당년주수{renderSortIcon('core_current_stock_weeks')}
+                    <div className="flex flex-col items-end">
+                      <span>당년주수{renderSortIcon('core_current_stock_weeks')}</span>
+                      <span className="text-gray-400 text-[11px] leading-tight">当年weekcover</span>
+                    </div>
                   </th>
                   <th 
                     className="text-right py-2 px-3 font-medium text-indigo-700 cursor-pointer hover:bg-indigo-100 select-none" 
                     style={{ width: '80px' }}
                     onClick={() => handleSort('core_prior_stock_weeks')}
                   >
-                    전년주수{renderSortIcon('core_prior_stock_weeks')}
+                    <div className="flex flex-col items-end">
+                      <span>전년주수{renderSortIcon('core_prior_stock_weeks')}</span>
+                      <span className="text-gray-400 text-[11px] leading-tight">上年weekcover</span>
+                    </div>
                   </th>
                   
                   {/* 아울렛상품 헤더 */}
@@ -770,28 +789,40 @@ export default function DealerCoreOutletAnalysis({
                     style={{ width: '80px' }}
                     onClick={() => handleSort('outlet_stock_amt')}
                   >
-                    기말재고(K){renderSortIcon('outlet_stock_amt')}
+                    <div className="flex flex-col items-end">
+                      <span>기말재고(K){renderSortIcon('outlet_stock_amt')}</span>
+                      <span className="text-gray-400 text-[11px] leading-tight">期末库存(K)</span>
+                    </div>
                   </th>
                   <th 
                     className="text-right py-2 px-3 font-medium text-indigo-700 cursor-pointer hover:bg-indigo-100 select-none" 
                     style={{ width: '80px' }}
                     onClick={() => handleSort('outlet_sales_amt')}
                   >
-                    판매매출(K){renderSortIcon('outlet_sales_amt')}
+                    <div className="flex flex-col items-end">
+                      <span>판매매출(K){renderSortIcon('outlet_sales_amt')}</span>
+                      <span className="text-gray-400 text-[11px] leading-tight">零售额(K)</span>
+                    </div>
                   </th>
                   <th 
                     className="text-right py-2 px-3 font-medium text-indigo-700 cursor-pointer hover:bg-indigo-100 select-none" 
                     style={{ width: '80px' }}
                     onClick={() => handleSort('outlet_current_stock_weeks')}
                   >
-                    당년주수{renderSortIcon('outlet_current_stock_weeks')}
+                    <div className="flex flex-col items-end">
+                      <span>당년주수{renderSortIcon('outlet_current_stock_weeks')}</span>
+                      <span className="text-gray-400 text-[11px] leading-tight">当年weekcover</span>
+                    </div>
                   </th>
                   <th 
                     className="text-right py-2 px-3 font-medium text-indigo-700 cursor-pointer hover:bg-indigo-100 select-none" 
                     style={{ width: '80px' }}
                     onClick={() => handleSort('outlet_prior_stock_weeks')}
                   >
-                    전년주수{renderSortIcon('outlet_prior_stock_weeks')}
+                    <div className="flex flex-col items-end">
+                      <span>전년주수{renderSortIcon('outlet_prior_stock_weeks')}</span>
+                      <span className="text-gray-400 text-[11px] leading-tight">上年weekcover</span>
+                    </div>
                   </th>
                   
                   {/* YOY 헤더 */}
@@ -800,42 +831,60 @@ export default function DealerCoreOutletAnalysis({
                     style={{ width: '70px' }}
                     onClick={() => handleSort('core_stock_amt')}
                   >
-                    주력재고{renderSortIcon('core_stock_amt')}
+                    <div className="flex flex-col items-end">
+                      <span>주력재고{renderSortIcon('core_stock_amt')}</span>
+                      <span className="text-gray-400 text-[11px] leading-tight">主力库存</span>
+                    </div>
                   </th>
                   <th 
                     className="text-right py-2 px-3 font-medium text-indigo-700 cursor-pointer hover:bg-indigo-100 select-none" 
                     style={{ width: '70px' }}
                     onClick={() => handleSort('outlet_stock_amt')}
                   >
-                    아울렛재고{renderSortIcon('outlet_stock_amt')}
+                    <div className="flex flex-col items-end">
+                      <span>아울렛재고{renderSortIcon('outlet_stock_amt')}</span>
+                      <span className="text-gray-400 text-[11px] leading-tight">奥莱库存</span>
+                    </div>
                   </th>
                   <th 
                     className="text-right py-2 px-3 font-medium text-indigo-700 cursor-pointer hover:bg-indigo-100 select-none" 
                     style={{ width: '70px' }}
                     onClick={() => handleSort('core_sales_amt')}
                   >
-                    주력매출{renderSortIcon('core_sales_amt')}
+                    <div className="flex flex-col items-end">
+                      <span>주력매출{renderSortIcon('core_sales_amt')}</span>
+                      <span className="text-gray-400 text-[11px] leading-tight">主力零售</span>
+                    </div>
                   </th>
                   <th 
                     className="text-right py-2 px-3 font-medium text-indigo-700 cursor-pointer hover:bg-indigo-100 select-none" 
                     style={{ width: '70px' }}
                     onClick={() => handleSort('outlet_sales_amt')}
                   >
-                    아울렛매출{renderSortIcon('outlet_sales_amt')}
+                    <div className="flex flex-col items-end">
+                      <span>아울렛매출{renderSortIcon('outlet_sales_amt')}</span>
+                      <span className="text-gray-400 text-[11px] leading-tight">奥莱零售</span>
+                    </div>
                   </th>
                   <th 
                     className="text-right py-2 px-3 font-medium text-indigo-700 cursor-pointer hover:bg-indigo-100 select-none" 
                     style={{ width: '70px' }}
                     onClick={() => handleSort('core_current_stock_weeks')}
                   >
-                    주력주수{renderSortIcon('core_current_stock_weeks')}
+                    <div className="flex flex-col items-end">
+                      <span>주력주수{renderSortIcon('core_current_stock_weeks')}</span>
+                      <span className="text-gray-400 text-[11px] leading-tight">主力weekcover</span>
+                    </div>
                   </th>
                   <th 
                     className="text-right py-2 px-3 font-medium text-indigo-700 cursor-pointer hover:bg-indigo-100 select-none" 
                     style={{ width: '70px' }}
                     onClick={() => handleSort('outlet_current_stock_weeks')}
                   >
-                    아울렛주수{renderSortIcon('outlet_current_stock_weeks')}
+                    <div className="flex flex-col items-end">
+                      <span>아울렛주수{renderSortIcon('outlet_current_stock_weeks')}</span>
+                      <span className="text-gray-400 text-[11px] leading-tight">奥莱weekcover</span>
+                    </div>
                   </th>
                 </tr>
               </thead>
@@ -868,22 +917,22 @@ export default function DealerCoreOutletAnalysis({
                         <td className="text-right py-2 px-3 text-gray-900 bg-yellow-50" style={{ width: '70px' }}>{formatYoyPercent(totals.current_sales_outlet, totals.prior_sales_outlet)}</td>
                         <td className="text-right py-2 px-3 text-gray-900 bg-yellow-50" style={{ width: '70px' }}>{formatYoyWeeks(totals.current_stock_weeks_core, totals.prior_stock_weeks_core)}</td>
                         <td className="text-right py-2 px-3 text-gray-900 bg-yellow-50" style={{ width: '70px' }}>{formatYoyWeeks(totals.current_stock_weeks_outlet, totals.prior_stock_weeks_outlet)}</td>
-                      </tr>
+                          </tr>
                     )}
                     
                     {/* 모든 대리상 행 */}
                     {sortedDealers.map((dealer) => (
-                      <tr
-                        key={dealer.account_id}
+                        <tr
+                          key={dealer.account_id}
                         className="border-b border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors"
-                        onClick={() => handleDealerClick(dealer)}
-                      >
+                          onClick={() => handleDealerClick(dealer)}
+                        >
                         <td className="py-2 px-2" style={{ width: '200px' }}>
-                          <div className="font-medium text-gray-800">{dealer.account_nm_en}</div>
-                          <div className="text-xs text-gray-500">
-                            {dealer.account_id} · {dealer.account_nm_kr}
-                          </div>
-                        </td>
+                            <div className="font-medium text-gray-800">{dealer.account_nm_en}</div>
+                            <div className="text-xs text-gray-500">
+                              {dealer.account_id} · {dealer.account_nm_kr}
+                            </div>
+                          </td>
                         
                         {/* 주력상품 데이터 */}
                         <td className="text-right py-2 px-3 text-gray-900 border-l border-gray-200" style={{ width: '80px' }}>{formatAmountK(dealer.current.core.stock_amt)}</td>
@@ -904,7 +953,7 @@ export default function DealerCoreOutletAnalysis({
                         <td className="text-right py-2 px-3 text-gray-900" style={{ width: '70px' }}>{formatYoyPercent(dealer.current.outlet.sales_amt, dealer.prior.outlet.sales_amt)}</td>
                         <td className="text-right py-2 px-3 text-gray-900" style={{ width: '70px' }}>{formatYoyWeeks(dealer.current.core.stock_weeks, dealer.prior.core.stock_weeks)}</td>
                         <td className="text-right py-2 px-3 text-gray-900" style={{ width: '70px' }}>{formatYoyWeeks(dealer.current.outlet.stock_weeks, dealer.prior.outlet.stock_weeks)}</td>
-                      </tr>
+                          </tr>
                     ))}
                   </>
                 )}
