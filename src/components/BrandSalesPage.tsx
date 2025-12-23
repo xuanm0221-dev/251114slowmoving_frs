@@ -422,7 +422,7 @@ export default function BrandSalesPage({ brand, title }: BrandSalesPageProps) {
         ) : (
           <>
             {/* 재고주수 분석 섹션 제목 */}
-            <SectionTitle title="1. 재고주수 분석" colorClass="bg-blue-500" />
+            <SectionTitle title="1. 재고주수 분석" subtitle="weekcover 分析" colorClass="bg-blue-500" />
 
             {/* 0. 재고주수 Summary 섹션 */}
             {inventoryBrandData && salesBrandData && inventoryData?.daysInMonth && (

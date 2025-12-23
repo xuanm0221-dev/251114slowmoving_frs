@@ -11,6 +11,7 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
+import BilingualLabel from "./BilingualLabel";
 import { 
   ItemTab, 
   ITEM_TABS,
@@ -161,7 +162,11 @@ export default function StockWeeksChart({
           <div className="flex items-center gap-4">
             <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
               <span className="text-purple-500">📈</span>
-              2025년 월별 재고주수 추이 (전체 아이템 비교)
+              <BilingualLabel 
+                primary="2025년 월별 재고주수 추이 (전체 아이템 비교)" 
+                secondary="2025年 ACC weekcover" 
+                align="left"
+              />
             </h2>
             {/* 상품 타입 탭 추가 */}
             <div className="flex gap-2">
@@ -173,7 +178,7 @@ export default function StockWeeksChart({
                     : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                 }`}
               >
-                상품전체
+                <BilingualLabel primary="상품전체" secondary="所有商品" align="center" />
               </button>
               <button
                 onClick={() => setProductTypeTab("주력")}
@@ -183,7 +188,7 @@ export default function StockWeeksChart({
                     : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                 }`}
               >
-                주력상품
+                <BilingualLabel primary="주력상품" secondary="主力商品" align="center" />
               </button>
               <button
                 onClick={() => setProductTypeTab("아울렛")}
@@ -193,7 +198,7 @@ export default function StockWeeksChart({
                     : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                 }`}
               >
-                아울렛상품
+                <BilingualLabel primary="아울렛상품" secondary="奥莱商品" align="center" />
               </button>
             </div>
           </div>
@@ -311,7 +316,11 @@ export default function StockWeeksChart({
         <div className="flex items-center gap-4">
           <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
             <span className="text-purple-500">📈</span>
-            2025년 월별 재고주수 추이 ({itemLabel})
+            <BilingualLabel 
+              primary={`2025년 월별 재고주수 추이 (${itemLabel})`}
+              secondary="2025年 ACC weekcover" 
+              align="left"
+            />
           </h2>
           {/* 상품 타입 탭 추가 */}
           <div className="flex gap-2">
@@ -323,7 +332,7 @@ export default function StockWeeksChart({
                   : "bg-gray-100 text-gray-700 hover:bg-gray-200"
               }`}
             >
-              상품전체
+              <BilingualLabel primary="상품전체" secondary="所有商品" align="center" />
             </button>
             <button
               onClick={() => setProductTypeTab("주력")}
@@ -333,7 +342,7 @@ export default function StockWeeksChart({
                   : "bg-gray-100 text-gray-700 hover:bg-gray-200"
               }`}
             >
-              주력상품
+              <BilingualLabel primary="주력상품" secondary="主力商品" align="center" />
             </button>
             <button
               onClick={() => setProductTypeTab("아울렛")}
@@ -343,7 +352,7 @@ export default function StockWeeksChart({
                   : "bg-gray-100 text-gray-700 hover:bg-gray-200"
               }`}
             >
-              아울렛상품
+              <BilingualLabel primary="아울렛상품" secondary="奥莱商品" align="center" />
             </button>
           </div>
         </div>

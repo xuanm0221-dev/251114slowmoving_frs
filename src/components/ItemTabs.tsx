@@ -2,6 +2,7 @@
 
 import { ItemTab, ITEM_TABS, Brand, BRANDS, StockWeekWindow } from "@/types/sales";
 import { cn } from "@/lib/utils";
+import BilingualLabel from "./BilingualLabel";
 
 interface ItemTabsProps {
   selectedTab: ItemTab;
@@ -39,12 +40,12 @@ export default function ItemTabs({
   // 현재 브랜드의 색상 정보 가져오기
   const brandInfo = BRANDS.find(b => b.key === brand);
 
-  const tabLabels: Record<ItemTab, { icon: string; label: string }> = {
-    전체: { icon: "👋", label: "아이템합계" },
-    Shoes: { icon: "👟", label: "슈즈" },
-    Headwear: { icon: "🧢", label: "모자" },
-    Bag: { icon: "👜", label: "가방" },
-    Acc_etc: { icon: "⭐", label: "기타악세" },
+  const tabLabels: Record<ItemTab, { icon: string; label: string; secondary: string }> = {
+    전체: { icon: "👋", label: "아이템합계", secondary: "Total" },
+    Shoes: { icon: "👟", label: "슈즈", secondary: "Shoes" },
+    Headwear: { icon: "🧢", label: "모자", secondary: "Headwear" },
+    Bag: { icon: "👜", label: "가방", secondary: "Bag" },
+    Acc_etc: { icon: "⭐", label: "기타악세", secondary: "Acc_etc" },
   };
 
   return (
@@ -62,7 +63,11 @@ export default function ItemTabs({
           )}
         >
           <span>{tabLabels[tab].icon}</span>
-          <span>{tabLabels[tab].label}</span>
+          <BilingualLabel 
+            primary={tabLabels[tab].label}
+            secondary={tabLabels[tab].secondary}
+            align="left"
+          />
         </button>
       ))}
 
@@ -88,7 +93,7 @@ export default function ItemTabs({
           <div className="flex items-center gap-2">
             <span className="text-blue-600 text-lg">📈</span>
             <label className="text-sm font-medium text-gray-700 whitespace-nowrap">
-              성장률
+              <BilingualLabel primary="성장률" secondary="成长率" align="left" />
             </label>
           </div>
           <div className="flex items-center gap-1.5">
@@ -145,7 +150,7 @@ export default function ItemTabs({
           <div className="flex items-center gap-2">
             <span className="text-emerald-600 text-lg">🎯</span>
             <label className="text-sm font-medium text-gray-700 whitespace-nowrap">
-              목표재고주수
+              <BilingualLabel primary="목표재고주수" secondary="目标weekcover" align="left" />
             </label>
           </div>
           <div className="flex items-center gap-1.5">
