@@ -649,6 +649,11 @@ export default function DealerCoreOutletAnalysis({
         title="대리상 주력/아울렛 분석"
         icon="🏪"
         iconColor="text-indigo-500"
+        titleExtra={
+          <span className="text-gray-400 text-sm font-normal">
+            FRS 主力/奥莱商品 分析
+          </span>
+        }
         defaultOpen={false}
       >
         {/* 카테고리 탭 */}
