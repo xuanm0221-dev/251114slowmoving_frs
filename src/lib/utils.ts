@@ -43,6 +43,42 @@ export function cn(...classes: (string | boolean | undefined | null)[]): string 
   return classes.filter(Boolean).join(" ");
 }
 
+/**
+ * ISO 날짜 문자열을 YY.MM.DD 형식으로 변환
+ * @param isoString ISO 8601 형식 날짜 문자열 (예: "2025-12-24T10:30:00Z")
+ * @returns YY.MM.DD 형식 문자열 (예: "25.12.24")
+ */
+export function formatUpdateDate(isoString: string): string {
+  try {
+    const date = new Date(isoString);
+    const year = date.getFullYear().toString().slice(-2); // 마지막 2자리
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, '0');
+    return `${year}.${month}.${day}`;
+  } catch {
+    return "";
+  }
+}
+
+/**
+ * ISO 날짜 문자열을 전체 날짜/시간 형식으로 변환 (툴팁용)
+ * @param isoString ISO 8601 형식 날짜 문자열
+ * @returns "YYYY년 MM월 DD일 HH:MM 업데이트됨" 형식
+ */
+export function formatUpdateDateTime(isoString: string): string {
+  try {
+    const date = new Date(isoString);
+    const year = date.getFullYear();
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    return `${year}년 ${month}월 ${day}일 ${hours}:${minutes} 업데이트됨`;
+  } catch {
+    return "";
+  }
+}
+
 
 
 

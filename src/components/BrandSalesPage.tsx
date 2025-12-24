@@ -46,6 +46,7 @@ import {
   buildEditableMonths 
 } from "@/lib/forecastInventoryStorage";
 import { PRODUCT_TYPE_RULES } from "@/constants/businessRules";
+import { formatUpdateDate, formatUpdateDateTime } from "@/lib/utils";
 
 interface BrandSalesPageProps {
   brand: Brand;
@@ -73,6 +74,7 @@ export default function BrandSalesPage({ brand, title }: BrandSalesPageProps) {
   const [stagnantItemTab, setStagnantItemTab] = useState<"ACC합계" | "신발" | "모자" | "가방" | "기타">("ACC합계"); // 정체재고 아이템 필터
   const [stagnantCurrentMonthMinQty, setStagnantCurrentMonthMinQty] = useState<number>(10); // 당월수량 기준 (기본값 10)
   const [editingForecastInventory, setEditingForecastInventory] = useState<ForecastInventoryData | null>(null); // 편집 중인 입고예정 데이터
+  const [lastUpdatedDate, setLastUpdatedDate] = useState<string | null>(null); // 입고예정 마지막 업데이트 날짜
   
   // 특정 아이템의 stockWeek 변경 핸들러
   const handleStockWeekChange = (itemTab: ItemTab, value: number) => {
@@ -141,6 +143,11 @@ export default function BrandSalesPage({ brand, title }: BrandSalesPageProps) {
             };
             
             setForecastInventoryData(mergedForecastData);
+            
+            // 마지막 업데이트 날짜 로드
+            if (forecastJson.metadata && forecastJson.metadata[brand]) {
+              setLastUpdatedDate(forecastJson.metadata[brand].lastUpdated);
+            }
           } else {
             console.warn("입고예정 재고자산 데이터를 불러오는데 실패했습니다.");
           }
@@ -184,13 +191,34 @@ export default function BrandSalesPage({ brand, title }: BrandSalesPageProps) {
   }, [brand]);
 
   // 입고예정 데이터 저장 핸들러
-  const handleSaveForecastInventory = () => {
+  const handleSaveForecastInventory = async () => {
     if (!editingForecastInventory) return;
     
-    // localStorage에 저장
-    const success = saveForecastInventoryToStorage(brand, editingForecastInventory);
-    
-    if (success) {
+    try {
+      // API로 JSON 파일에 저장
+      const response = await fetch('/api/save-forecast-inventory', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          brand,
+          data: editingForecastInventory,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || '저장에 실패했습니다.');
+      }
+
+      // localStorage에도 백업
+      saveForecastInventoryToStorage(brand, editingForecastInventory);
+      
+      // 현재 날짜/시간으로 업데이트
+      const now = new Date().toISOString();
+      setLastUpdatedDate(now);
+      
       // forecastInventoryData state 업데이트
       if (forecastInventoryData) {
         const updatedData: ForecastInventorySummaryData = {
@@ -202,9 +230,11 @@ export default function BrandSalesPage({ brand, title }: BrandSalesPageProps) {
         };
         setForecastInventoryData(updatedData);
       }
-      alert("입고예정 데이터가 저장되었습니다.");
-    } else {
-      alert("저장에 실패했습니다.");
+      
+      alert("입고예정 데이터가 JSON 파일에 저장되었습니다.\n이제 Git으로 커밋/푸시할 수 있습니다.");
+    } catch (error) {
+      console.error("저장 실패:", error);
+      alert(`저장에 실패했습니다: ${error instanceof Error ? error.message : '알 수 없는 오류'}`);
     }
   };
 
@@ -754,15 +784,21 @@ export default function BrandSalesPage({ brand, title }: BrandSalesPageProps) {
                         <div className="pt-2 border-t border-gray-300">
                           <div className="text-xs text-gray-500">
                             <span className="font-semibold">📦 데이터 소스:</span>
-                            <span className="ml-2">로컬 스토리지 (브라우저 localStorage에 저장된 사용자 입력 데이터)</span>
-                          </div>
-                          <div className="text-xs text-gray-500 mt-1">
-                            <span className="font-semibold">🔧 초기 데이터:</span>
-                            <span className="ml-2">public/data/accessory_forecast_inventory_summary.json (최초 로드 시 기본값)</span>
+                            <span className="ml-2">public/data/accessory_forecast_inventory_summary.json (서버 파일)</span>
                           </div>
                           <div className="text-xs text-gray-500 mt-1">
                             <span className="font-semibold">⚙️ 처리방식:</span>
-                            <span className="ml-2">대시보드에서 직접 수정 가능, 저장 버튼 클릭 시 브라우저 localStorage에 저장</span>
+                            <span className="ml-2">대시보드에서 직접 수정 가능, 저장 버튼 클릭 시 JSON 파일에 영구 저장</span>
+                          </div>
+                          {lastUpdatedDate && (
+                            <div className="text-xs text-gray-500 mt-1">
+                              <span className="font-semibold">📅 마지막 업데이트:</span>
+                              <span className="ml-2">{formatUpdateDateTime(lastUpdatedDate)}</span>
+                            </div>
+                          )}
+                          <div className="text-xs text-gray-500 mt-1">
+                            <span className="font-semibold">🔄 Git 연동:</span>
+                            <span className="ml-2">JSON 파일이 직접 수정되므로 Git으로 커밋/푸시 가능, Vercel 배포 시 자동 반영</span>
                           </div>
                         </div>
                       </div>
@@ -772,6 +808,7 @@ export default function BrandSalesPage({ brand, title }: BrandSalesPageProps) {
                     <button
                       onClick={handleSaveForecastInventory}
                       className="group relative px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-sm rounded-lg font-semibold shadow-lg shadow-blue-500/50 hover:shadow-xl hover:shadow-blue-600/60 transition-all duration-300 flex items-center gap-2 transform hover:scale-105 active:scale-95"
+                      title={lastUpdatedDate ? formatUpdateDateTime(lastUpdatedDate) : "입고예정 데이터 저장"}
                     >
                       <svg 
                         className="w-4 h-4 transition-transform duration-300 group-hover:rotate-12" 
@@ -787,7 +824,7 @@ export default function BrandSalesPage({ brand, title }: BrandSalesPageProps) {
                         />
                       </svg>
                       <span className="relative">
-                        저장
+                        {lastUpdatedDate ? `${formatUpdateDate(lastUpdatedDate)} 업데이트` : "저장"}
                         <span className="absolute -bottom-0.5 left-0 w-0 h-0.5 bg-white/50 group-hover:w-full transition-all duration-300"></span>
                       </span>
                     </button>
@@ -809,6 +846,7 @@ export default function BrandSalesPage({ brand, title }: BrandSalesPageProps) {
                         brand={brand}
                         onSave={handleSaveForecastInventory}
                         onDataChange={setEditingForecastInventory}
+                        lastUpdatedDate={lastUpdatedDate}
                       />
                     </>
                   ) : (
@@ -928,3 +966,4 @@ export default function BrandSalesPage({ brand, title }: BrandSalesPageProps) {
     </>
   );
 }
+

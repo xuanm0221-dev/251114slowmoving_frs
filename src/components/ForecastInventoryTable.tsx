@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { ForecastInventoryData, Brand } from "@/types/sales";
-import { formatMonth, cn } from "@/lib/utils";
+import { formatMonth, cn, formatUpdateDate, formatUpdateDateTime } from "@/lib/utils";
 
 interface ForecastInventoryTableProps {
   data: ForecastInventoryData;
@@ -10,6 +10,7 @@ interface ForecastInventoryTableProps {
   brand: Brand;
   onSave: (data: ForecastInventoryData) => void;
   onDataChange?: (data: ForecastInventoryData) => void; // 편집 중인 데이터를 부모에게 전달
+  lastUpdatedDate?: string | null; // ISO 형식의 마지막 업데이트 날짜
 }
 
 const ITEM_ROWS: { label: string; dataKey: string; isHeader: boolean; editable: boolean }[] = [
@@ -26,6 +27,7 @@ export default function ForecastInventoryTable({
   brand,
   onSave,
   onDataChange,
+  lastUpdatedDate,
 }: ForecastInventoryTableProps) {
   // 로컬 state로 편집 중인 데이터 관리
   const [editingData, setEditingData] = useState<ForecastInventoryData>(data);
