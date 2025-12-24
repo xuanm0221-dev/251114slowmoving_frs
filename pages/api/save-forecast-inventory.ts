@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import fs from "fs";
 import path from "path";
+import { execSync } from "child_process";
 
 interface ForecastInventoryMonthData {
   Shoes?: number;
@@ -71,9 +72,47 @@ export default async function handler(
     // 파일에 쓰기 (포맷팅 적용)
     fs.writeFileSync(filePath, JSON.stringify(existingData, null, 2), "utf-8");
 
+    // 로컬 개발 환경에서만 자동 Git commit & push
+    let gitPushStatus = "skipped (production)";
+    if (process.env.NODE_ENV === "development") {
+      try {
+        const timestamp = new Date().toLocaleString("ko-KR", { 
+          timeZone: "Asia/Seoul",
+          year: "numeric",
+          month: "2-digit", 
+          day: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit"
+        });
+        const commitMessage = `입고예정 재고자산 업데이트 (${brand}) - ${timestamp}`;
+        
+        // Git 명령 실행
+        execSync("git add public/data/accessory_forecast_inventory_summary.json", { 
+          cwd: process.cwd(),
+          stdio: "pipe" 
+        });
+        execSync(`git commit -m "${commitMessage}"`, { 
+          cwd: process.cwd(),
+          stdio: "pipe" 
+        });
+        execSync("git push", { 
+          cwd: process.cwd(),
+          stdio: "pipe" 
+        });
+        
+        gitPushStatus = "success";
+        console.log(`✅ 자동 Git push 완료: ${commitMessage}`);
+      } catch (error) {
+        gitPushStatus = "failed";
+        console.error("⚠️ 자동 Git push 실패 (수동으로 푸시 필요):", error);
+        // 파일 저장은 성공했으므로 에러를 throw하지 않음
+      }
+    }
+
     return res.status(200).json({ 
       success: true, 
-      message: "Forecast inventory data saved successfully" 
+      message: "Forecast inventory data saved successfully",
+      gitPush: gitPushStatus
     });
   } catch (error) {
     console.error("Failed to save forecast inventory:", error);
