@@ -188,7 +188,7 @@ export default function StockWeeksSummary({
   };
 
   // 현재 월에 적용된 remark 정보 계산 (당년 + 전년)
-  const getRemarkInfo = (month: string): string => {
+  const getRemarkInfo = (month: string): { current: string; previous: string } => {
     const calculateRemark = (yearMonth: string): string => {
       const [yearStr, monthStr] = yearMonth.split(".");
       const year = parseInt(yearStr);
@@ -428,22 +428,29 @@ export default function StockWeeksSummary({
       <div className="mt-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
         <div className="flex flex-wrap items-center gap-4 text-xs text-gray-600">
           <div className="flex items-center gap-1">
-            <span className="font-medium">
-              주력상품<span className="text-gray-400 font-normal"> 主力商品</span>:
-            </span>
+            <div className="flex flex-col">
+              <span className="font-medium">주력상품:</span>
+              <span className="text-gray-400 text-[10px] leading-tight">主力商品</span>
+            </div>
             <span>{getProductTypeExamples(selectedMonth).core}</span>
           </div>
           <div className="border-l border-gray-300 pl-4 ml-2 flex items-center gap-1">
-            <span className="font-medium">
-              아울렛상품<span className="text-gray-400 font-normal"> 奥莱商品</span>:
-            </span>
+            <div className="flex flex-col">
+              <span className="font-medium">아울렛상품:</span>
+              <span className="text-gray-400 text-[10px] leading-tight">奥莱商品</span>
+            </div>
             <span>{getProductTypeExamples(selectedMonth).outlet}</span>
           </div>
-          <div className="border-l border-gray-300 pl-4 ml-2 flex items-center gap-1">
-            <span className="text-indigo-600 font-medium">
-              당년 적용<span className="text-indigo-400 font-normal"> 今年标准</span>: {getRemarkInfo(selectedMonth).current}  |  
-              전년 적용<span className="text-indigo-400 font-normal"> 去年标准</span>: {getRemarkInfo(selectedMonth).previous}
-            </span>
+          <div className="border-l border-gray-300 pl-4 ml-2 flex items-center gap-3">
+            <div className="flex flex-col">
+              <span className="text-indigo-600 font-medium">당년 적용: {getRemarkInfo(selectedMonth).current}</span>
+              <span className="text-indigo-400 text-[10px] leading-tight">今年标准</span>
+            </div>
+            <span className="text-gray-400">|</span>
+            <div className="flex flex-col">
+              <span className="text-indigo-600 font-medium">전년 적용: {getRemarkInfo(selectedMonth).previous}</span>
+              <span className="text-indigo-400 text-[10px] leading-tight">去年标准</span>
+            </div>
           </div>
         </div>
       </div>
