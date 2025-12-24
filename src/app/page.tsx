@@ -129,7 +129,7 @@ export default function Home() {
             <h3 className="text-lg font-semibold text-white mb-4">📁 기타 데이터</h3>
             <ul className="space-y-2 text-gray-400 text-sm">
               <li>• 대리상 마스터: 로컬 CSV</li>
-              <li>• 입고예정: 초기값(CSV) + UI 입력</li>
+              <li>• 입고예정: 대시보드에서 직접 관리</li>
             </ul>
           </div>
         </div>
@@ -167,19 +167,17 @@ export default function Home() {
               </div>
             </div>
 
-            {/* 입고예정 초기값 */}
+            {/* 입고예정 재고자산 관리 */}
             <div>
               <h4 className="text-sm font-semibold text-purple-300 mb-3">
-                📝 입고예정 초기값 생성 (선택)
+                💾 입고예정 재고자산 관리 (대시보드)
               </h4>
-              <div className="flex flex-col gap-1">
-                <code className="px-4 py-2 bg-gray-900 rounded-lg text-gray-300 font-mono text-sm">
-                  python scripts/preprocess_forecast_inventory.py
-                </code>
-                <span className="text-xs text-gray-500 ml-1">
-                  → 입고예정 초기값 생성 (이후 대시보드 UI에서 수정 가능)
-                </span>
-              </div>
+              <ul className="text-xs text-gray-400 space-y-1.5 ml-4">
+                <li>• 각 브랜드 페이지에서 직접 수정 및 저장</li>
+                <li>• 저장 시 JSON 파일에 영구 저장</li>
+                <li>• 로컬 환경: 자동 Git commit & push → Vercel 배포</li>
+                <li>• 마지막 업데이트 날짜 자동 기록</li>
+              </ul>
             </div>
 
             {/* 자동 조회 안내 */}
@@ -199,11 +197,13 @@ export default function Home() {
             {/* UI 입력 안내 */}
             <div className="pt-2">
               <h4 className="text-sm font-semibold text-yellow-300 mb-2">
-                ✏️ 대시보드에서 직접 수정
+                ✏️ 대시보드에서 직접 수정 (입고예정)
               </h4>
-              <p className="text-xs text-gray-400 ml-4">
-                • 입고예정 재고: 각 브랜드 페이지에서 수치 직접 입력 및 저장
-              </p>
+              <ul className="text-xs text-gray-400 space-y-1 ml-4">
+                <li>• 각 브랜드 페이지 → 입고예정 재고자산 섹션</li>
+                <li>• 숫자 수정 → [YY.MM.DD 업데이트] 버튼 클릭</li>
+                <li>• JSON 파일 저장 + 자동 Git push (로컬)</li>
+              </ul>
             </div>
           </div>
         </div>
