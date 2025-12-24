@@ -427,14 +427,14 @@ export default function StockWeeksSummary({
       {/* 범례 */}
       <div className="mt-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
         <div className="flex flex-wrap items-center gap-4 text-xs text-gray-600">
-          <div className="flex items-center gap-1">
+          <div className="flex items-start gap-1">
             <div className="flex flex-col">
               <span className="font-medium">주력상품:</span>
               <span className="text-gray-400 text-[10px] leading-tight">主力商品</span>
             </div>
             <span>{getProductTypeExamples(selectedMonth).core}</span>
           </div>
-          <div className="border-l border-gray-300 pl-4 ml-2 flex items-center gap-1">
+          <div className="border-l border-gray-300 pl-4 ml-2 flex items-start gap-1">
             <div className="flex flex-col">
               <span className="font-medium">아울렛상품:</span>
               <span className="text-gray-400 text-[10px] leading-tight">奥莱商品</span>
