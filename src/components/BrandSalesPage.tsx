@@ -428,6 +428,18 @@ export default function BrandSalesPage({ brand, title }: BrandSalesPageProps) {
           <WarningBanner categories={allUnexpectedCategories} />
         )}
 
+        {/* 입고예정 자산 업데이트 정보 */}
+        {lastUpdatedDate && (
+          <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg flex items-center gap-2">
+            <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span className="text-sm text-blue-800 font-medium">
+              💾 입고예정 자산: {formatUpdateDateTime(lastUpdatedDate)}
+            </span>
+          </div>
+        )}
+
         {/* 로딩/에러 */}
         {loading ? (
           <div className="card">
