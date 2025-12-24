@@ -33,7 +33,7 @@ interface ProductData {
   account_nm_en: string;
   account_nm_kr: string;
   prdt_scs_cd: string;
-  prdt_nm_cn: string;
+  prdt_nm: string;
   segment: 'core' | 'outlet';
   current: DealerSegmentData;
   prior: DealerSegmentData;
@@ -227,7 +227,7 @@ function ProductDetailModal({
                   {filteredProducts.map((product, idx) => (
                   <tr key={product.prdt_scs_cd + idx} className="border-b border-gray-100 hover:bg-gray-50">
                     <td className="py-2 px-3 font-mono text-xs text-gray-700">{product.prdt_scs_cd}</td>
-                    <td className="py-2 px-3 text-gray-700 max-w-[250px] truncate" title={product.prdt_nm_cn}>{product.prdt_nm_cn}</td>
+                    <td className="py-2 px-3 text-gray-700 max-w-[250px] truncate" title={product.prdt_nm}>{product.prdt_nm}</td>
                     <td className="text-right py-2 px-3 text-gray-900 border-l border-gray-200">{formatAmountK(product.current.stock_amt)}</td>
                     <td className="text-right py-2 px-3 text-gray-900">{formatAmountK(product.current.sales_amt)}</td>
                     <td className="text-right py-2 px-3 text-gray-900">{formatStockWeeks(product.current.stock_weeks)}</td>
@@ -497,7 +497,7 @@ function DealerDetailModal({
                     return (
                       <tr key={product.prdt_scs_cd + idx} className="border-b border-gray-100 hover:bg-gray-50">
                         <td className="py-2 px-2 font-mono text-xs text-gray-700">{product.prdt_scs_cd}</td>
-                        <td className="py-2 px-2 text-gray-700 max-w-[200px] truncate" title={product.prdt_nm_cn}>{product.prdt_nm_cn}</td>
+                        <td className="py-2 px-2 text-gray-700 max-w-[200px] truncate" title={product.prdt_nm}>{product.prdt_nm}</td>
                         
                         {/* 주력상품 데이터 */}
                         <td className="text-right py-2 px-2 text-gray-900 border-l border-gray-200">{isCore ? formatAmountK(coreData.current.stock_amt) : '-'}</td>

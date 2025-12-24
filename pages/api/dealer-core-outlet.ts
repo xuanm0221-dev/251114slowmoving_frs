@@ -31,7 +31,7 @@ interface ProductData {
   account_nm_en: string;
   account_nm_kr: string;
   prdt_scs_cd: string;
-  prdt_nm_cn: string;
+  prdt_nm: string;
   segment: 'core' | 'outlet';
   current: DealerSegmentData;
   prior: DealerSegmentData;
@@ -199,9 +199,10 @@ stock_raw AS (
     p.remark6, p.remark7, p.remark8, p.remark9, p.remark10,
     p.remark11, p.remark12, p.remark13, p.remark14, p.remark15,
     p.sesn,
-    p.prdt_nm_cn
+    m.prdt_nm
   FROM CHN.DW_STOCK_M s
   INNER JOIN FNF.CHN.MST_PRDT_SCS p ON s.prdt_scs_cd = p.prdt_scs_cd
+  LEFT JOIN fnf.sap_fnf.mst_prdt m ON p.prdt_cd = m.prdt_cd
   WHERE s.yymm IN ('${baseMonth}', '${priorMonth}')
     AND s.brd_cd = '${brandCode}'
     AND p.parent_prdt_kind_cd = 'A'
@@ -214,7 +215,7 @@ stock_with_segment AS (
     sr.yymm,
     sdm.account_id,
     sr.prdt_scs_cd,
-    sr.prdt_nm_cn,
+    sr.prdt_nm,
     sr.stock_amt,
     CASE (FLOOR(DATEDIFF('month', TO_DATE('202312', 'YYYYMM'), TO_DATE(sr.yymm || '01', 'YYYYMMDD')) / 3) + 1)
       WHEN 1 THEN sr.remark1
@@ -246,7 +247,7 @@ stock_classified AS (
     yymm,
     account_id,
     prdt_scs_cd,
-    prdt_nm_cn,
+    prdt_nm,
     stock_amt,
     ${getProductTypeCase('op_std', 'sesn', 'yy')} AS segment
   FROM stock_with_segment
@@ -369,7 +370,7 @@ stock_by_product AS (
   SELECT 
     account_id,
     prdt_scs_cd,
-    MAX(prdt_nm_cn) AS prdt_nm_cn,
+    MAX(prdt_nm) AS prdt_nm,
     segment,
     SUM(CASE WHEN yymm = '${baseMonth}' THEN stock_amt ELSE 0 END) AS current_stock_amt,
     SUM(CASE WHEN yymm = '${priorMonth}' THEN stock_amt ELSE 0 END) AS prior_stock_amt
@@ -395,7 +396,7 @@ product_agg AS (
     dm.account_id,
     dm.account_nm_en,
     st.prdt_scs_cd,
-    st.prdt_nm_cn,
+    st.prdt_nm,
     st.segment,
     COALESCE(st.current_stock_amt, 0) AS current_stock_amt,
     COALESCE(sal.current_sales_amt, 0) AS current_sales_amt,
@@ -424,7 +425,7 @@ SELECT
   prior_stock_outlet,
   prior_sales_outlet,
   NULL AS prdt_scs_cd,
-  NULL AS prdt_nm_cn,
+  NULL AS prdt_nm,
   NULL AS segment,
   NULL AS current_stock_amt,
   NULL AS current_sales_amt,
@@ -451,7 +452,7 @@ SELECT
   NULL AS prior_stock_outlet,
   NULL AS prior_sales_outlet,
   prdt_scs_cd,
-  prdt_nm_cn,
+  prdt_nm,
   segment,
   current_stock_amt,
   current_sales_amt,
@@ -534,7 +535,7 @@ ORDER BY record_type, account_id, prdt_scs_cd
           account_nm_en: row.ACCOUNT_NM_EN,
           account_nm_kr: dealerKoreanNames.get(row.ACCOUNT_ID) || '',
           prdt_scs_cd: row.PRDT_SCS_CD,
-          prdt_nm_cn: row.PRDT_NM_CN,
+          prdt_nm: row.PRDT_NM,
           segment: row.SEGMENT,
           current: {
             stock_amt: row.CURRENT_STOCK_AMT || 0,
