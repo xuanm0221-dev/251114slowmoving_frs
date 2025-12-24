@@ -872,22 +872,31 @@ export default function ShopStagnantStockAnalysis({
           <div className="flex items-center gap-3">
             <span className="text-gray-400 text-sm font-normal">OR</span>
             <div className="flex bg-gray-100 rounded-lg p-0.5">
-              {(['전체', '창고', '온라인매장', '오프라인매장'] as ShopFilterTab[]).map(tab => (
-                <button
-                  key={tab}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setShopFilterTab(tab);
-                  }}
-                  className={`px-3 py-1 text-xs rounded-md transition-colors ${
-                    shopFilterTab === tab
-                      ? 'bg-white text-blue-600 shadow-sm font-medium'
-                      : 'text-gray-600 hover:text-gray-900'
-                  }`}
-                >
-                  {tab}
-                </button>
-              ))}
+              {(['전체', '창고', '온라인매장', '오프라인매장'] as ShopFilterTab[]).map(tab => {
+                const translations: Record<ShopFilterTab, string> = {
+                  '전체': 'Total',
+                  '창고': '仓库',
+                  '온라인매장': 'EC OR',
+                  '오프라인매장': 'OFF OR'
+                };
+                return (
+                  <button
+                    key={tab}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShopFilterTab(tab);
+                    }}
+                    className={`px-3 py-1.5 text-xs rounded-md transition-colors flex flex-col items-center ${
+                      shopFilterTab === tab
+                        ? 'bg-white text-blue-600 shadow-sm font-medium'
+                        : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                  >
+                    <span>{tab}</span>
+                    <span className="text-[10px] text-gray-400 font-normal mt-0.5">{translations[tab]}</span>
+                  </button>
+                );
+              })}
             </div>
           </div>
         }
