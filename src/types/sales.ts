@@ -123,6 +123,11 @@ export interface ForecastInventorySummaryData {
     DISCOVERY: ForecastInventoryData;
   };
   months: string[]; // 존재하는 월만 포함 (예: ["2025.11", "2025.12", "2026.01"])
+  metadata?: {
+    [brand: string]: {
+      lastUpdated: string; // ISO 8601 형식 (예: "2025-12-24T10:30:00Z")
+    };
+  };
 }
 
 // ========== 실제 입고 재고자산(Actual Arrival) 타입 ==========
