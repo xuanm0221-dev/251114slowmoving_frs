@@ -47,41 +47,8 @@ def build_sales_aggregation_query(start_month: str = '202401', end_month: str = 
     """
     query = f"""
 WITH 
--- Step 0: 운영기준(remark) 정규화 (VIEW 대신 CTE 사용)
-remark_normalized AS (
-  SELECT prdt_scs_cd, '2024-01-01'::DATE AS q_start_dt, 1 AS remark_idx, remark1 AS op_std
-  FROM FNF.CHN.MST_PRDT_SCS WHERE remark1 IS NOT NULL AND TRIM(remark1) != ''
-  
-  UNION ALL
-  SELECT prdt_scs_cd, '2024-04-01'::DATE, 2, remark2
-  FROM FNF.CHN.MST_PRDT_SCS WHERE remark2 IS NOT NULL AND TRIM(remark2) != ''
-  
-  UNION ALL
-  SELECT prdt_scs_cd, '2024-07-01'::DATE, 3, remark3
-  FROM FNF.CHN.MST_PRDT_SCS WHERE remark3 IS NOT NULL AND TRIM(remark3) != ''
-  
-  UNION ALL
-  SELECT prdt_scs_cd, '2024-10-01'::DATE, 4, remark4
-  FROM FNF.CHN.MST_PRDT_SCS WHERE remark4 IS NOT NULL AND TRIM(remark4) != ''
-  
-  UNION ALL
-  SELECT prdt_scs_cd, '2025-01-01'::DATE, 5, remark5
-  FROM FNF.CHN.MST_PRDT_SCS WHERE remark5 IS NOT NULL AND TRIM(remark5) != ''
-  
-  UNION ALL
-  SELECT prdt_scs_cd, '2025-04-01'::DATE, 6, remark6
-  FROM FNF.CHN.MST_PRDT_SCS WHERE remark6 IS NOT NULL AND TRIM(remark6) != ''
-  
-  UNION ALL
-  SELECT prdt_scs_cd, '2025-07-01'::DATE, 7, remark7
-  FROM FNF.CHN.MST_PRDT_SCS WHERE remark7 IS NOT NULL AND TRIM(remark7) != ''
-  
-  UNION ALL
-  SELECT prdt_scs_cd, '2025-10-01'::DATE, 8, remark8
-  FROM FNF.CHN.MST_PRDT_SCS WHERE remark8 IS NOT NULL AND TRIM(remark8) != ''
-),
-
--- Step 1: 판매 데이터에 상품/매장 마스터 조인 및 분기 계산
+-- Step 1: 판매 데이터에 상품/매장 마스터 조인 및 remark 자동 계산
+-- 기준: 2023.12 (remark1) 시작, 3개월씩 자동 확장
 sales_with_master AS (
   SELECT 
     s.sale_dt,
@@ -94,10 +61,13 @@ sales_with_master AS (
     p.parent_prdt_kind_cd,
     p.prdt_kind_nm_en,
     d.fr_or_cls,
-    -- 해당 판매일의 분기 시작일
-    DATE_TRUNC('QUARTER', s.sale_dt) AS q_start_dt,
+    -- remark 번호 자동 계산 (23.12 기준, 3개월 단위)
+    FLOOR(DATEDIFF('month', TO_DATE('202312', 'YYYYMM'), s.sale_dt) / 3) + 1 AS remark_num,
     -- 해당 판매일의 연도 YY (2024 → 24)
-    SUBSTR(TO_CHAR(s.sale_dt, 'YYYY'), 3, 2) AS row_yy
+    SUBSTR(TO_CHAR(s.sale_dt, 'YYYY'), 3, 2) AS row_yy,
+    p.remark1, p.remark2, p.remark3, p.remark4, p.remark5,
+    p.remark6, p.remark7, p.remark8, p.remark9, p.remark10,
+    p.remark11, p.remark12, p.remark13, p.remark14, p.remark15
   FROM CHN.DW_SALE s
   LEFT JOIN FNF.CHN.MST_PRDT_SCS p ON s.prdt_scs_cd = p.prdt_scs_cd
   LEFT JOIN (
@@ -114,16 +84,30 @@ sales_with_master AS (
     AND d.fr_or_cls IN ('FR', 'OR')  -- HQ 제외
 ),
 
--- Step 2: 운영기준(remark) 조인
+-- Step 2: 동적 remark 선택
 sales_with_remark AS (
   SELECT 
     s.*,
-    r.op_std,
-    r.remark_idx
+    CASE s.remark_num
+      WHEN 1 THEN s.remark1
+      WHEN 2 THEN s.remark2
+      WHEN 3 THEN s.remark3
+      WHEN 4 THEN s.remark4
+      WHEN 5 THEN s.remark5
+      WHEN 6 THEN s.remark6
+      WHEN 7 THEN s.remark7
+      WHEN 8 THEN s.remark8
+      WHEN 9 THEN s.remark9
+      WHEN 10 THEN s.remark10
+      WHEN 11 THEN s.remark11
+      WHEN 12 THEN s.remark12
+      WHEN 13 THEN s.remark13
+      WHEN 14 THEN s.remark14
+      WHEN 15 THEN s.remark15
+      ELSE NULL
+    END AS op_std
   FROM sales_with_master s
-  LEFT JOIN remark_normalized r
-    ON s.prdt_scs_cd = r.prdt_scs_cd
-    AND s.q_start_dt = r.q_start_dt
+  WHERE s.remark_num >= 1 AND s.remark_num <= 15
 ),
 
 -- Step 3: 주력/아울렛 판정

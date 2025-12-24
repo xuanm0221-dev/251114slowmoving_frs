@@ -843,6 +843,9 @@ export default function DealerStagnantStockAnalysis({
         icon="🏪"
         iconColor="text-purple-500"
         defaultOpen={false}
+        titleExtra={
+          <span className="text-gray-400 text-sm font-normal">FR</span>
+        }
         headerAction={
           <div className="text-xs text-gray-500 text-right">
             <div>FR 기준 | prdt_scs_cd 단위 | 전월말 수량 조건 미적용</div>

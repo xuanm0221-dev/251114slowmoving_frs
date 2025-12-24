@@ -177,9 +177,10 @@ export default function ItemTabs({
 
         {/* 신규발주가능 금액 표시 */}
         <div className="flex items-center gap-2">
-          <span className="text-xs font-medium text-gray-600 whitespace-nowrap">
-            신규발주 가능금액:
-          </span>
+          <div className="flex flex-col">
+            <span className="text-xs font-medium text-gray-600 whitespace-nowrap">신규발주 가능금액:</span>
+            <span className="text-[10px] text-gray-400 leading-tight">可追加下单金额</span>
+          </div>
             <span
               className={cn(
                 "px-3 py-1.5 rounded-md text-sm font-bold min-w-[80px] text-center",

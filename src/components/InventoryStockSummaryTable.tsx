@@ -109,9 +109,21 @@ export default function InventoryStockSummaryTable({
   }
 
   const rows = [
-    { label: "재고자산(M)", getValue: getInventoryValue },
-    { label: "판매매출(M)", getValue: getSalesValue },
-    { label: "재고입고금액(M)", getValue: getArrivalValue },
+    { 
+      label: "재고자산(M)", 
+      labelChinese: "库存",
+      getValue: getInventoryValue 
+    },
+    { 
+      label: "판매매출(M)", 
+      labelChinese: "零售",
+      getValue: getSalesValue 
+    },
+    { 
+      label: "재고입고금액(M)", 
+      labelChinese: "入库",
+      getValue: getArrivalValue 
+    },
   ];
 
   return (
@@ -143,7 +155,10 @@ export default function InventoryStockSummaryTable({
           {rows.map((row, idx) => (
             <tr key={idx}>
               <td className="text-left sticky left-0 bg-white z-10 row-header font-semibold text-gray-800">
-                {row.label}
+                <div className="flex flex-col">
+                  <span>{row.label}</span>
+                  <span className="text-[10px] text-gray-400 font-normal leading-tight">{row.labelChinese}</span>
+                </div>
               </td>
               {displayMonths.map((month) => {
                 const value = row.getValue(month);

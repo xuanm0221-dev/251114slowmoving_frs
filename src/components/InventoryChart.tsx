@@ -509,27 +509,39 @@ export default function InventoryChart({
     <div className="card mb-4">
       {/* 헤더 */}
       <div className="flex flex-wrap items-center gap-4 mb-4">
-        <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-          <span className="text-green-500">📊</span>
-          월별 {channelLabel} 재고자산 추이 ({itemLabel}) - {yearTab === "당년" ? "2025년" : "2024년"}
-        </h2>
+        <div className="flex items-center gap-2">
+          <span className="text-green-500 text-xl">📊</span>
+          <div className="flex flex-col">
+            <h2 className="text-xl font-bold text-gray-800">
+              월별 {channelLabel} 재고자산 추이 ({itemLabel}) - {yearTab === "당년" ? "2025년" : "2024년"}
+            </h2>
+            <span className="text-[10px] text-gray-400 leading-tight">库存趋势</span>
+          </div>
+        </div>
         
         {/* 채널 탭 (ALL, 대리상, 창고) - 제목 바로 옆 */}
         <div className="flex flex-wrap items-center gap-2">
-          {CHANNEL_TABS.map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setChannelTab(tab)}
-              className={cn(
-                "px-3 py-2 rounded-lg font-medium text-sm transition-all duration-200",
-                channelTab === tab
-                  ? "bg-gray-700 text-white"
-                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-              )}
-            >
-              {CHANNEL_LABELS[tab]}
-            </button>
-          ))}
+          {CHANNEL_TABS.map((tab) => {
+            const chineseLabels = { ALL: "Total", FRS: "FR", 창고: "仓库" };
+            return (
+              <button
+                key={tab}
+                onClick={() => setChannelTab(tab)}
+                className={cn(
+                  "px-3 py-2 rounded-lg font-medium text-sm transition-all duration-200 flex flex-col items-center gap-0.5",
+                  channelTab === tab
+                    ? "bg-gray-700 text-white"
+                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                )}
+              >
+                <span>{CHANNEL_LABELS[tab]}</span>
+                <span className={cn(
+                  "text-[10px] leading-tight",
+                  channelTab === tab ? "text-gray-300" : "text-gray-400"
+                )}>{chineseLabels[tab]}</span>
+              </button>
+            );
+          })}
         </div>
 
         {/* 구분선 */}
@@ -542,13 +554,17 @@ export default function InventoryChart({
               key={tab}
               onClick={() => setYearTab(tab)}
               className={cn(
-                "px-3 py-2 rounded-lg font-medium text-sm transition-all duration-200",
+                "px-3 py-2 rounded-lg font-medium text-sm transition-all duration-200 flex flex-col items-center gap-0.5",
                 yearTab === tab
                   ? "bg-indigo-600 text-white"
                   : "bg-gray-100 text-gray-600 hover:bg-gray-200"
               )}
             >
-              {tab}
+              <span>{tab}</span>
+              <span className={cn(
+                "text-[10px] leading-tight",
+                yearTab === tab ? "text-indigo-200" : "text-gray-400"
+              )}>{tab === "당년" ? "25年" : "24年"}</span>
             </button>
           ))}
         </div>
@@ -665,51 +681,53 @@ export default function InventoryChart({
 
       {/* 범례 설명 */}
       <div className="mt-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
-        <div className="flex flex-wrap items-center gap-6 text-xs text-gray-600">
-          <div className="flex items-center gap-3">
-            <span className="font-medium">{yearTab === "당년" ? "25년" : "24년"} 재고자산:</span>
+        <div className="flex flex-wrap items-center gap-4 text-xs text-gray-600">
+          <div className="flex items-center gap-2">
+            <span className="font-medium">
+              {yearTab === "당년" ? "25년" : "24년"} 재고자산
+              <span className="text-gray-400 font-normal"> {yearTab === "당년" ? "25年" : "24年"}库存</span>
+            </span>
             {yearTab === "당년" && (
               <div className="flex items-center gap-1">
                 <span className="w-4 h-3 rounded" style={{ backgroundColor: COLORS.forecast_inventory }}></span>
-                <span>전체 (예상)</span>
+                <span>전체<span className="text-gray-400"> 预估</span></span>
               </div>
             )}
             <div className="flex items-center gap-1">
               <span className="w-4 h-3 rounded" style={{ backgroundColor: COLORS.curr_core }}></span>
-              <span>주력</span>
+              <span>주력<span className="text-gray-400"> 主力</span></span>
             </div>
             <div className="flex items-center gap-1">
               <span className="w-4 h-3 rounded" style={{ backgroundColor: COLORS.curr_outlet }}></span>
-              <span>아울렛</span>
+              <span>아울렛<span className="text-gray-400"> 奥莱</span></span>
             </div>
           </div>
-          <div className="flex items-center gap-3">
-            <span className="font-medium">{yearTab === "당년" ? "25년" : "24년"} 판매매출:</span>
+          <div className="flex items-center gap-2">
+            <span className="font-medium">
+              {yearTab === "당년" ? "25년" : "24년"}판매매출
+              <span className="text-gray-400 font-normal"> {yearTab === "당년" ? "25年" : "24年"}零售</span>
+            </span>
             {yearTab === "당년" && (
               <div className="flex items-center gap-1">
                 <span className="w-4 h-3 rounded" style={{ backgroundColor: COLORS.forecast_sales }}></span>
-                <span>전체 (예상)</span>
+                <span>전체<span className="text-gray-400"> 预估</span></span>
               </div>
             )}
             <div className="flex items-center gap-1">
               <span className="w-4 h-3 rounded" style={{ backgroundColor: COLORS.prev_core }}></span>
-              <span>주력</span>
+              <span>주력<span className="text-gray-400"> 主力</span></span>
             </div>
             <div className="flex items-center gap-1">
               <span className="w-4 h-3 rounded" style={{ backgroundColor: COLORS.prev_outlet }}></span>
-              <span>아울렛</span>
+              <span>아울렛<span className="text-gray-400"> 奥莱</span></span>
             </div>
           </div>
-          <div className="flex items-center gap-3">
-            <span className="font-medium">재고주수:</span>
-            <div className="flex items-center gap-1">
-              <span className="w-4 h-0.5" style={{ backgroundColor: "#DC2626" }}></span>
-              <span className="w-2 h-2 rounded-full" style={{ backgroundColor: "#DC2626" }}></span>
-              <span>{channelTab === "ALL" ? "전체" : channelTab === "FRS" ? "대리상" : "창고"}주수</span>
-            </div>
+          <div className="flex items-center gap-2">
+            <span className="font-medium">재고주수<span className="text-gray-400 font-normal"> weekcover</span></span>
           </div>
         </div>
       </div>
     </div>
   );
 }
+

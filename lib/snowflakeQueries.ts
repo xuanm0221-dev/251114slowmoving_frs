@@ -133,31 +133,48 @@ export function getRemarkColumnForQuarter(quarter: string): string {
 }
 
 /**
- * CASE 기반 remark 선택 CTE
- * 월(YYYYMM)을 기준으로 해당 분기의 remark 컬럼 직접 선택
+ * 자동 계산 기반 remark 선택 CTE
+ * 기준: 2023.12 (remark1) 시작, 3개월씩 자동 확장
+ * remark1: 23.12~24.02, remark2: 24.03~05, ... (자동)
  */
 export const REMARK_SELECTION_CTE = `
-  remark_selected AS (
+  remark_calc AS (
     SELECT 
       prdt_scs_cd,
-      CASE 
-        WHEN q_month BETWEEN '202401' AND '202403' THEN remark1
-        WHEN q_month BETWEEN '202404' AND '202406' THEN remark2
-        WHEN q_month BETWEEN '202407' AND '202409' THEN remark3
-        WHEN q_month BETWEEN '202410' AND '202412' THEN remark4
-        WHEN q_month BETWEEN '202501' AND '202503' THEN remark5
-        WHEN q_month BETWEEN '202504' AND '202506' THEN remark6
-        WHEN q_month BETWEEN '202507' AND '202509' THEN remark7
-        WHEN q_month >= '202510' THEN remark8
-        ELSE NULL
-      END AS op_std,
-      q_month
+      q_month,
+      FLOOR(DATEDIFF('month', TO_DATE('202312', 'YYYYMM'), TO_DATE(q_month || '01', 'YYYYMMDD')) / 3) + 1 AS remark_num
     FROM FNF.CHN.MST_PRDT_SCS
     CROSS JOIN (
       SELECT DISTINCT TO_CHAR(sale_dt, 'YYYYMM') AS q_month
       FROM CHN.DW_SALE
       WHERE sale_dt >= '2024-01-01' AND sale_dt < '2025-12-01'
     ) months
+  ),
+  remark_selected AS (
+    SELECT 
+      rc.prdt_scs_cd,
+      rc.q_month,
+      CASE rc.remark_num
+        WHEN 1 THEN p.remark1
+        WHEN 2 THEN p.remark2
+        WHEN 3 THEN p.remark3
+        WHEN 4 THEN p.remark4
+        WHEN 5 THEN p.remark5
+        WHEN 6 THEN p.remark6
+        WHEN 7 THEN p.remark7
+        WHEN 8 THEN p.remark8
+        WHEN 9 THEN p.remark9
+        WHEN 10 THEN p.remark10
+        WHEN 11 THEN p.remark11
+        WHEN 12 THEN p.remark12
+        WHEN 13 THEN p.remark13
+        WHEN 14 THEN p.remark14
+        WHEN 15 THEN p.remark15
+        ELSE NULL
+      END AS op_std
+    FROM remark_calc rc
+    INNER JOIN FNF.CHN.MST_PRDT_SCS p ON rc.prdt_scs_cd = p.prdt_scs_cd
+    WHERE rc.remark_num >= 1 AND rc.remark_num <= 15
   )
 `;
 
@@ -218,8 +235,9 @@ sales_raw AS (
     s.tag_amt,
     p.sesn,
     s.prdt_scs_cd,
-    p.remark1, p.remark2, p.remark3, p.remark4,
-    p.remark5, p.remark6, p.remark7, p.remark8
+    p.remark1, p.remark2, p.remark3, p.remark4, p.remark5,
+    p.remark6, p.remark7, p.remark8, p.remark9, p.remark10,
+    p.remark11, p.remark12, p.remark13, p.remark14, p.remark15
   FROM CHN.DW_SALE s
   INNER JOIN FNF.CHN.MST_PRDT_SCS p 
     ON s.prdt_scs_cd = p.prdt_scs_cd
@@ -241,22 +259,36 @@ sales_mapped AS (
     ON sr.shop_id = sm.norm_key
 ),
 
--- Step 3: remark 적용 (CASE 기반)
+-- Step 3: remark 자동 계산 (23.12 기준, 3개월 단위)
+sales_with_remark_calc AS (
+  SELECT 
+    sm.*,
+    FLOOR(DATEDIFF('month', TO_DATE('202312', 'YYYYMM'), TO_DATE(sale_yyyymm || '01', 'YYYYMMDD')) / 3) + 1 AS remark_num
+  FROM sales_mapped sm
+),
 sales_with_remark AS (
   SELECT 
-    *,
-    CASE 
-      WHEN sale_yyyymm BETWEEN '202401' AND '202403' THEN remark1
-      WHEN sale_yyyymm BETWEEN '202404' AND '202406' THEN remark2
-      WHEN sale_yyyymm BETWEEN '202407' AND '202409' THEN remark3
-      WHEN sale_yyyymm BETWEEN '202410' AND '202412' THEN remark4
-      WHEN sale_yyyymm BETWEEN '202501' AND '202503' THEN remark5
-      WHEN sale_yyyymm BETWEEN '202504' AND '202506' THEN remark6
-      WHEN sale_yyyymm BETWEEN '202507' AND '202509' THEN remark7
-      WHEN sale_yyyymm >= '202510' THEN remark8
+    swr.*,
+    CASE swr.remark_num
+      WHEN 1 THEN swr.remark1
+      WHEN 2 THEN swr.remark2
+      WHEN 3 THEN swr.remark3
+      WHEN 4 THEN swr.remark4
+      WHEN 5 THEN swr.remark5
+      WHEN 6 THEN swr.remark6
+      WHEN 7 THEN swr.remark7
+      WHEN 8 THEN swr.remark8
+      WHEN 9 THEN swr.remark9
+      WHEN 10 THEN swr.remark10
+      WHEN 11 THEN swr.remark11
+      WHEN 12 THEN swr.remark12
+      WHEN 13 THEN swr.remark13
+      WHEN 14 THEN swr.remark14
+      WHEN 15 THEN swr.remark15
       ELSE NULL
     END AS op_std
-  FROM sales_mapped
+  FROM sales_with_remark_calc swr
+  WHERE swr.remark_num >= 1 AND swr.remark_num <= 15
 ),
 
 -- Step 4: 주력/아울렛 분류
@@ -333,8 +365,9 @@ stock_raw AS (
     s.stock_qty_expected,
     p.sesn,
     s.prdt_scs_cd,
-    p.remark1, p.remark2, p.remark3, p.remark4,
-    p.remark5, p.remark6, p.remark7, p.remark8
+    p.remark1, p.remark2, p.remark3, p.remark4, p.remark5,
+    p.remark6, p.remark7, p.remark8, p.remark9, p.remark10,
+    p.remark11, p.remark12, p.remark13, p.remark14, p.remark15
   FROM CHN.DW_STOCK_M s
   INNER JOIN FNF.CHN.MST_PRDT_SCS p 
     ON s.prdt_scs_cd = p.prdt_scs_cd
@@ -355,8 +388,9 @@ stock_mapped AS (
     sr.stock_qty_expected,
     sr.sesn,
     sr.prdt_scs_cd,
-    sr.remark1, sr.remark2, sr.remark3, sr.remark4,
-    sr.remark5, sr.remark6, sr.remark7, sr.remark8,
+    sr.remark1, sr.remark2, sr.remark3, sr.remark4, sr.remark5,
+    sr.remark6, sr.remark7, sr.remark8, sr.remark9, sr.remark10,
+    sr.remark11, sr.remark12, sr.remark13, sr.remark14, sr.remark15,
     COALESCE(mn.fr_or_cls, mc.fr_or_cls, mi.fr_or_cls) AS fr_or_cls,
     COALESCE(mn.norm_key, mc.norm_key, mi.norm_key) AS final_norm_key,
     CASE 
@@ -379,22 +413,36 @@ stock_filtered AS (
   WHERE fr_or_cls IN ('FR', 'OR', 'HQ')
 ),
 
--- Step 4: remark 적용 (CASE 기반)
+-- Step 4: remark 자동 계산 (23.12 기준, 3개월 단위)
+stock_with_remark_calc AS (
+  SELECT 
+    sf.*,
+    FLOOR(DATEDIFF('month', TO_DATE('202312', 'YYYYMM'), TO_DATE(yymm || '01', 'YYYYMMDD')) / 3) + 1 AS remark_num
+  FROM stock_filtered sf
+),
 stock_with_remark AS (
   SELECT 
-    *,
-    CASE 
-      WHEN yymm BETWEEN '202401' AND '202403' THEN remark1
-      WHEN yymm BETWEEN '202404' AND '202406' THEN remark2
-      WHEN yymm BETWEEN '202407' AND '202409' THEN remark3
-      WHEN yymm BETWEEN '202410' AND '202412' THEN remark4
-      WHEN yymm BETWEEN '202501' AND '202503' THEN remark5
-      WHEN yymm BETWEEN '202504' AND '202506' THEN remark6
-      WHEN yymm BETWEEN '202507' AND '202509' THEN remark7
-      WHEN yymm >= '202510' THEN remark8
+    swr.*,
+    CASE swr.remark_num
+      WHEN 1 THEN swr.remark1
+      WHEN 2 THEN swr.remark2
+      WHEN 3 THEN swr.remark3
+      WHEN 4 THEN swr.remark4
+      WHEN 5 THEN swr.remark5
+      WHEN 6 THEN swr.remark6
+      WHEN 7 THEN swr.remark7
+      WHEN 8 THEN swr.remark8
+      WHEN 9 THEN swr.remark9
+      WHEN 10 THEN swr.remark10
+      WHEN 11 THEN swr.remark11
+      WHEN 12 THEN swr.remark12
+      WHEN 13 THEN swr.remark13
+      WHEN 14 THEN swr.remark14
+      WHEN 15 THEN swr.remark15
       ELSE NULL
     END AS op_std
-  FROM stock_filtered
+  FROM stock_with_remark_calc swr
+  WHERE swr.remark_num >= 1 AND swr.remark_num <= 15
 ),
 
 -- Step 5: 주력/아울렛 분류
@@ -435,8 +483,9 @@ or_sales_raw AS (
     s.tag_amt,
     s.prdt_scs_cd,
     p.sesn,
-    p.remark1, p.remark2, p.remark3, p.remark4,
-    p.remark5, p.remark6, p.remark7, p.remark8
+    p.remark1, p.remark2, p.remark3, p.remark4, p.remark5,
+    p.remark6, p.remark7, p.remark8, p.remark9, p.remark10,
+    p.remark11, p.remark12, p.remark13, p.remark14, p.remark15
   FROM CHN.DW_SALE s
   INNER JOIN FNF.CHN.MST_PRDT_SCS p 
     ON s.prdt_scs_cd = p.prdt_scs_cd
@@ -457,22 +506,36 @@ or_sales_mapped AS (
   WHERE sm.fr_or_cls = 'OR'
 ),
 
--- Step 9: OR 판매 remark 적용
+-- Step 9: OR 판매 remark 자동 계산 (23.12 기준, 3개월 단위)
+or_sales_with_remark_calc AS (
+  SELECT 
+    osm.*,
+    FLOOR(DATEDIFF('month', TO_DATE('202312', 'YYYYMM'), TO_DATE(sale_yymm || '01', 'YYYYMMDD')) / 3) + 1 AS remark_num
+  FROM or_sales_mapped osm
+),
 or_sales_with_remark AS (
   SELECT 
-    *,
-    CASE 
-      WHEN sale_yymm BETWEEN '202401' AND '202403' THEN remark1
-      WHEN sale_yymm BETWEEN '202404' AND '202406' THEN remark2
-      WHEN sale_yymm BETWEEN '202407' AND '202409' THEN remark3
-      WHEN sale_yymm BETWEEN '202410' AND '202412' THEN remark4
-      WHEN sale_yymm BETWEEN '202501' AND '202503' THEN remark5
-      WHEN sale_yymm BETWEEN '202504' AND '202506' THEN remark6
-      WHEN sale_yymm BETWEEN '202507' AND '202509' THEN remark7
-      WHEN sale_yymm >= '202510' THEN remark8
+    oswr.*,
+    CASE oswr.remark_num
+      WHEN 1 THEN oswr.remark1
+      WHEN 2 THEN oswr.remark2
+      WHEN 3 THEN oswr.remark3
+      WHEN 4 THEN oswr.remark4
+      WHEN 5 THEN oswr.remark5
+      WHEN 6 THEN oswr.remark6
+      WHEN 7 THEN oswr.remark7
+      WHEN 8 THEN oswr.remark8
+      WHEN 9 THEN oswr.remark9
+      WHEN 10 THEN oswr.remark10
+      WHEN 11 THEN oswr.remark11
+      WHEN 12 THEN oswr.remark12
+      WHEN 13 THEN oswr.remark13
+      WHEN 14 THEN oswr.remark14
+      WHEN 15 THEN oswr.remark15
       ELSE NULL
     END AS op_std
-  FROM or_sales_mapped
+  FROM or_sales_with_remark_calc oswr
+  WHERE oswr.remark_num >= 1 AND oswr.remark_num <= 15
 ),
 
 -- Step 10: OR 판매 주력/아울렛 분류

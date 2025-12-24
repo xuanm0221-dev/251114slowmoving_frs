@@ -143,7 +143,13 @@ function ProductDetailModal({
             <h3 className="text-lg font-bold text-gray-800">
               {dealerName} - {segmentLabel}
             </h3>
-            <p className="text-sm text-gray-500">prdt_scs_cd 단위 상세 | {filteredProducts.length}개 품목</p>
+            <div className="flex items-center gap-2 text-sm text-gray-500">
+              <span>prdt_scs_cd 단위 상세</span>
+              <span className="text-gray-400 text-xs">prdt_scs_cd 单位详细</span>
+              <span>|</span>
+              <span>{filteredProducts.length}개 품목</span>
+              <span className="text-gray-400 text-xs">{filteredProducts.length}个商品</span>
+            </div>
           </div>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-2xl font-light">×</button>
         </div>
@@ -163,12 +169,42 @@ function ProductDetailModal({
                 </th>
               </tr>
               <tr>
-                <th className="text-right py-2 px-3 font-medium text-gray-600 border-l border-gray-300">기말재고(K)</th>
-                <th className="text-right py-2 px-3 font-medium text-gray-600">판매매출(K)</th>
-                <th className="text-right py-2 px-3 font-medium text-gray-600">재고주수</th>
-                <th className="text-right py-2 px-3 font-medium text-gray-600 border-l border-gray-300">기말재고(K)</th>
-                <th className="text-right py-2 px-3 font-medium text-gray-600">판매매출(K)</th>
-                <th className="text-right py-2 px-3 font-medium text-gray-600">재고주수</th>
+                <th className="text-right py-2 px-3 font-medium text-gray-600 border-l border-gray-300">
+                  <div className="flex flex-col items-end">
+                    <span>기말재고(K)</span>
+                    <span className="text-gray-300 text-[10px] font-normal">期末库存(K)</span>
+                  </div>
+                </th>
+                <th className="text-right py-2 px-3 font-medium text-gray-600">
+                  <div className="flex flex-col items-end">
+                    <span>판매매출(K)</span>
+                    <span className="text-gray-300 text-[10px] font-normal">零售额(K)</span>
+                  </div>
+                </th>
+                <th className="text-right py-2 px-3 font-medium text-gray-600">
+                  <div className="flex flex-col items-end">
+                    <span>재고주수</span>
+                    <span className="text-gray-300 text-[10px] font-normal">weekcover</span>
+                  </div>
+                </th>
+                <th className="text-right py-2 px-3 font-medium text-gray-600 border-l border-gray-300">
+                  <div className="flex flex-col items-end">
+                    <span>기말재고(K)</span>
+                    <span className="text-gray-300 text-[10px] font-normal">期末库存(K)</span>
+                  </div>
+                </th>
+                <th className="text-right py-2 px-3 font-medium text-gray-600">
+                  <div className="flex flex-col items-end">
+                    <span>판매매출(K)</span>
+                    <span className="text-gray-300 text-[10px] font-normal">零售额(K)</span>
+                  </div>
+                </th>
+                <th className="text-right py-2 px-3 font-medium text-gray-600">
+                  <div className="flex flex-col items-end">
+                    <span>재고주수</span>
+                    <span className="text-gray-300 text-[10px] font-normal">weekcover</span>
+                  </div>
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -296,9 +332,13 @@ function DealerDetailModal({
             <h3 className="text-lg font-bold text-gray-800">
               {dealer.account_nm_en} ({dealer.account_id})
             </h3>
-            <p className="text-sm text-gray-500">
-              prdt_scs_cd 단위 상세 | 주력 {coreProducts.length}개 · 아울렛 {outletProducts.length}개 품목
-            </p>
+            <div className="flex items-center gap-2 text-sm text-gray-500">
+              <span>prdt_scs_cd 단위 상세</span>
+              <span className="text-gray-400 text-xs">prdt_scs_cd 单位详细</span>
+              <span>|</span>
+              <span>주력 {coreProducts.length}개 · 아울렛 {outletProducts.length}개 품목</span>
+              <span className="text-gray-400 text-xs">主力 {coreProducts.length}个 · 奥莱 {outletProducts.length}个商品</span>
+            </div>
           </div>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-2xl font-light">×</button>
         </div>
@@ -311,10 +351,16 @@ function DealerDetailModal({
                 <th className="text-left py-2 px-2 font-medium text-indigo-700" rowSpan={2}>prdt_scs_cd</th>
                 <th className="text-left py-2 px-2 font-medium text-indigo-700" rowSpan={2}>품명</th>
                 <th className="text-center py-2 px-2 font-medium text-indigo-700 border-l border-indigo-200" colSpan={4}>
-                  주력상품
+                  <div className="flex flex-col items-center">
+                    <span>주력상품</span>
+                    <span className="text-gray-300 text-[10px] font-normal">主力商品</span>
+                  </div>
                 </th>
                 <th className="text-center py-2 px-2 font-medium text-indigo-700 border-l border-indigo-200" colSpan={4}>
-                  아울렛상품
+                  <div className="flex flex-col items-center">
+                    <span>아울렛상품</span>
+                    <span className="text-gray-300 text-[10px] font-normal">奥莱商品</span>
+                  </div>
                 </th>
                 <th className="text-center py-2 px-2 font-medium text-indigo-700 border-l border-indigo-200" colSpan={6}>
                   YOY
@@ -322,24 +368,94 @@ function DealerDetailModal({
               </tr>
               <tr>
                 {/* 주력상품 */}
-                <th className="text-right py-2 px-2 font-medium text-indigo-700 border-l border-indigo-200">기말재고(K)</th>
-                <th className="text-right py-2 px-2 font-medium text-indigo-700">판매매출(K)</th>
-                <th className="text-right py-2 px-2 font-medium text-indigo-700">당년주수</th>
-                <th className="text-right py-2 px-2 font-medium text-indigo-700">전년주수</th>
+                <th className="text-right py-2 px-2 font-medium text-indigo-700 border-l border-indigo-200">
+                  <div className="flex flex-col items-end">
+                    <span>기말재고(K)</span>
+                    <span className="text-gray-300 text-[10px] font-normal">期末库存(K)</span>
+                  </div>
+                </th>
+                <th className="text-right py-2 px-2 font-medium text-indigo-700">
+                  <div className="flex flex-col items-end">
+                    <span>판매매출(K)</span>
+                    <span className="text-gray-300 text-[10px] font-normal">零售额(K)</span>
+                  </div>
+                </th>
+                <th className="text-right py-2 px-2 font-medium text-indigo-700">
+                  <div className="flex flex-col items-end">
+                    <span>당년주수</span>
+                    <span className="text-gray-300 text-[10px] font-normal">今年wc</span>
+                  </div>
+                </th>
+                <th className="text-right py-2 px-2 font-medium text-indigo-700">
+                  <div className="flex flex-col items-end">
+                    <span>전년주수</span>
+                    <span className="text-gray-300 text-[10px] font-normal">去年wc</span>
+                  </div>
+                </th>
                 
                 {/* 아울렛상품 */}
-                <th className="text-right py-2 px-2 font-medium text-indigo-700 border-l border-indigo-200">기말재고(K)</th>
-                <th className="text-right py-2 px-2 font-medium text-indigo-700">판매매출(K)</th>
-                <th className="text-right py-2 px-2 font-medium text-indigo-700">당년주수</th>
-                <th className="text-right py-2 px-2 font-medium text-indigo-700">전년주수</th>
+                <th className="text-right py-2 px-2 font-medium text-indigo-700 border-l border-indigo-200">
+                  <div className="flex flex-col items-end">
+                    <span>기말재고(K)</span>
+                    <span className="text-gray-300 text-[10px] font-normal">期末库存(K)</span>
+                  </div>
+                </th>
+                <th className="text-right py-2 px-2 font-medium text-indigo-700">
+                  <div className="flex flex-col items-end">
+                    <span>판매매출(K)</span>
+                    <span className="text-gray-300 text-[10px] font-normal">零售额(K)</span>
+                  </div>
+                </th>
+                <th className="text-right py-2 px-2 font-medium text-indigo-700">
+                  <div className="flex flex-col items-end">
+                    <span>당년주수</span>
+                    <span className="text-gray-300 text-[10px] font-normal">今年wc</span>
+                  </div>
+                </th>
+                <th className="text-right py-2 px-2 font-medium text-indigo-700">
+                  <div className="flex flex-col items-end">
+                    <span>전년주수</span>
+                    <span className="text-gray-300 text-[10px] font-normal">去年wc</span>
+                  </div>
+                </th>
                 
                 {/* YOY */}
-                <th className="text-right py-2 px-2 font-medium text-indigo-700 border-l border-indigo-200">주력재고</th>
-                <th className="text-right py-2 px-2 font-medium text-indigo-700">아울렛재고</th>
-                <th className="text-right py-2 px-2 font-medium text-indigo-700">주력매출</th>
-                <th className="text-right py-2 px-2 font-medium text-indigo-700">아울렛매출</th>
-                <th className="text-right py-2 px-2 font-medium text-indigo-700">주력주수</th>
-                <th className="text-right py-2 px-2 font-medium text-indigo-700">아울렛주수</th>
+                <th className="text-right py-2 px-2 font-medium text-indigo-700 border-l border-indigo-200">
+                  <div className="flex flex-col items-end">
+                    <span>주력재고</span>
+                    <span className="text-gray-300 text-[10px] font-normal">主力库存</span>
+                  </div>
+                </th>
+                <th className="text-right py-2 px-2 font-medium text-indigo-700">
+                  <div className="flex flex-col items-end">
+                    <span>아울렛재고</span>
+                    <span className="text-gray-300 text-[10px] font-normal">奥莱库存</span>
+                  </div>
+                </th>
+                <th className="text-right py-2 px-2 font-medium text-indigo-700">
+                  <div className="flex flex-col items-end">
+                    <span>주력매출</span>
+                    <span className="text-gray-300 text-[10px] font-normal">主力零售</span>
+                  </div>
+                </th>
+                <th className="text-right py-2 px-2 font-medium text-indigo-700">
+                  <div className="flex flex-col items-end">
+                    <span>아울렛매출</span>
+                    <span className="text-gray-300 text-[10px] font-normal">奥莱零售</span>
+                  </div>
+                </th>
+                <th className="text-right py-2 px-2 font-medium text-indigo-700">
+                  <div className="flex flex-col items-end">
+                    <span>주력주수</span>
+                    <span className="text-gray-300 text-[10px] font-normal">主力wc</span>
+                  </div>
+                </th>
+                <th className="text-right py-2 px-2 font-medium text-indigo-700">
+                  <div className="flex flex-col items-end">
+                    <span>아울렛주수</span>
+                    <span className="text-gray-300 text-[10px] font-normal">奥莱wc</span>
+                  </div>
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -705,8 +821,11 @@ export default function DealerCoreOutletAnalysis({
             )}
           </div>
           
-          <div className="text-xs text-gray-500 text-right">
-            <div>FR 기준 | Tag 금액 기준 | prdt_scs_cd 단위</div>
+          <div className="text-xs text-gray-600 text-right">
+            <div className="flex flex-col items-end gap-0.5">
+              <span>FR 기준 ｜ Tag 금액 기준 ｜ prdt_scs_cd 단위</span>
+              <span className="text-gray-400 text-[10px]">FR ｜ Tag 金额为基准 ｜ prdt_scs_cd 单位</span>
+            </div>
           </div>
         </div>
 

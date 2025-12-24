@@ -490,10 +490,15 @@ export default function BrandSalesPage({ brand, title }: BrandSalesPageProps) {
             {/* 1.7. 재고,판매,입고 추이 표 */}
             {inventoryTabDataWithForecast && salesTabData && (
               <div className="card mb-4">
-                <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-                  <span className="text-indigo-500">📈</span>
-                  재고,판매,입고 추이
-                </h2>
+                <div className="mb-4 flex items-center gap-2">
+                  <span className="text-indigo-500 text-xl">📈</span>
+                  <div className="flex flex-col">
+                    <h2 className="text-xl font-bold text-gray-800">
+                      재고,판매,입고 추이
+                    </h2>
+                    <span className="text-[10px] text-gray-400 leading-tight">库存，零售，入库趋势</span>
+                  </div>
+                </div>
                 <InventoryStockSummaryTable
                   selectedTab={selectedTab}
                   inventoryData={inventoryTabDataWithForecast}
@@ -505,21 +510,43 @@ export default function BrandSalesPage({ brand, title }: BrandSalesPageProps) {
                 
                 {/* 범례 설명 */}
                 <div className="mt-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
-                  <div className="flex flex-wrap items-start gap-6 text-xs text-gray-600">
-                    <div className="flex items-center gap-1">
-                      <span>📊</span>
-                      <span className="font-medium">예상판매매출 계산식:</span>
-                      <span className="ml-2">전년동월 전체판매 실적 × 성장률</span>
+                  <div className="flex flex-col gap-2 text-xs text-gray-600">
+                    {/* 한국어 범례 */}
+                    <div className="flex flex-wrap items-start gap-6">
+                      <div className="flex items-center gap-1">
+                        <span>📊</span>
+                        <span className="font-medium">예상판매매출 계산식:</span>
+                        <span className="ml-2">전년동월 전체판매 실적 × 성장률</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <span>📦</span>
+                        <span className="font-medium">예상재고자산 계산식:</span>
+                        <span className="ml-2">이전월 전체재고 + 입고예정 - 판매예정</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <span>🚚</span>
+                        <span className="font-medium">입고예정재고:</span>
+                        <span className="ml-2">중국법인 SCM 악세 물류 입고예정일 기준</span>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-1">
-                      <span>📦</span>
-                      <span className="font-medium">예상재고자산 계산식:</span>
-                      <span className="ml-2">이전월 전체재고 + 입고예정 - 판매예정</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <span>🚚</span>
-                      <span className="font-medium">입고예정재고:</span>
-                      <span className="ml-2">중국법인 SCM 악세 물류 입고예정일 기준</span>
+                    
+                    {/* 중국어 범례 */}
+                    <div className="flex flex-wrap items-start gap-6 text-gray-400 text-[10px]">
+                      <div className="flex items-center gap-1">
+                        <span>📊</span>
+                        <span className="font-medium">预计零售计算方法:</span>
+                        <span className="ml-2">去年同期整体销售实绩 × 增长率</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <span>📦</span>
+                        <span className="font-medium">预计库存计算方法:</span>
+                        <span className="ml-2">上月整体库存 + 预计入库 − 预计销售</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <span>🚚</span>
+                        <span className="font-medium">预计入库:</span>
+                        <span className="ml-2">以中国法人 SCM 饰品物流预计入库日为基准</span>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -849,7 +876,7 @@ export default function BrandSalesPage({ brand, title }: BrandSalesPageProps) {
             </CollapsibleSection>
 
             {/* 정체재고 분석 섹션 제목 */}
-            <SectionTitle title="2. 정체재고 분석" colorClass="bg-orange-500" />
+            <SectionTitle title="2. 정체재고 분석" subtitle="滞销库存分析" colorClass="bg-orange-500" />
 
             {/* 1.75. 재고택금액 추이 (시즌별) - 전년대비/매출액대비 전환 차트 */}
             <InventorySeasonChart 

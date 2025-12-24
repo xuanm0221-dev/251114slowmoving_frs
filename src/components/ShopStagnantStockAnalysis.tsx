@@ -869,23 +869,26 @@ export default function ShopStagnantStockAnalysis({
         iconColor="text-blue-500"
         defaultOpen={false}
         titleExtra={
-          <div className="flex bg-gray-100 rounded-lg p-0.5">
-            {(['전체', '창고', '온라인매장', '오프라인매장'] as ShopFilterTab[]).map(tab => (
-              <button
-                key={tab}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setShopFilterTab(tab);
-                }}
-                className={`px-3 py-1 text-xs rounded-md transition-colors ${
-                  shopFilterTab === tab
-                    ? 'bg-white text-blue-600 shadow-sm font-medium'
-                    : 'text-gray-600 hover:text-gray-900'
-                }`}
-              >
-                {tab}
-              </button>
-            ))}
+          <div className="flex items-center gap-3">
+            <span className="text-gray-400 text-sm font-normal">OR</span>
+            <div className="flex bg-gray-100 rounded-lg p-0.5">
+              {(['전체', '창고', '온라인매장', '오프라인매장'] as ShopFilterTab[]).map(tab => (
+                <button
+                  key={tab}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShopFilterTab(tab);
+                  }}
+                  className={`px-3 py-1 text-xs rounded-md transition-colors ${
+                    shopFilterTab === tab
+                      ? 'bg-white text-blue-600 shadow-sm font-medium'
+                      : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                >
+                  {tab}
+                </button>
+              ))}
+            </div>
           </div>
         }
         headerAction={

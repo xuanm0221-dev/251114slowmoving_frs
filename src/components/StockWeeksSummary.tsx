@@ -45,7 +45,6 @@ const BRAND_LIGHT_COLORS: Record<Brand, string> = {
 // Summary 행 정의 (새 구조: 전체 → 주력/아울렛 → 대리상/본사물류/직영)
 const SUMMARY_ROWS = [
   { label: "전체주수", level: 0, type: "total" },           // 헤더 level 0
-  { label: "(전년비)", level: 1, type: "total", isYoy: true },  // 전년비 행
   { label: "ㄴ 주력상품", level: 1, type: "total_core" },   // 헤더 level 1
   { label: "- 대리상", level: 2, type: "frs_core" },        // 상세 level 2
   { label: "- 창고", level: 2, type: "warehouse_core" },    // 상세 level 2
@@ -188,6 +187,59 @@ export default function StockWeeksSummary({
     return Math.round(num).toLocaleString();
   };
 
+  // 현재 월에 적용된 remark 정보 계산 (당년 + 전년)
+  const getRemarkInfo = (month: string): string => {
+    const calculateRemark = (yearMonth: string): string => {
+      const [yearStr, monthStr] = yearMonth.split(".");
+      const year = parseInt(yearStr);
+      const monthNum = parseInt(monthStr);
+      
+      // 23.12 기준으로 remark 번호 계산
+      const baseYear = 2023;
+      const baseMonth = 12;
+      
+      const monthsSinceBase = (year - baseYear) * 12 + (monthNum - baseMonth);
+      const remarkNum = Math.floor(monthsSinceBase / 3) + 1;
+      
+      // remark 기간 계산
+      const startMonthsSinceBase = (remarkNum - 1) * 3;
+      const startYear = baseYear + Math.floor((baseMonth + startMonthsSinceBase) / 12);
+      const startMonth = ((baseMonth + startMonthsSinceBase - 1) % 12) + 1;
+      
+      const endMonthsSinceBase = remarkNum * 3 - 1;
+      const endYear = baseYear + Math.floor((baseMonth + endMonthsSinceBase) / 12);
+      const endMonth = ((baseMonth + endMonthsSinceBase - 1) % 12) + 1;
+      
+      const startYY = String(startYear).slice(2);
+      const endYY = String(endYear).slice(2);
+      
+      return `remark${remarkNum}: ${startYY}.${String(startMonth).padStart(2, '0')}~${endYY}.${String(endMonth).padStart(2, '0')}`;
+    };
+
+    const current = calculateRemark(month);
+    const prevMonth = getPreviousYearMonth(month);
+    const previous = calculateRemark(prevMonth);
+
+    return { current, previous };
+  };
+
+  // 현재 월 기준 주력/아울렛 시즌 예시 계산
+  const getProductTypeExamples = (month: string): { core: string; outlet: string } => {
+    const [yearStr] = month.split(".");
+    const year = parseInt(yearStr);
+    const yy = String(year).slice(2);
+    const nextYy = String(year + 1).slice(2);
+    
+    // 주력: INTRO, FOCUS, 해당 연도 SS/FW, 다음 연도 SS/FW
+    const coreExample = `INTRO, FOCUS, ${yy}SS, ${yy}FW, ${nextYy}SS, ${nextYy}FW 이상`;
+    
+    // 아울렛: OUTLET, CARE, DONE, 전년 FW 이하
+    const prevYy = String(year - 1).slice(2);
+    const outletExample = `OUTLET, CARE, DONE, ${prevYy}FW 이하`;
+    
+    return { core: coreExample, outlet: outletExample };
+  };
+
   // 카드 렌더링
   const renderCard = (itemTab: ItemTab) => {
     const info = ITEM_TAB_INFO[itemTab];
@@ -260,6 +312,7 @@ export default function StockWeeksSummary({
               <tr className="bg-gray-100 text-gray-600">
                 <th className="px-1.5 py-1 text-left font-medium">구분</th>
                 <th className="px-1.5 py-1 text-right font-medium">당년주수</th>
+                <th className="px-1.5 py-1 text-right font-medium">전년비</th>
                 <th className="px-1.5 py-1 text-right font-medium">당년재고</th>
               </tr>
             </thead>
@@ -270,34 +323,6 @@ export default function StockWeeksSummary({
                 
                 const weeksDiff = currentData.weeks - prevData.weeks;
                 const weeksDiffFormatted = formatWeeksDiff(weeksDiff);
-                const inventoryYOY = formatInventoryYOY(currentData.inventory, prevData.inventory);
-                const inventoryDiff = currentData.inventory - prevData.inventory;
-                const inventoryDiffFormatted = formatInventoryDiff(inventoryDiff, currentData.inventory, prevData.inventory);
-
-                // 전년비 행인 경우
-                if (row.isYoy) {
-                  return (
-                    <tr
-                      key={idx}
-                      className="border-b border-gray-200"
-                    >
-                      <td
-                        className={cn(
-                          "px-1.5 py-1 text-left whitespace-nowrap pl-2",
-                          "text-gray-600 italic"
-                        )}
-                      >
-                        {row.label}
-                      </td>
-                      <td className={cn("px-1.5 py-1 text-right font-medium whitespace-nowrap", weeksDiffFormatted.color)}>
-                        {weeksDiffFormatted.text}
-                      </td>
-                      <td className={cn("px-1.5 py-1 text-right font-medium whitespace-nowrap", inventoryDiffFormatted.color)}>
-                        {inventoryDiffFormatted.text}
-                      </td>
-                    </tr>
-                  );
-                }
 
                 // level 0, 1은 헤더 스타일 (회색 배경 + 구분선)
                 const isHeader = row.level === 0 || row.level === 1;
@@ -336,10 +361,27 @@ export default function StockWeeksSummary({
                       {currentData.weeks === 0 ? "-" : `${currentData.weeks.toFixed(1)}주`}
                     </td>
                     <td className={cn(
+                      "px-1.5 py-1 text-right font-medium whitespace-nowrap",
+                      weeksDiffFormatted.color,
+                      isRetailCore && "text-gray-400"
+                    )}>
+                      {weeksDiffFormatted.text}
+                    </td>
+                    <td className={cn(
                       "px-1.5 py-1 text-right whitespace-nowrap",
                       isRetailCore ? "text-gray-400" : "text-gray-500"
                     )}>
-                      {currentData.inventory === 0 ? "-" : formatWithComma(currentData.inventory / 1000000)}
+                      {currentData.inventory === 0 ? "-" : (() => {
+                        const inventoryM = formatWithComma(currentData.inventory / 1000000);
+                        
+                        // "전체주수" 행에만 전년비 표시
+                        if (row.type === "total" && prevData.inventory > 0) {
+                          const yoyPercent = Math.round((currentData.inventory / prevData.inventory) * 100);
+                          return `${inventoryM}(${yoyPercent}%)`;
+                        }
+                        
+                        return inventoryM;
+                      })()}
                     </td>
                   </tr>
                 );
@@ -385,22 +427,23 @@ export default function StockWeeksSummary({
       {/* 범례 */}
       <div className="mt-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
         <div className="flex flex-wrap items-center gap-4 text-xs text-gray-600">
-          <span className="font-medium">YOY 증감:</span>
           <div className="flex items-center gap-1">
-            <span className="text-red-500 font-medium">빨간색</span>
-            <span>= 증가 (전년 대비 ↑)</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <span className="text-blue-500 font-medium">파란색</span>
-            <span>= 감소 (전년 대비 ↓)</span>
+            <span className="font-medium">
+              주력상품<span className="text-gray-400 font-normal"> 主力商品</span>:
+            </span>
+            <span>{getProductTypeExamples(selectedMonth).core}</span>
           </div>
           <div className="border-l border-gray-300 pl-4 ml-2 flex items-center gap-1">
-            <span className="font-medium">{PRODUCT_TYPE_RULES.core.label}:</span>
-            <span>{PRODUCT_TYPE_RULES.core.shortDescription}</span>
+            <span className="font-medium">
+              아울렛상품<span className="text-gray-400 font-normal"> 奥莱商品</span>:
+            </span>
+            <span>{getProductTypeExamples(selectedMonth).outlet}</span>
           </div>
-          <div className="flex items-center gap-1">
-            <span className="font-medium">아울렛상품:</span>
-            <span>OUTLET, CARE, DONE</span>
+          <div className="border-l border-gray-300 pl-4 ml-2 flex items-center gap-1">
+            <span className="text-indigo-600 font-medium">
+              당년 적용<span className="text-indigo-400 font-normal"> 今年标准</span>: {getRemarkInfo(selectedMonth).current}  |  
+              전년 적용<span className="text-indigo-400 font-normal"> 去年标准</span>: {getRemarkInfo(selectedMonth).previous}
+            </span>
           </div>
         </div>
       </div>

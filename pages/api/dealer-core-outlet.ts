@@ -195,8 +195,9 @@ stock_raw AS (
     TO_VARCHAR(s.shop_id) AS shop_id,
     s.prdt_scs_cd,
     s.stock_tag_amt_expected AS stock_amt,
-    p.remark1, p.remark2, p.remark3, p.remark4,
-    p.remark5, p.remark6, p.remark7, p.remark8,
+    p.remark1, p.remark2, p.remark3, p.remark4, p.remark5,
+    p.remark6, p.remark7, p.remark8, p.remark9, p.remark10,
+    p.remark11, p.remark12, p.remark13, p.remark14, p.remark15,
     p.sesn,
     p.prdt_nm_cn
   FROM CHN.DW_STOCK_M s
@@ -207,7 +208,7 @@ stock_raw AS (
     ${getCategoryFilter(selectedCategory)}
 ),
 
--- 재고 + 대리상 매핑 + remark 적용
+-- 재고 + 대리상 매핑 + remark 자동 계산 (23.12 기준, 3개월 단위)
 stock_with_segment AS (
   SELECT 
     sr.yymm,
@@ -215,15 +216,22 @@ stock_with_segment AS (
     sr.prdt_scs_cd,
     sr.prdt_nm_cn,
     sr.stock_amt,
-    CASE 
-      WHEN sr.yymm BETWEEN '202401' AND '202403' THEN sr.remark1
-      WHEN sr.yymm BETWEEN '202404' AND '202406' THEN sr.remark2
-      WHEN sr.yymm BETWEEN '202407' AND '202409' THEN sr.remark3
-      WHEN sr.yymm BETWEEN '202410' AND '202412' THEN sr.remark4
-      WHEN sr.yymm BETWEEN '202501' AND '202503' THEN sr.remark5
-      WHEN sr.yymm BETWEEN '202504' AND '202506' THEN sr.remark6
-      WHEN sr.yymm BETWEEN '202507' AND '202509' THEN sr.remark7
-      WHEN sr.yymm >= '202510' THEN sr.remark8
+    CASE (FLOOR(DATEDIFF('month', TO_DATE('202312', 'YYYYMM'), TO_DATE(sr.yymm || '01', 'YYYYMMDD')) / 3) + 1)
+      WHEN 1 THEN sr.remark1
+      WHEN 2 THEN sr.remark2
+      WHEN 3 THEN sr.remark3
+      WHEN 4 THEN sr.remark4
+      WHEN 5 THEN sr.remark5
+      WHEN 6 THEN sr.remark6
+      WHEN 7 THEN sr.remark7
+      WHEN 8 THEN sr.remark8
+      WHEN 9 THEN sr.remark9
+      WHEN 10 THEN sr.remark10
+      WHEN 11 THEN sr.remark11
+      WHEN 12 THEN sr.remark12
+      WHEN 13 THEN sr.remark13
+      WHEN 14 THEN sr.remark14
+      WHEN 15 THEN sr.remark15
       ELSE NULL
     END AS op_std,
     sr.sesn,
@@ -251,8 +259,9 @@ sales_raw AS (
     TO_VARCHAR(s.shop_id) AS shop_id,
     s.prdt_scs_cd,
     s.tag_amt,
-    p.remark1, p.remark2, p.remark3, p.remark4,
-    p.remark5, p.remark6, p.remark7, p.remark8,
+    p.remark1, p.remark2, p.remark3, p.remark4, p.remark5,
+    p.remark6, p.remark7, p.remark8, p.remark9, p.remark10,
+    p.remark11, p.remark12, p.remark13, p.remark14, p.remark15,
     p.sesn
   FROM CHN.DW_SALE s
   INNER JOIN FNF.CHN.MST_PRDT_SCS p ON s.prdt_scs_cd = p.prdt_scs_cd
@@ -262,22 +271,29 @@ sales_raw AS (
     ${getCategoryFilter(selectedCategory)}
 ),
 
--- 판매 + 대리상 매핑 + remark 적용
+-- 판매 + 대리상 매핑 + remark 자동 계산 (23.12 기준, 3개월 단위)
 sales_with_segment AS (
   SELECT 
     sr.yymm,
     sdm.account_id,
     sr.prdt_scs_cd,
     sr.tag_amt,
-    CASE 
-      WHEN sr.yymm BETWEEN '202401' AND '202403' THEN sr.remark1
-      WHEN sr.yymm BETWEEN '202404' AND '202406' THEN sr.remark2
-      WHEN sr.yymm BETWEEN '202407' AND '202409' THEN sr.remark3
-      WHEN sr.yymm BETWEEN '202410' AND '202412' THEN sr.remark4
-      WHEN sr.yymm BETWEEN '202501' AND '202503' THEN sr.remark5
-      WHEN sr.yymm BETWEEN '202504' AND '202506' THEN sr.remark6
-      WHEN sr.yymm BETWEEN '202507' AND '202509' THEN sr.remark7
-      WHEN sr.yymm >= '202510' THEN sr.remark8
+    CASE (FLOOR(DATEDIFF('month', TO_DATE('202312', 'YYYYMM'), TO_DATE(sr.yymm || '01', 'YYYYMMDD')) / 3) + 1)
+      WHEN 1 THEN sr.remark1
+      WHEN 2 THEN sr.remark2
+      WHEN 3 THEN sr.remark3
+      WHEN 4 THEN sr.remark4
+      WHEN 5 THEN sr.remark5
+      WHEN 6 THEN sr.remark6
+      WHEN 7 THEN sr.remark7
+      WHEN 8 THEN sr.remark8
+      WHEN 9 THEN sr.remark9
+      WHEN 10 THEN sr.remark10
+      WHEN 11 THEN sr.remark11
+      WHEN 12 THEN sr.remark12
+      WHEN 13 THEN sr.remark13
+      WHEN 14 THEN sr.remark14
+      WHEN 15 THEN sr.remark15
       ELSE NULL
     END AS op_std,
     sr.sesn,

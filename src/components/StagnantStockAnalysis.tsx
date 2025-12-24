@@ -929,6 +929,9 @@ export default function StagnantStockAnalysis({
         icon="📊"
         iconColor="text-orange-500"
         defaultOpen={false}
+        titleExtra={
+          <span className="text-gray-400 text-sm font-normal">商品单位</span>
+        }
         headerAction={
           <div className="text-xs text-gray-500 text-right">
             <div>25년 기준: 차기 26NSF, 당기 25NSF, 과시즌 = 나머지 | 24년 기준: 차기 25NSF, 당기 24NSF, 과시즌 = 나머지</div>
