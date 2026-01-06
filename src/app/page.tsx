@@ -1,9 +1,24 @@
+"use client";
+
 import Link from "next/link";
 import Navigation from "@/components/Navigation";
 import { BRANDS } from "@/types/sales";
 import { PRODUCT_TYPE_RULES, CHANNEL_RULES } from "@/constants/businessRules";
+import { useReferenceMonth } from "@/contexts/ReferenceMonthContext";
+
+/**
+ * 시작월부터 종료월까지의 개월 수를 계산
+ */
+function calculateMonths(startMonth: string, endMonth: string): number {
+  const [startYear, startM] = startMonth.split(".").map(Number);
+  const [endYear, endM] = endMonth.split(".").map(Number);
+  return (endYear - startYear) * 12 + (endM - startM) + 1;
+}
 
 export default function Home() {
+  const { referenceMonth } = useReferenceMonth();
+  const startMonth = "2024.01";
+  const totalMonths = calculateMonths(startMonth, referenceMonth);
   return (
     <>
       <Navigation />
@@ -16,7 +31,7 @@ export default function Home() {
           <p className="text-xl text-gray-400 max-w-2xl mx-auto">
             브랜드별 악세사리 재고주수 월별 현황을 한눈에 확인하세요.
             <br />
-            2024.01 ~ 2025.11 (총 23개월) 데이터 분석
+            {startMonth} ~ {referenceMonth} (총 {totalMonths}개월) 데이터 분석
           </p>
         </div>
 
@@ -97,7 +112,7 @@ export default function Home() {
           <div className="card">
             <h3 className="text-lg font-semibold text-white mb-4">📊 데이터 범위</h3>
             <ul className="space-y-2 text-gray-400 text-sm">
-              <li>• 분석 기간: 2024.01 ~ 2025.11</li>
+              <li>• 분석 기간: {startMonth} ~ {referenceMonth}</li>
               <li>• 브랜드: MLB, MLB KIDS, DISCOVERY</li>
               <li>• 카테고리: 악세사리</li>
               <li>• 아이템: Shoes, Headwear, Bag, Acc_etc</li>
@@ -174,9 +189,23 @@ export default function Home() {
               </h4>
               <ul className="text-xs text-gray-400 space-y-1.5 ml-4">
                 <li>• 각 브랜드 페이지에서 직접 수정 및 저장</li>
+                <li>• 기준월 이후 데이터만 수정 가능 (과거 데이터 보호)</li>
                 <li>• 저장 시 JSON 파일에 영구 저장</li>
                 <li>• 로컬 환경: 자동 Git commit & push → Vercel 배포</li>
                 <li>• 마지막 업데이트 날짜 자동 기록</li>
+              </ul>
+            </div>
+
+            {/* 스냅샷 저장 기능 */}
+            <div>
+              <h4 className="text-sm font-semibold text-orange-300 mb-3">
+                📸 스냅샷 저장 기능
+              </h4>
+              <ul className="text-xs text-gray-400 space-y-1.5 ml-4">
+                <li>• 판매/재고 스냅샷: 기준월의 판매 및 재고 데이터 저장</li>
+                <li>• 입고예정 스냅샷: 기준월의 입고예정 재고자산 데이터 저장</li>
+                <li>• 기준월이 마감된 월일 때만 저장 가능</li>
+                <li>• 네비게이션 바에서 저장 버튼 확인 및 실행</li>
               </ul>
             </div>
 
