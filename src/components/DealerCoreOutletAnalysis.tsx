@@ -5,6 +5,7 @@ import type { Brand } from "@/types/sales";
 import { BRAND_CODE_MAP } from "@/types/stagnantStock";
 import CollapsibleSection from "./CollapsibleSection";
 import BilingualLabel from "./BilingualLabel";
+import { useReferenceMonth } from "@/contexts/ReferenceMonthContext";
 
 interface DealerSegmentData {
   stock_amt: number;
@@ -538,11 +539,6 @@ function DealerDetailModal({
   );
 }
 
-// 2025년 월 옵션
-const MONTHS_2025 = Array.from({ length: 12 }, (_, i) => ({
-  value: `2025${String(i + 1).padStart(2, "0")}`,
-  label: `${i + 1}월`,
-}));
 
 // 카테고리 옵션
 const CATEGORY_OPTIONS = [
@@ -561,7 +557,10 @@ export default function DealerCoreOutletAnalysis({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<ApiResponse | null>(null);
-  const [selectedMonth, setSelectedMonth] = useState<string>("202511"); // YYYYMM 형식
+  // 전역 기준월 사용
+  const { referenceMonth } = useReferenceMonth();
+  // API는 "YYYYMM" 형식을 사용하므로 변환
+  const selectedMonth = referenceMonth.replace(".", "");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   
   // 정렬 상태
@@ -618,7 +617,7 @@ export default function DealerCoreOutletAnalysis({
     } finally {
       setLoading(false);
     }
-  }, [brandCode, selectedMonth, selectedCategory]);
+  }, [brandCode, selectedMonth, selectedCategory, referenceMonth]);
 
   useEffect(() => {
     console.log('[DealerCoreOutlet] useEffect triggered:', { selectedMonth, brandCode, selectedCategory });
@@ -627,7 +626,7 @@ export default function DealerCoreOutletAnalysis({
     } else {
       console.log('[DealerCoreOutlet] selectedMonth is empty, not fetching');
     }
-  }, [fetchData, selectedMonth, brandCode, selectedCategory]);
+  }, [fetchData, selectedMonth, brandCode, selectedCategory, referenceMonth]);
 
   // 정렬 핸들러
   const handleSort = (field: string) => {
@@ -802,17 +801,9 @@ export default function DealerCoreOutletAnalysis({
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
               <span className="text-sm font-medium text-gray-600">기준월:</span>
-              <select
-                value={selectedMonth}
-                onChange={(e) => setSelectedMonth(e.target.value)}
-                className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white"
-              >
-                {MONTHS_2025.map((month) => (
-                  <option key={month.value} value={month.value}>
-                    {month.label}
-                  </option>
-                ))}
-              </select>
+              <div className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm bg-gray-50 text-gray-700">
+                {formatMonth(selectedMonth)}
+              </div>
             </div>
             {data && (
               <div className="text-xs text-gray-500">

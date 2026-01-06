@@ -10,6 +10,7 @@ import type {
 } from "@/types/stagnantStock";
 import { BRAND_CODE_MAP } from "@/types/stagnantStock";
 import CollapsibleSection from "./CollapsibleSection";
+import { useReferenceMonth } from "@/contexts/ReferenceMonthContext";
 
 // 대리상 마스터 타입
 interface DealerMaster {
@@ -370,7 +371,10 @@ export default function DealerStagnantStockAnalysis({
   const [dealerMasters, setDealerMasters] = useState<Map<string, DealerMaster>>(new Map());
   
   const [availableMonths, setAvailableMonths] = useState<string[]>([]);
-  const [targetMonth, setTargetMonth] = useState<string>("");
+  // 전역 기준월 사용
+  const { referenceMonth } = useReferenceMonth();
+  // API는 "YYYYMM" 형식을 사용하므로 변환
+  const targetMonth = referenceMonth.replace(".", "");
   const [internalThresholdPct, setInternalThresholdPct] = useState<number>(0.01);
   const [internalMinQty, setInternalMinQty] = useState<number>(10);
   
@@ -455,13 +459,13 @@ export default function DealerStagnantStockAnalysis({
     }
   }, [brandCode, targetMonth, thresholdPct, minQty]);
 
-  // 초기 월 목록 로드
+  // 초기 월 목록 로드 (전역 기준월 변경 시에도 업데이트)
   useEffect(() => {
     const loadInitialMonths = async () => {
       try {
         const params = new URLSearchParams({
           brand: brandCode,
-          targetMonth: "202511",
+          targetMonth: targetMonth,
           dimensionTab: "컬러&사이즈",
           thresholdPct: "0.01",
         });
@@ -471,22 +475,21 @@ export default function DealerStagnantStockAnalysis({
           const result: StagnantStockResponse = await response.json();
           if (result.availableMonths?.length > 0) {
             setAvailableMonths(result.availableMonths);
-            const targetDefault = result.availableMonths.includes("202511") 
-              ? "202511" 
-              : result.availableMonths[0];
-            setTargetMonth(targetDefault);
           }
         }
       } catch (err) {
         console.error("Failed to load initial months:", err);
       }
     };
-    loadInitialMonths();
-  }, [brandCode]);
+    
+    if (targetMonth) {
+      loadInitialMonths();
+    }
+  }, [brandCode, targetMonth]);
 
   useEffect(() => {
     if (targetMonth) fetchData();
-  }, [fetchData, targetMonth, thresholdPct, minQty]);
+  }, [fetchData, targetMonth, thresholdPct, minQty, referenceMonth]);
 
   // 상품별 정체/시즌 정보 맵 생성
   const itemInfoMap = useMemo(() => {
@@ -857,13 +860,9 @@ export default function DealerStagnantStockAnalysis({
         <div className="mb-4 p-3 flex flex-wrap items-end gap-4">
           <div className="flex flex-col gap-1">
             <label className="text-xs font-medium text-gray-600">기준월:</label>
-            <select
-              value={targetMonth}
-              onChange={(e) => setTargetMonth(e.target.value)}
-              className="px-2 py-1.5 border border-gray-300 rounded text-sm bg-white focus:outline-none focus:ring-2 focus:ring-purple-300"
-            >
-              {availableMonths.map(m => <option key={m} value={m}>{formatMonth(m)}</option>)}
-            </select>
+            <div className="px-2 py-1.5 border border-gray-300 rounded text-sm bg-gray-50 text-gray-700">
+              {formatMonth(targetMonth)}
+            </div>
           </div>
 
           <div className="flex flex-col gap-1">

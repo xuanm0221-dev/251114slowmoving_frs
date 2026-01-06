@@ -9,7 +9,7 @@ interface StockWeeksTableProps {
   salesData: SalesItemTabData;
   daysInMonth: { [month: string]: number };
   stockWeek: number;
-  year: "2024" | "2025";
+  year: "2024" | "2025" | "2026";
   stockWeekWindow: StockWeekWindow;
   productTypeTab: ProductTypeTab;
 }
@@ -24,13 +24,9 @@ const MONTHS_2025 = [
   "2025.07", "2025.08", "2025.09", "2025.10", "2025.11", "2025.12"
 ];
 
-// 2025년 히트맵에는 26.04까지의 재고주수를 함께 표시
-const MONTHS_2025_WITH_FORECAST = [
-  ...MONTHS_2025,
-  "2026.01",
-  "2026.02",
-  "2026.03",
-  "2026.04",
+const MONTHS_2026 = [
+  "2026.01", "2026.02", "2026.03", "2026.04", "2026.05", "2026.06",
+  "2026.07", "2026.08", "2026.09", "2026.10", "2026.11", "2026.12"
 ];
 
 const STOCK_WEEKS_ROWS = [
@@ -71,7 +67,12 @@ export default function StockWeeksTable({
   stockWeekWindow,
   productTypeTab,
 }: StockWeeksTableProps) {
-  const months = year === "2024" ? MONTHS_2024 : MONTHS_2025_WITH_FORECAST;
+  // 연도별 고정 월 배열 사용
+  const months = year === "2024" 
+    ? MONTHS_2024 
+    : year === "2025"
+    ? MONTHS_2025
+    : MONTHS_2026;
   
   // 선택된 행인지 확인하는 함수
   const isRowSelected = (rowType: string): boolean => {

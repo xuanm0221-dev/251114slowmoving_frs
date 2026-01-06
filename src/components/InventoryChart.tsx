@@ -21,7 +21,7 @@ import {
   InventoryMonthData,
   SalesMonthData,
 } from "@/types/sales";
-import { cn } from "@/lib/utils";
+import { cn, generateMonthsForYearAndNextHalf } from "@/lib/utils";
 import { computeStockWeeksForRowType, StockWeekWindow } from "@/utils/stockWeeks";
 
 interface InventoryChartProps {
@@ -33,6 +33,7 @@ interface InventoryChartProps {
   daysInMonth: { [month: string]: number };
   stockWeekWindow: StockWeekWindow;
   stockWeek: number;
+  referenceMonth: string; // 기준월 추가
 }
 
 // 색상 정의 (주력: 진한 계열, 아울렛: 연한 계열)
@@ -77,7 +78,8 @@ const getMonthsForChart = (
   inventoryBrandData: InventoryBrandData,
   salesBrandData: SalesBrandData,
   selectedTab: ItemTab,
-  yearTab: YearTab
+  yearTab: YearTab,
+  referenceMonth: string // 기준월 추가
 ): string[] => {
   const invItem = inventoryBrandData[selectedTab] || {};
   const salesItem = salesBrandData[selectedTab] || {};
@@ -88,18 +90,23 @@ const getMonthsForChart = (
   ]);
 
   // 연도에 따라 필터링
-  const [startMonth, endMonth] = yearTab === "당년" 
-    ? ["2025.01", "2026.04"]  // 당년: 2025.01 ~ 2026.04
-    : ["2024.01", "2024.12"]; // 전년: 2024.01 ~ 2024.12
+  let filteredMonths: string[];
+  if (yearTab === "당년") {
+    // 당년: 기준월이 속한 연도의 1월부터 기준월까지 + 다음 연도 1월~6월
+    filteredMonths = generateMonthsForYearAndNextHalf(referenceMonth);
+    // 실제 데이터가 있는 월만 포함 (forecast 월은 salesBrandData에 포함되어 있음)
+    filteredMonths = filteredMonths.filter(m => monthSet.has(m));
+  } else {
+    // 전년: 2024.01 ~ 2024.12
+    filteredMonths = Array.from(monthSet).filter(m => m >= "2024.01" && m <= "2024.12");
+  }
 
-  return Array.from(monthSet)
-    .filter((m) => m >= startMonth && m <= endMonth)
-    .sort((a, b) => {
-      const [ya, ma] = a.split(".").map(Number);
-      const [yb, mb] = b.split(".").map(Number);
-      if (ya !== yb) return ya - yb;
-      return ma - mb;
-    });
+  return filteredMonths.sort((a, b) => {
+    const [ya, ma] = a.split(".").map(Number);
+    const [yb, mb] = b.split(".").map(Number);
+    if (ya !== yb) return ya - yb;
+    return ma - mb;
+  });
 };
 
 // 커스텀 Tooltip 컴포넌트
@@ -265,13 +272,14 @@ export default function InventoryChart({
   daysInMonth,
   stockWeekWindow,
   stockWeek,
+  referenceMonth,
 }: InventoryChartProps) {
   // 연도 탭 상태 (당년/전년)
   const [yearTab, setYearTab] = useState<YearTab>("당년");
 
   const months = useMemo(
-    () => getMonthsForChart(inventoryBrandData, salesBrandData, selectedTab, yearTab),
-    [inventoryBrandData, salesBrandData, selectedTab, yearTab]
+    () => getMonthsForChart(inventoryBrandData, salesBrandData, selectedTab, yearTab, referenceMonth),
+    [inventoryBrandData, salesBrandData, selectedTab, yearTab, referenceMonth]
   );
 
   // 채널별 재고 데이터 가져오기
@@ -446,9 +454,10 @@ export default function InventoryChart({
     let maxInv = 0;
     let maxSales = 0;
     
-    // 2024년 + 2025년 모든 월 데이터에서 재고자산 최대값 계산
+    // 2024년 + 기준월이 속한 연도의 1월부터 기준월까지 + 다음 연도 1월~6월까지 모든 월 데이터에서 재고자산 최대값 계산
+    const targetMonths = generateMonthsForYearAndNextHalf(referenceMonth);
     const allInvMonths = Object.keys(inventoryBrandData[selectedTab] || {}).filter(
-      (m) => m >= "2024.01" && m <= "2026.04"
+      (m) => m >= "2024.01" && m <= "2024.12" || targetMonths.includes(m)
     );
     
     allInvMonths.forEach((monthYm) => {
@@ -461,9 +470,9 @@ export default function InventoryChart({
       }
     });
     
-    // 2024년 + 2025년 모든 월 데이터에서 판매매출 최대값 계산
+    // 2024년 + 기준월이 속한 연도의 1월부터 기준월까지 + 다음 연도 1월~6월까지 모든 월 데이터에서 판매매출 최대값 계산
     const allSalesMonths = Object.keys(salesBrandData[selectedTab] || {}).filter(
-      (m) => m >= "2024.01" && m <= "2026.04"
+      (m) => m >= "2024.01" && m <= "2024.12" || targetMonths.includes(m)
     );
     
     allSalesMonths.forEach((monthYm) => {

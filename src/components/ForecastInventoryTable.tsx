@@ -11,6 +11,7 @@ interface ForecastInventoryTableProps {
   onSave: (data: ForecastInventoryData) => void;
   onDataChange?: (data: ForecastInventoryData) => void; // 편집 중인 데이터를 부모에게 전달
   lastUpdatedDate?: string | null; // ISO 형식의 마지막 업데이트 날짜
+  referenceMonth: string; // 기준월 추가
 }
 
 const ITEM_ROWS: { label: string; dataKey: string; isHeader: boolean; editable: boolean }[] = [
@@ -28,6 +29,7 @@ export default function ForecastInventoryTable({
   onSave,
   onDataChange,
   lastUpdatedDate,
+  referenceMonth,
 }: ForecastInventoryTableProps) {
   // 로컬 state로 편집 중인 데이터 관리
   const [editingData, setEditingData] = useState<ForecastInventoryData>(data);
@@ -37,10 +39,17 @@ export default function ForecastInventoryTable({
     setEditingData(data);
   }, [data]);
 
-  // editingData가 변경될 때마다 부모에게 알림
+  // editingData가 변경될 때마다 부모에게 알림 (기준월 이후 데이터만 전달)
   useEffect(() => {
-    onDataChange?.(editingData);
-  }, [editingData, onDataChange]);
+    // 기준월 이후 데이터만 필터링하여 전달
+    const filteredData: ForecastInventoryData = {};
+    Object.keys(editingData).forEach((month) => {
+      if (month > referenceMonth) {
+        filteredData[month] = editingData[month];
+      }
+    });
+    onDataChange?.(filteredData);
+  }, [editingData, onDataChange, referenceMonth]);
 
   const getCellValue = (month: string, dataKey: string): number => {
     const monthData = editingData[month];
@@ -60,6 +69,11 @@ export default function ForecastInventoryTable({
   };
 
   const handleCellChange = (month: string, dataKey: string, value: string) => {
+    // 기준월 이후의 월만 편집 가능
+    if (month <= referenceMonth) {
+      return;
+    }
+
     const numValue = value === "" ? 0 : parseFloat(value.replace(/,/g, ""));
     if (isNaN(numValue) || numValue < 0) return;
 
@@ -124,6 +138,7 @@ export default function ForecastInventoryTable({
                 </td>
                 {months.map((month) => {
                   const value = getCellValue(month, row.dataKey);
+                  const isEditable = row.editable && month > referenceMonth;
                   
                   if (!row.editable) {
                     // 아이템합계는 읽기 전용
@@ -141,7 +156,23 @@ export default function ForecastInventoryTable({
                     );
                   }
 
-                  // 편집 가능한 셀
+                  // 편집 가능 여부에 따라 표시
+                  if (!isEditable) {
+                    // 기준월 이전은 읽기 전용
+                    return (
+                      <td
+                        key={month}
+                        className={cn(
+                          "text-gray-600 bg-gray-50/50"
+                        )}
+                        title="입고예정 재고자산 (읽기 전용 - 기준월 이전)"
+                      >
+                        {formatNumber(value)}
+                      </td>
+                    );
+                  }
+
+                  // 편집 가능한 셀 (기준월 이후만)
                   return (
                     <td
                       key={month}

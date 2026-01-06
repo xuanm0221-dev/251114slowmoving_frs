@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { ReferenceMonthProvider } from "@/contexts/ReferenceMonthContext";
 
 export const metadata: Metadata = {
   title: "악세사리 판매매출 요약",
@@ -20,9 +21,11 @@ export default function RootLayout({
         />
       </head>
       <body>
-        <div className="min-h-screen bg-gray-50">
-          {children}
-        </div>
+        <ReferenceMonthProvider>
+          <div className="min-h-screen bg-gray-50">
+            {children}
+          </div>
+        </ReferenceMonthProvider>
       </body>
     </html>
   );

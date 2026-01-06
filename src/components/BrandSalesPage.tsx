@@ -46,7 +46,8 @@ import {
   buildEditableMonths 
 } from "@/lib/forecastInventoryStorage";
 import { PRODUCT_TYPE_RULES } from "@/constants/businessRules";
-import { formatUpdateDate, formatUpdateDateTime } from "@/lib/utils";
+import { formatUpdateDate, formatUpdateDateTime, generateOneYearMonths, generateMonthsFromReference, generateMonthsForYearAndNextHalf } from "@/lib/utils";
+import { useReferenceMonth } from "@/contexts/ReferenceMonthContext";
 
 interface BrandSalesPageProps {
   brand: Brand;
@@ -54,6 +55,7 @@ interface BrandSalesPageProps {
 }
 
 export default function BrandSalesPage({ brand, title }: BrandSalesPageProps) {
+  const { referenceMonth, setLastUpdatedDate: setContextLastUpdatedDate } = useReferenceMonth(); // 전역 기준월
   const [selectedTab, setSelectedTab] = useState<ItemTab>("전체");
   const [salesData, setSalesData] = useState<SalesSummaryData | null>(null);
   const [inventoryData, setInventoryData] = useState<InventorySummaryData | null>(null);
@@ -146,7 +148,10 @@ export default function BrandSalesPage({ brand, title }: BrandSalesPageProps) {
             
             // 마지막 업데이트 날짜 로드
             if (forecastJson.metadata && forecastJson.metadata[brand]) {
-              setLastUpdatedDate(forecastJson.metadata[brand].lastUpdated);
+              const lastUpdated = forecastJson.metadata[brand].lastUpdated;
+              setLastUpdatedDate(lastUpdated);
+              // Context에도 업데이트
+              setContextLastUpdatedDate(brand, lastUpdated);
             }
           } else {
             console.warn("입고예정 재고자산 데이터를 불러오는데 실패했습니다.");
@@ -157,7 +162,7 @@ export default function BrandSalesPage({ brand, title }: BrandSalesPageProps) {
 
         // 실제 입고 재고자산 데이터 로드 (Snowflake API)
         try {
-          const actualArrivalResponse = await fetch(`/api/actual-arrival?brand=${brand}`);
+          const actualArrivalResponse = await fetch(`/api/actual-arrival?brand=${brand}&referenceMonth=${referenceMonth}`);
           if (actualArrivalResponse.ok) {
             const actualArrivalJson: ActualArrivalData = await actualArrivalResponse.json();
             setActualArrivalData(actualArrivalJson);
@@ -188,11 +193,28 @@ export default function BrandSalesPage({ brand, title }: BrandSalesPageProps) {
     };
 
     fetchData();
-  }, [brand]);
+  }, [brand, referenceMonth]);
 
   // 입고예정 데이터 저장 핸들러
   const handleSaveForecastInventory = async () => {
     if (!editingForecastInventory) return;
+    
+    // 기준월 이후 데이터만 필터링 (기준월 이전은 절대 포함하지 않음)
+    const filteredData: ForecastInventoryData = {};
+    Object.keys(editingForecastInventory).forEach((month) => {
+      if (month > referenceMonth) {
+        filteredData[month] = editingForecastInventory[month];
+      } else {
+        // 기준월 이전 데이터가 포함되어 있으면 경고 (디버깅용)
+        console.warn(`[입고예정 저장] 기준월(${referenceMonth}) 이전 데이터(${month})는 저장되지 않습니다.`);
+      }
+    });
+    
+    // 필터링된 데이터가 없으면 저장하지 않음
+    if (Object.keys(filteredData).length === 0) {
+      alert("저장할 기준월 이후 데이터가 없습니다.");
+      return;
+    }
     
     try {
       // API로 JSON 파일에 저장
@@ -203,7 +225,8 @@ export default function BrandSalesPage({ brand, title }: BrandSalesPageProps) {
         },
         body: JSON.stringify({
           brand,
-          data: editingForecastInventory,
+          data: filteredData,
+          referenceMonth,
         }),
       });
 
@@ -212,20 +235,40 @@ export default function BrandSalesPage({ brand, title }: BrandSalesPageProps) {
         throw new Error(errorData.error || '저장에 실패했습니다.');
       }
 
-      // localStorage에도 백업
-      saveForecastInventoryToStorage(brand, editingForecastInventory);
+      // localStorage에도 백업 (필터링된 데이터)
+      saveForecastInventoryToStorage(brand, filteredData);
       
       // 현재 날짜/시간으로 업데이트
       const now = new Date().toISOString();
       setLastUpdatedDate(now);
+      // Context에도 업데이트
+      setContextLastUpdatedDate(brand, now);
       
-      // forecastInventoryData state 업데이트
+      // forecastInventoryData state 업데이트 (기존 데이터와 병합)
+      // 기준월 이전 데이터는 절대 변경하지 않음
       if (forecastInventoryData) {
+        const existingBrandData = forecastInventoryData.brands[brand] || {};
+        const mergedData: ForecastInventoryData = {};
+        
+        // 기존 데이터에서 기준월 이전 및 기준월은 유지 (과거 데이터 보호)
+        Object.keys(existingBrandData).forEach((month) => {
+          if (month <= referenceMonth) {
+            mergedData[month] = existingBrandData[month];
+          }
+        });
+        
+        // 기준월 이후 데이터만 업데이트
+        Object.keys(filteredData).forEach((month) => {
+          if (month > referenceMonth) {
+            mergedData[month] = filteredData[month];
+          }
+        });
+        
         const updatedData: ForecastInventorySummaryData = {
           ...forecastInventoryData,
           brands: {
             ...forecastInventoryData.brands,
-            [brand]: editingForecastInventory,
+            [brand]: mergedData,
           },
         };
         setForecastInventoryData(updatedData);
@@ -255,22 +298,13 @@ export default function BrandSalesPage({ brand, title }: BrandSalesPageProps) {
   const forecastInventoryBrandData: ForecastInventoryData | undefined =
     forecastInventoryData?.brands[brand];
   
-  // 기준월 계산 (inventoryData.months의 마지막 월)
-  const latestActualYm = useMemo(() => {
-    if (!inventoryData?.months || inventoryData.months.length === 0) return "2025.11";
-    const sortedMonths = [...inventoryData.months].sort((a, b) => {
-      const [yearA, monthA] = a.split(".").map(Number);
-      const [yearB, monthB] = b.split(".").map(Number);
-      if (yearA !== yearB) return yearA - yearB;
-      return monthA - monthB;
-    });
-    return sortedMonths[sortedMonths.length - 1];
-  }, [inventoryData?.months]);
+  // 기준월: 전역 Context에서 가져온 기준월 사용
+  const latestActualYm = referenceMonth;
   
-  // 편집 가능한 월 목록 (기준월 + 1부터 6개월)
+  // 편집 가능한 월 목록 (기준월 + 1부터 12개월)
   const forecastInventoryMonths: string[] = useMemo(() => {
-    return buildEditableMonths(latestActualYm, 6);
-  }, [latestActualYm]);
+    return buildEditableMonths(referenceMonth, 12);
+  }, [referenceMonth]);
 
   const actualArrivalBrandData: ActualArrivalData | undefined = actualArrivalData ?? undefined;
   // months는 데이터의 키에서 추출 (2025.01 ~ 2025.11)
@@ -285,7 +319,7 @@ export default function BrandSalesPage({ brand, title }: BrandSalesPageProps) {
 
   // 재고자산 표용: 25.10까지 Actual + 25.11~26.04 Forecast 재고자산
   const {
-    months: inventoryMonthsWithForecast,
+    months: inventoryMonthsWithForecastRaw,
     data: inventoryTabDataWithForecast,
   } = useMemo(() => {
     if (
@@ -315,6 +349,11 @@ export default function BrandSalesPage({ brand, title }: BrandSalesPageProps) {
     inventoryTabData,
   ]);
 
+  // 재고자산 표용: 24.01~26.12 고정 범위 필터링
+  const inventoryMonthsWithForecast = useMemo(() => {
+    return inventoryMonthsWithForecastRaw.filter(month => month >= "2024.01" && month <= "2026.12");
+  }, [inventoryMonthsWithForecastRaw]);
+
   // 재고자산/재고자산 차트용: 선택된 탭에는 forecast 재고를 반영
   const inventoryBrandDataForChart: InventoryBrandData | undefined = useMemo(() => {
     if (!inventoryBrandData) return undefined;
@@ -326,8 +365,12 @@ export default function BrandSalesPage({ brand, title }: BrandSalesPageProps) {
 
   // months 배열에 forecast 월 추가
   const allMonths = useMemo(() => {
-    if (!salesData?.months) return [];
-    const monthsSet = new Set(salesData.months);
+    const monthsSet = new Set<string>();
+    
+    // 기존 실적 월 추가
+    if (salesData?.months) {
+      salesData.months.forEach(month => monthsSet.add(month));
+    }
     
     // Forecast 월 추가
     if (salesBrandData) {
@@ -340,21 +383,33 @@ export default function BrandSalesPage({ brand, title }: BrandSalesPageProps) {
       });
     }
     
+    // 24.01~26.12까지의 모든 월을 강제로 포함 (데이터가 없어도 표시)
+    for (let year = 2024; year <= 2026; year++) {
+      for (let month = 1; month <= 12; month++) {
+        const monthStr = `${year}.${String(month).padStart(2, "0")}`;
+        monthsSet.add(monthStr);
+      }
+    }
+    
     // 월 정렬 (YYYY.MM 형식 기준)
-    return Array.from(monthsSet).sort((a, b) => {
+    const sortedMonths = Array.from(monthsSet).sort((a, b) => {
       const [yearA, monthA] = a.split(".").map(Number);
       const [yearB, monthB] = b.split(".").map(Number);
       if (yearA !== yearB) return yearA - yearB;
       return monthA - monthB;
     });
+    
+    // 24.01~26.12 고정 범위 필터링 (판매매출 표용)
+    return sortedMonths.filter(month => {
+      return month >= "2024.01" && month <= "2026.12";
+    });
   }, [salesData?.months, salesBrandData]);
 
   // 차트용 재고주수 데이터 계산 (히트맵과 동일한 계산 로직 사용)
-  const MONTHS_2025_WITH_FORECAST = [
-    "2025.01", "2025.02", "2025.03", "2025.04", "2025.05", "2025.06",
-    "2025.07", "2025.08", "2025.09", "2025.10", "2025.11", "2025.12",
-    "2026.01", "2026.02", "2026.03", "2026.04",
-  ];
+  // 기준월이 속한 연도의 1월~12월 + 다음 연도 1월~6월
+  const stockWeeksChartMonths = useMemo(() => {
+    return generateMonthsForYearAndNextHalf(referenceMonth);
+  }, [referenceMonth]);
 
   const stockWeeksChartData = useMemo(() => {
     if (!salesTabData || !inventoryTabDataWithForecast || !inventoryData?.daysInMonth) {
@@ -362,14 +417,14 @@ export default function BrandSalesPage({ brand, title }: BrandSalesPageProps) {
     }
     // 상품 타입 탭에 따라 차트 데이터 계산
     return computeStockWeeksForChart(
-      MONTHS_2025_WITH_FORECAST,
+      stockWeeksChartMonths,
       inventoryTabDataWithForecast,
       salesTabData,
       inventoryData.daysInMonth,
       stockWeekWindow,
       productTypeTab
     );
-  }, [salesTabData, inventoryTabDataWithForecast, inventoryData?.daysInMonth, stockWeekWindow, productTypeTab]);
+  }, [salesTabData, inventoryTabDataWithForecast, inventoryData?.daysInMonth, stockWeekWindow, productTypeTab, stockWeeksChartMonths]);
 
   // 타겟월 (26.03) deltaInventory 계산
   const TARGET_MONTH = "2026.03";
@@ -428,17 +483,6 @@ export default function BrandSalesPage({ brand, title }: BrandSalesPageProps) {
           <WarningBanner categories={allUnexpectedCategories} />
         )}
 
-        {/* 입고예정 자산 업데이트 정보 */}
-        {lastUpdatedDate && (
-          <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg flex items-center gap-2">
-            <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <span className="text-sm text-blue-800 font-medium">
-              💾 입고예정 자산: {formatUpdateDateTime(lastUpdatedDate)}
-            </span>
-          </div>
-        )}
 
         {/* 로딩/에러 */}
         {loading ? (
@@ -511,6 +555,7 @@ export default function BrandSalesPage({ brand, title }: BrandSalesPageProps) {
                 channelTab={channelTab}
                 productTypeTab={productTypeTab}
                 setProductTypeTab={setProductTypeTab}
+                referenceMonth={referenceMonth}
               />
             )}
 
@@ -526,6 +571,7 @@ export default function BrandSalesPage({ brand, title }: BrandSalesPageProps) {
                 daysInMonth={inventoryData.daysInMonth}
                 stockWeekWindow={stockWeekWindow}
                 stockWeek={stockWeeks[selectedTab]}
+                referenceMonth={referenceMonth}
               />
             )}
 
@@ -548,6 +594,7 @@ export default function BrandSalesPage({ brand, title }: BrandSalesPageProps) {
                   forecastInventoryData={forecastInventoryBrandData}
                   actualArrivalData={actualArrivalBrandData}
                   months={allMonths}
+                  referenceMonth={referenceMonth}
                 />
                 
                 {/* 범례 설명 */}
@@ -629,6 +676,22 @@ export default function BrandSalesPage({ brand, title }: BrandSalesPageProps) {
                         productTypeTab={productTypeTab}
                       />
                     </div>
+
+                    {/* 2026년 재고주수 */}
+                    {salesTabData && inventoryTabDataWithForecast && inventoryData?.daysInMonth && (
+                      <div className="mb-6">
+                        <h3 className="text-lg font-semibold text-gray-700 mb-3">2026년 재고주수</h3>
+                        <StockWeeksTable
+                          inventoryData={inventoryTabDataWithForecast}
+                          salesData={salesTabData}
+                          daysInMonth={inventoryData.daysInMonth}
+                          stockWeek={stockWeeks[selectedTab]}
+                          year="2026"
+                          stockWeekWindow={stockWeekWindow}
+                          productTypeTab={productTypeTab}
+                        />
+                      </div>
+                    )}
 
                     {/* 재고주수 계산식 범례 */}
                     <div className="mt-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
@@ -789,7 +852,7 @@ export default function BrandSalesPage({ brand, title }: BrandSalesPageProps) {
                       <div className="flex flex-col gap-2">
                         <div className="flex flex-wrap gap-4">
                           <span className="text-gray-400">
-                            기준월 ({latestActualYm}) 이후 6개월 입고예정 (수기입력 가능)
+                            기준월 ({referenceMonth}) 이후 12개월 입고예정 (수기입력 가능)
                           </span>
                           <span className="text-gray-400">금액단위: 1위안</span>
                         </div>
@@ -859,6 +922,7 @@ export default function BrandSalesPage({ brand, title }: BrandSalesPageProps) {
                         onSave={handleSaveForecastInventory}
                         onDataChange={setEditingForecastInventory}
                         lastUpdatedDate={lastUpdatedDate}
+                        referenceMonth={referenceMonth}
                       />
                     </>
                   ) : (

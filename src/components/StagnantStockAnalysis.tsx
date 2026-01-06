@@ -17,6 +17,7 @@ import type {
 import { DIMENSION_TABS, BRAND_CODE_MAP, STAGNANT_CHANNEL_TABS } from "@/types/stagnantStock";
 import CollapsibleSection from "./CollapsibleSection";
 import StagnantStockDetailModal from "./StagnantStockDetailModal";
+import { useReferenceMonth } from "@/contexts/ReferenceMonthContext";
 
 // 아이템 필터 탭 타입
 type ItemFilterTab = "ACC합계" | "신발" | "모자" | "가방" | "기타";
@@ -582,7 +583,10 @@ export default function StagnantStockAnalysis({
   
   // 컨트롤 상태
   const [availableMonths, setAvailableMonths] = useState<string[]>([]);
-  const [targetMonth, setTargetMonth] = useState<string>("");
+  // 전역 기준월 사용
+  const { referenceMonth } = useReferenceMonth();
+  // API는 "YYYYMM" 형식을 사용하므로 변환
+  const targetMonth = referenceMonth.replace(".", "");
   const [internalThresholdPct, setInternalThresholdPct] = useState<number>(0.01);
   const [internalDimensionTab, setInternalDimensionTab] = useState<DimensionTab>("스타일");
   
@@ -867,16 +871,13 @@ export default function StagnantStockAnalysis({
     }
   }, [brandCode, targetMonth, dimensionTab, thresholdPct, minQty, currentMonthMinQty]);
 
-  // 초기 월 목록 로드
+  // 초기 월 목록 로드 (전역 기준월 변경 시에도 업데이트)
   useEffect(() => {
     const loadInitialMonths = async () => {
       try {
-        // 기본 기준월을 2025년 11월로 고정
-        const defaultMonth = "202511";
-        
         const params = new URLSearchParams({
           brand: brandCode,
-          targetMonth: defaultMonth,
+          targetMonth: targetMonth,
           dimensionTab: "스타일",
           thresholdPct: "0.01",
         });
@@ -886,11 +887,6 @@ export default function StagnantStockAnalysis({
           const result: StagnantStockResponse = await response.json();
           if (result.availableMonths && result.availableMonths.length > 0) {
             setAvailableMonths(result.availableMonths);
-            // 2025년 11월이 availableMonths에 있으면 선택, 없으면 최신 월 선택
-            const targetDefault = result.availableMonths.includes("202511") 
-              ? "202511" 
-              : result.availableMonths[0];
-            setTargetMonth(targetDefault);
           }
         }
       } catch (err) {
@@ -898,15 +894,17 @@ export default function StagnantStockAnalysis({
       }
     };
     
-    loadInitialMonths();
-  }, [brandCode]);
+    if (targetMonth) {
+      loadInitialMonths();
+    }
+  }, [brandCode, targetMonth]);
 
   // 조건 변경 시 데이터 재로드 (탭 전환 시 반드시 재계산)
   useEffect(() => {
     if (targetMonth) {
       fetchData();
     }
-  }, [fetchData, targetMonth, dimensionTab, thresholdPct, currentMonthMinQty]);
+  }, [fetchData, targetMonth, dimensionTab, thresholdPct, currentMonthMinQty, referenceMonth]);
 
   // 정렬 핸들러
   const handleSort = (key: SortKey) => {
@@ -944,18 +942,12 @@ export default function StagnantStockAnalysis({
           <div className="flex flex-wrap items-end justify-between gap-4">
             {/* 왼쪽: 컨트롤들 */}
             <div className="flex flex-wrap items-end gap-4">
-              {/* 기준월 */}
+              {/* 기준월 표시 (전역 기준월 사용) */}
               <div className="flex flex-col gap-1">
                 <label className="text-sm font-medium text-gray-700">기준월</label>
-                <select
-                  value={targetMonth}
-                  onChange={(e) => setTargetMonth(e.target.value)}
-                  className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  {availableMonths.map(m => (
-                    <option key={m} value={m}>{formatMonth(m)}</option>
-                  ))}
-                </select>
+                <div className="px-3 py-2 border border-gray-300 rounded-md text-sm bg-gray-50 text-gray-700">
+                  {formatMonth(targetMonth)}
+                </div>
               </div>
 
               {/* 정체재고 기준 */}

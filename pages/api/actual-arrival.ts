@@ -9,19 +9,38 @@ const BRAND_CODE_MAP: Record<string, string> = {
   DISCOVERY: "X",
 };
 
-interface SnowflakeRow {
-  item: string;
-  "25.01": number;
-  "25.02": number;
-  "25.03": number;
-  "25.04": number;
-  "25.05": number;
-  "25.06": number;
-  "25.07": number;
-  "25.08": number;
-  "25.09": number;
-  "25.10": number;
-  "25.11": number;
+// 기준월까지의 월 목록 생성 (2025.01부터 기준월까지)
+function generateMonths(startMonth: string, endMonth: string): { months: string[]; yyyymmList: number[]; monthKeys: string[] } {
+  const [startYear, startMonthNum] = startMonth.split(".").map(Number);
+  const [endYear, endMonthNum] = endMonth.split(".").map(Number);
+  
+  const months: string[] = [];
+  const yyyymmList: number[] = [];
+  const monthKeys: string[] = [];
+  
+  let currentYear = startYear;
+  let currentMonth = startMonthNum;
+  
+  while (
+    currentYear < endYear || 
+    (currentYear === endYear && currentMonth <= endMonthNum)
+  ) {
+    const monthStr = `${currentYear}.${String(currentMonth).padStart(2, '0')}`;
+    const yyyymm = currentYear * 100 + currentMonth;
+    const monthKey = `${String(currentYear).slice(2)}.${String(currentMonth).padStart(2, '0')}`;
+    
+    months.push(monthStr);
+    yyyymmList.push(yyyymm);
+    monthKeys.push(monthKey);
+    
+    currentMonth++;
+    if (currentMonth > 12) {
+      currentMonth = 1;
+      currentYear++;
+    }
+  }
+  
+  return { months, yyyymmList, monthKeys };
 }
 
 export default async function handler(
@@ -32,10 +51,19 @@ export default async function handler(
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  const { brand } = req.query;
+  const { brand, referenceMonth } = req.query;
 
   if (!brand || typeof brand !== "string") {
     return res.status(400).json({ error: "brand parameter is required" });
+  }
+
+  // 기준월이 없으면 기본값 사용 (2025.11)
+  const endMonth = (referenceMonth as string) || "2025.11";
+  const startMonth = "2024.01";
+
+  // 기준월 검증
+  if (!endMonth.match(/^\d{4}\.\d{2}$/)) {
+    return res.status(400).json({ error: "Invalid referenceMonth format. Expected YYYY.MM" });
   }
 
   const brdCd = BRAND_CODE_MAP[brand] || brand;
@@ -43,12 +71,26 @@ export default async function handler(
     return res.status(400).json({ error: "Invalid brand. Must be MLB, MLB KIDS, or DISCOVERY" });
   }
 
-  // 브랜드 코드 검증 및 로깅
-  console.log(`[actual-arrival] brand=${brand}, brdCd=${brdCd}`);
+  // 기준월까지의 월 목록 생성
+  const { months, yyyymmList, monthKeys } = generateMonths(startMonth, endMonth);
+  
+  // 시작월과 종료월을 YYYYMM 형식으로 변환
+  const startYyyymm = parseInt(startMonth.replace(".", ""));
+  const endYyyymm = parseInt(endMonth.replace(".", ""));
+
+  console.log(`[actual-arrival] brand=${brand}, brdCd=${brdCd}, referenceMonth=${endMonth}, months=${months.length}`);
 
   try {
-    // Snowflake SQL (문자열 치환 방식으로 brdCd 직접 삽입)
-    // brdCd는 M/I/X 중 하나로만 허용되므로 SQL 인젝션 안전
+    // PIVOT 컬럼 동적 생성
+    const pivotColumns = yyyymmList.map(yyyymm => yyyymm.toString()).join(",");
+    
+    // SELECT 컬럼 동적 생성
+    const selectColumns = yyyymmList.map((yyyymm, idx) => {
+      const monthKey = monthKeys[idx];
+      return `NVL("${yyyymm}",0) AS "${monthKey}"`;
+    }).join(",\n    ");
+
+    // Snowflake SQL 동적 생성
     const sql = `
 WITH base AS (
     SELECT
@@ -64,7 +106,7 @@ WITH base AS (
     JOIN sap_fnf.mst_prdt p
       ON a.prdt_cd = p.prdt_cd
     WHERE a.brd_cd = '${brdCd}'
-      AND a.yyyymm BETWEEN 202501 AND 202511
+      AND a.yyyymm BETWEEN ${startYyyymm} AND ${endYyyymm}
       AND p.prdt_hrrc1_nm = 'ACC'
       AND p.prdt_hrrc2_nm IN ('Shoes','Headwear','Bag','Acc_etc')
 ),
@@ -80,22 +122,12 @@ pv AS (
     SELECT *
     FROM agg
     PIVOT (
-        SUM(in_stock_amt) FOR yyyymm IN (202501,202502,202503,202504,202505,202506,202507,202508,202509,202510,202511)
+        SUM(in_stock_amt) FOR yyyymm IN (${pivotColumns})
     )
 )
 SELECT
       item
-    , NVL("202501",0) AS "25.01"
-    , NVL("202502",0) AS "25.02"
-    , NVL("202503",0) AS "25.03"
-    , NVL("202504",0) AS "25.04"
-    , NVL("202505",0) AS "25.05"
-    , NVL("202506",0) AS "25.06"
-    , NVL("202507",0) AS "25.07"
-    , NVL("202508",0) AS "25.08"
-    , NVL("202509",0) AS "25.09"
-    , NVL("202510",0) AS "25.10"
-    , NVL("202511",0) AS "25.11"
+    , ${selectColumns}
 FROM pv
 ORDER BY
     CASE item
@@ -108,27 +140,14 @@ ORDER BY
     END
     `;
 
-    // 디버깅: 실행할 SQL 확인 (brdCd 부분만)
-    console.log(`[actual-arrival] Executing SQL with brd_cd = '${brdCd}'`);
+    console.log(`[actual-arrival] Executing SQL with brd_cd = '${brdCd}', range = ${startYyyymm}~${endYyyymm}`);
 
-    const rows: SnowflakeRow[] = await runQuery(sql);
+    const rows = await runQuery(sql) as any[];
 
-    // 디버깅: 쿼리 결과 확인 (사용자 요청 형식)
     console.log("actual-arrival rows.length", rows.length);
-    if (rows.length > 0) {
-      console.log("actual-arrival first row", rows[0]);
-      // 실제 키 이름 확인
-      console.log("actual-arrival first row keys:", Object.keys(rows[0]));
-      // 첫 번째 행의 모든 속성 값 확인
-      console.log("actual-arrival first row values:", JSON.stringify(rows[0], null, 2));
-    } else {
-      console.warn(`[actual-arrival] No rows returned from query. brdCd=${brdCd}`);
-    }
 
     // Snowflake 결과를 ActualArrivalData 형식으로 변환
     const result: ActualArrivalData = {};
-    const months = ["2025.01", "2025.02", "2025.03", "2025.04", "2025.05", "2025.06", "2025.07", "2025.08", "2025.09", "2025.10", "2025.11"];
-    const monthKeys = ["25.01", "25.02", "25.03", "25.04", "25.05", "25.06", "25.07", "25.08", "25.09", "25.10", "25.11"];
 
     // 각 월별로 데이터 초기화
     months.forEach(month => {
@@ -155,18 +174,8 @@ ORDER BY
       // 각 월별 데이터 추출 및 변환
       monthKeys.forEach((monthKey, idx) => {
         const month = months[idx];
-        
-        // 컬럼 키 접근: "25.01" 형식으로 직접 접근
-        // Snowflake는 alias를 그대로 키로 사용하므로 "25.01"로 접근
-        const value = (row as any)[monthKey];
-        
-        // 숫자 값 처리 (null/undefined는 0으로)
+        const value = row[monthKey];
         const numValue = value != null ? Number(value) : 0;
-        
-        // 디버깅: 첫 번째 행의 첫 번째 월 값 확인
-        if (rows.indexOf(row) === 0 && idx === 0) {
-          console.log(`[actual-arrival] Reading value for monthKey="${monthKey}":`, value, "→", numValue);
-        }
         
         if (result[month] && itemKey) {
           (result[month] as any)[itemKey] = numValue;

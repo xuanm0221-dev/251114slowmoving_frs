@@ -8,7 +8,7 @@ import {
   ItemTab,
   ActualArrivalData,
 } from "@/types/sales";
-import { formatAmountM, formatMonth, cn } from "@/lib/utils";
+import { formatAmountM, formatMonth, cn, generateMonthsFromReference } from "@/lib/utils";
 
 interface InventoryStockSummaryTableProps {
   selectedTab: ItemTab;
@@ -17,6 +17,7 @@ interface InventoryStockSummaryTableProps {
   forecastInventoryData?: ForecastInventoryData;
   actualArrivalData?: ActualArrivalData;
   months: string[];
+  referenceMonth: string;
 }
 
 export default function InventoryStockSummaryTable({
@@ -26,6 +27,7 @@ export default function InventoryStockSummaryTable({
   forecastInventoryData,
   actualArrivalData,
   months,
+  referenceMonth,
 }: InventoryStockSummaryTableProps) {
   // 재고자산(M) 계산: 전체재고 ÷ 1,000,000
   const getInventoryValue = (month: string): number => {
@@ -52,7 +54,8 @@ export default function InventoryStockSummaryTable({
   // 재고입고금액(M) 계산:
   // 1) 실제 입고액(ActualArrival)이 있으면 우선 사용
   // 2) 없으면 입고예정(ForecastInventory)을 사용
-  // 3) 모두 없으면 null
+  // 3) 26.07~26.12 구간에서는 데이터가 없어도 0 반환
+  // 4) 그 외는 null
   const getArrivalValue = (month: string): number | null => {
     // 1. 실제 입고 데이터
     const actualMonth = actualArrivalData?.[month];
@@ -74,30 +77,44 @@ export default function InventoryStockSummaryTable({
 
     // 2. 입고예정 데이터
     const forecastMonth = forecastInventoryData?.[month];
-    if (!forecastMonth) return null;
-
-    if (selectedTab === "전체") {
-      const total =
-        (forecastMonth.Shoes || 0) +
-        (forecastMonth.Headwear || 0) +
-        (forecastMonth.Bag || 0) +
-        (forecastMonth.Acc_etc || 0);
-      return Math.round(total / 1_000_000);
-    } else {
-      const itemValue = forecastMonth[selectedTab];
-      if (itemValue === undefined) return null;
-      return Math.round(itemValue / 1_000_000);
+    if (forecastMonth) {
+      if (selectedTab === "전체") {
+        const total =
+          (forecastMonth.Shoes || 0) +
+          (forecastMonth.Headwear || 0) +
+          (forecastMonth.Bag || 0) +
+          (forecastMonth.Acc_etc || 0);
+        return Math.round(total / 1_000_000);
+      } else {
+        const itemValue = forecastMonth[selectedTab];
+        if (itemValue === undefined) return null;
+        return Math.round(itemValue / 1_000_000);
+      }
     }
+
+    // 3. 26.07~26.12 구간에서는 데이터가 없어도 0 반환
+    const [year, monthNum] = month.split(".").map(Number);
+    if (year === 2026 && monthNum >= 7 && monthNum <= 12) {
+      return 0;
+    }
+
+    // 4. 그 외는 null 반환
+    return null;
   };
 
-  // forecast 월인지 확인
+  // forecast 월인지 확인 (26.01~26.12까지 모두 forecast로 판단)
   const isForecastMonth = (month: string): boolean => {
+    // 26.01~26.12까지는 모두 forecast로 판단
+    const [year, monthNum] = month.split(".").map(Number);
+    if (year === 2026 && monthNum >= 1 && monthNum <= 12) {
+      return true;
+    }
     return salesData[month]?.isForecast === true;
   };
 
-  // 표에 표시할 월 필터링 (25.01 ~ 26.04)
+  // 표에 표시할 월 필터링 (24.01부터 26.12까지)
   const displayMonths = months.filter(
-    (m) => m >= "2025.01" && m <= "2026.04"
+    (m) => m >= "2024.01" && m <= "2026.12"
   );
 
   if (displayMonths.length === 0) {

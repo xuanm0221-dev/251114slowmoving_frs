@@ -79,6 +79,108 @@ export function formatUpdateDateTime(isoString: string): string {
   }
 }
 
+/**
+ * 기준월 기준으로 N개월까지의 월 배열 생성
+ * @param referenceMonth 기준월 (예: "2025.12")
+ * @param count 개월 수 (예: 6)
+ * @returns 기준월 포함하여 count개월까지의 월 배열 (예: ["2025.12", "2026.01", ..., "2026.05"])
+ */
+export function generateMonthsFromReference(referenceMonth: string, count: number): string[] {
+  const result: string[] = [];
+  const [year, month] = referenceMonth.split(".").map(Number);
+  
+  let currentYear = year;
+  let currentMonth = month;
+  
+  for (let i = 0; i < count; i++) {
+    const monthStr = `${currentYear}.${currentMonth.toString().padStart(2, "0")}`;
+    result.push(monthStr);
+    
+    currentMonth++;
+    if (currentMonth > 12) {
+      currentMonth = 1;
+      currentYear++;
+    }
+  }
+  
+  return result;
+}
+
+/**
+ * 기준월 기준으로 1년(12개월)까지의 월 배열 생성
+ * @param referenceMonth 기준월 (예: "2025.12")
+ * @returns 기준월 포함하여 12개월까지의 월 배열
+ */
+export function generateOneYearMonths(referenceMonth: string): string[] {
+  return generateMonthsFromReference(referenceMonth, 12);
+}
+
+/**
+ * 기준월 기준으로 과거 N개월 + 기준월 + 미래 M개월의 월 배열 생성
+ * @param referenceMonth 기준월 (예: "2025.12")
+ * @param pastMonths 과거 개월 수 (예: 12)
+ * @param futureMonths 미래 개월 수 (예: 6)
+ * @returns 기준월 기준 과거 N개월 + 기준월 + 미래 M개월 배열
+ */
+export function generateMonthsAroundReference(
+  referenceMonth: string,
+  pastMonths: number,
+  futureMonths: number
+): string[] {
+  const [refYear, refMonth] = referenceMonth.split(".").map(Number);
+  const months: string[] = [];
+  
+  // 과거 N개월 (기준월 제외)
+  for (let i = pastMonths; i >= 1; i--) {
+    let year = refYear;
+    let month = refMonth - i;
+    if (month <= 0) {
+      month += 12;
+      year -= 1;
+    }
+    months.push(`${year}.${String(month).padStart(2, "0")}`);
+  }
+  
+  // 기준월 포함
+  months.push(referenceMonth);
+  
+  // 미래 M개월
+  for (let i = 1; i <= futureMonths; i++) {
+    let year = refYear;
+    let month = refMonth + i;
+    if (month > 12) {
+      month -= 12;
+      year += 1;
+    }
+    months.push(`${year}.${String(month).padStart(2, "0")}`);
+  }
+  
+  return months;
+}
+
+/**
+ * 기준월이 속한 연도의 1월~12월 + 다음 연도 1월~6월의 월 배열 생성
+ * @param referenceMonth 기준월 (예: "2025.12")
+ * @returns 기준월 연도 전체(1월~12월) + 다음 연도 6개월(1월~6월) 배열
+ */
+export function generateMonthsForYearAndNextHalf(referenceMonth: string): string[] {
+  const [refYear, refMonth] = referenceMonth.split(".").map(Number);
+  const months: string[] = [];
+  
+  // 기준월이 속한 연도의 1월부터 기준월까지
+  for (let month = 1; month <= refMonth; month++) {
+    months.push(`${refYear}.${String(month).padStart(2, "0")}`);
+  }
+  
+  // 다음 연도 1월~6월
+  const nextYear = refYear + 1;
+  for (let month = 1; month <= 6; month++) {
+    months.push(`${nextYear}.${String(month).padStart(2, "0")}`);
+  }
+  
+  return months;
+}
+
 
 
 

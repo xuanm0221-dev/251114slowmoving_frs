@@ -21,6 +21,7 @@ import {
   StockWeekWindow,
 } from "@/types/sales";
 import { StockWeeksChartPoint, computeStockWeeksForChart, ProductTypeTab, getWindowMonths, getDaysInMonthFromYm, calculateWeeks } from "@/utils/stockWeeks";
+import { generateMonthsForYearAndNextHalf } from "@/lib/utils";
 
 interface StockWeeksChartProps {
   selectedTab: ItemTab;
@@ -35,6 +36,7 @@ interface StockWeeksChartProps {
   channelTab: ChannelTab;
   productTypeTab: ProductTypeTab;
   setProductTypeTab: (tab: ProductTypeTab) => void;
+  referenceMonth: string; // 기준월 추가
 }
 
 // 아이템별 색상 정의 (주력: 진한색, 아울렛: 연한색)
@@ -61,15 +63,6 @@ const MONTHS_2025 = [
   "2025.07", "2025.08", "2025.09", "2025.10", "2025.11", "2025.12"
 ];
 
-// 2025년 히트맵에는 26.04까지의 재고주수를 함께 표시
-const MONTHS_2025_WITH_FORECAST = [
-  ...MONTHS_2025,
-  "2026.01",
-  "2026.02",
-  "2026.03",
-  "2026.04",
-];
-
 // 채널 라벨
 const CHANNEL_LABELS: Record<ChannelTab, string> = {
   ALL: "전체",
@@ -88,7 +81,12 @@ export default function StockWeeksChart({
   channelTab,
   productTypeTab,
   setProductTypeTab,
+  referenceMonth,
 }: StockWeeksChartProps) {
+  // 기준월이 속한 연도의 1월~12월 + 다음 연도 1월~6월 = 총 18개월
+  const chartMonths = useMemo(() => {
+    return generateMonthsForYearAndNextHalf(referenceMonth);
+  }, [referenceMonth]);
 
   // 단일 아이템 차트 데이터: props로 받은 데이터 그대로 사용
   const singleItemChartData = useMemo(() => {
@@ -108,7 +106,7 @@ export default function StockWeeksChart({
       
       if (itemInventoryData && itemSalesData) {
         itemChartDataMap[itemTab] = computeStockWeeksForChart(
-          MONTHS_2025_WITH_FORECAST,
+          chartMonths,
           itemInventoryData,
           itemSalesData,
           daysInMonth,
@@ -119,7 +117,7 @@ export default function StockWeeksChart({
     });
 
     // 월별로 데이터 포인트 생성
-    return MONTHS_2025_WITH_FORECAST.map((month, index) => {
+    return chartMonths.map((month, index) => {
       // 월 레이블 생성: 25.01 형식, 예상 월은 (F) 추가
       const [yearStr, monthStr] = month.split(".");
       const yearShort = yearStr.slice(-2);

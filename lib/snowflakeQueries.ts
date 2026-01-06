@@ -147,7 +147,7 @@ export const REMARK_SELECTION_CTE = `
     CROSS JOIN (
       SELECT DISTINCT TO_CHAR(sale_dt, 'YYYYMM') AS q_month
       FROM CHN.DW_SALE
-      WHERE sale_dt >= '2024-01-01' AND sale_dt < '2025-12-01'
+      WHERE sale_dt >= '2024-01-01' AND sale_dt < '2026-01-01'
     ) months
   ),
   remark_selected AS (
@@ -243,7 +243,7 @@ sales_raw AS (
   INNER JOIN FNF.CHN.MST_PRDT_SCS p 
     ON s.prdt_scs_cd = p.prdt_scs_cd
   WHERE s.sale_dt >= '2024-01-01'
-    AND s.sale_dt < '2025-12-01'
+    AND s.sale_dt < '2026-01-01'
     AND s.brd_cd = '${brandCode}'
     AND p.parent_prdt_kind_cd = 'A'
     AND p.prdt_kind_nm_en IN ('Shoes', 'Headwear', 'Bag', 'Acc_etc')
@@ -492,6 +492,7 @@ or_sales_raw AS (
     s.tag_amt,
     s.prdt_scs_cd,
     p.sesn,
+    p.operate_standard,
     p.remark1, p.remark2, p.remark3, p.remark4, p.remark5,
     p.remark6, p.remark7, p.remark8, p.remark9, p.remark10,
     p.remark11, p.remark12, p.remark13, p.remark14, p.remark15
@@ -525,26 +526,29 @@ or_sales_with_remark_calc AS (
 or_sales_with_remark AS (
   SELECT 
     oswr.*,
-    CASE oswr.remark_num
-      WHEN 1 THEN oswr.remark1
-      WHEN 2 THEN oswr.remark2
-      WHEN 3 THEN oswr.remark3
-      WHEN 4 THEN oswr.remark4
-      WHEN 5 THEN oswr.remark5
-      WHEN 6 THEN oswr.remark6
-      WHEN 7 THEN oswr.remark7
-      WHEN 8 THEN oswr.remark8
-      WHEN 9 THEN oswr.remark9
-      WHEN 10 THEN oswr.remark10
-      WHEN 11 THEN oswr.remark11
-      WHEN 12 THEN oswr.remark12
-      WHEN 13 THEN oswr.remark13
-      WHEN 14 THEN oswr.remark14
-      WHEN 15 THEN oswr.remark15
+    CASE 
+      -- 2025년 12월부터 operate_standard 사용
+      WHEN oswr.sale_yymm >= '202512' THEN oswr.operate_standard
+      -- 2025년 11월까지는 remark 방식 유지
+      WHEN oswr.remark_num = 1 THEN oswr.remark1
+      WHEN oswr.remark_num = 2 THEN oswr.remark2
+      WHEN oswr.remark_num = 3 THEN oswr.remark3
+      WHEN oswr.remark_num = 4 THEN oswr.remark4
+      WHEN oswr.remark_num = 5 THEN oswr.remark5
+      WHEN oswr.remark_num = 6 THEN oswr.remark6
+      WHEN oswr.remark_num = 7 THEN oswr.remark7
+      WHEN oswr.remark_num = 8 THEN oswr.remark8
+      WHEN oswr.remark_num = 9 THEN oswr.remark9
+      WHEN oswr.remark_num = 10 THEN oswr.remark10
+      WHEN oswr.remark_num = 11 THEN oswr.remark11
+      WHEN oswr.remark_num = 12 THEN oswr.remark12
+      WHEN oswr.remark_num = 13 THEN oswr.remark13
+      WHEN oswr.remark_num = 14 THEN oswr.remark14
+      WHEN oswr.remark_num = 15 THEN oswr.remark15
       ELSE NULL
     END AS op_std
   FROM or_sales_with_remark_calc oswr
-  WHERE oswr.remark_num >= 1 AND oswr.remark_num <= 15
+  WHERE (oswr.sale_yymm >= '202512' OR (oswr.remark_num >= 1 AND oswr.remark_num <= 15))
 ),
 
 -- Step 10: OR 판매 주력/아울렛 분류

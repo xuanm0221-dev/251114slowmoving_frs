@@ -34,6 +34,11 @@ export default function SalesTable({ data, months }: SalesTableProps) {
   };
 
   const isForecastMonth = (month: string): boolean => {
+    // 26.01~26.12까지는 모두 forecast로 판단
+    const [year, monthNum] = month.split(".").map(Number);
+    if (year === 2026 && monthNum >= 1 && monthNum <= 12) {
+      return true;
+    }
     return data[month]?.isForecast === true;
   };
 

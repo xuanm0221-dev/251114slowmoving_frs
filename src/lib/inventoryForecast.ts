@@ -110,7 +110,7 @@ export function buildInventoryForecastForTab(
     inventoryMonths,
     salesBrandDataWithForecast,
     forecastInventoryBrandData,
-    forecastMonthsCount = 6,
+    forecastMonthsCount = 12,
   } = params;
 
   if (

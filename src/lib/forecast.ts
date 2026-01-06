@@ -63,7 +63,7 @@ function findLatestActualYm(
 }
 
 /**
- * Forecast 대상 월 리스트 생성 (최대 6개월)
+ * Forecast 대상 월 리스트 생성 (최대 12개월)
  */
 function generateForecastMonths(
   latestActualYm: number,
@@ -73,7 +73,7 @@ function generateForecastMonths(
   let currentYm = addMonth(latestActualYm);
   let count = 0;
 
-  while (count < 6) {
+  while (count < 12) {
     const monthStr = ymToMonth(currentYm);
     // 이미 실적이 있는 월은 제외
     if (!existingMonths.has(monthStr)) {

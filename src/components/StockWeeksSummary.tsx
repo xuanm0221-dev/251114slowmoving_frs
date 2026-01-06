@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useMemo } from "react";
 import { 
   Brand, 
   ItemTab, 
@@ -15,6 +15,7 @@ import {
 import { cn } from "@/lib/utils";
 import { computeStockWeeksForRowType, getWindowMonths } from "@/utils/stockWeeks";
 import { PRODUCT_TYPE_RULES } from "@/constants/businessRules";
+import { useReferenceMonth } from "@/contexts/ReferenceMonthContext";
 
 interface StockWeeksSummaryProps {
   brand: Brand;
@@ -54,13 +55,6 @@ const SUMMARY_ROWS = [
   { label: "- 직영", level: 2, type: "warehouse_outlet" },  // 창고 아울렛 (직영에서만 소진)
 ];
 
-// 2025년 월 옵션
-const MONTHS_2025 = Array.from({ length: 12 }, (_, i) => ({
-  value: `2025.${String(i + 1).padStart(2, "0")}`,
-  label: `${i + 1}월`,
-}));
-
-
 export default function StockWeeksSummary({
   brand,
   inventoryBrandData,
@@ -70,19 +64,9 @@ export default function StockWeeksSummary({
   onStockWeekChange,
   stockWeekWindow,
 }: StockWeeksSummaryProps) {
-  // 가장 최근 데이터가 있는 월 찾기
-  const getLatestMonth = (): string => {
-    const allData = inventoryBrandData["전체"];
-    for (let i = 11; i >= 0; i--) {
-      const month = `2025.${String(i + 1).padStart(2, "0")}`;
-      if (allData[month]) {
-        return month;
-      }
-    }
-    return "2025.10"; // 기본값
-  };
-
-  const [selectedMonth, setSelectedMonth] = useState<string>(getLatestMonth());
+  // 전역 기준월 사용
+  const { referenceMonth } = useReferenceMonth();
+  const selectedMonth = referenceMonth;
 
   // 직영재고 계산 함수 (retail_core 행 타입용)
   const calculateRetailStock = (orSales: number, days: number, itemTab: ItemTab): number => {
@@ -193,6 +177,13 @@ export default function StockWeeksSummary({
       const [yearStr, monthStr] = yearMonth.split(".");
       const year = parseInt(yearStr);
       const monthNum = parseInt(monthStr);
+      
+      // 2025.12부터는 operate_standard 사용
+      if (year > 2025 || (year === 2025 && monthNum >= 12)) {
+        const startYY = String(year).slice(2);
+        const endYY = String(year + 1).slice(2);
+        return `operate_standard: ${startYY}.12~${endYY}.02`;
+      }
       
       // 23.12 기준으로 remark 번호 계산
       const baseYear = 2023;
@@ -401,22 +392,6 @@ export default function StockWeeksSummary({
           <span className="text-blue-500">📋</span>
           {brand} 아이템별 재고 SUMMARY
         </h2>
-        
-        {/* 월 선택 드롭다운 */}
-        <div className="flex items-center gap-2">
-          <span className="text-sm text-gray-600">기준 월:</span>
-          <select
-            value={selectedMonth}
-            onChange={(e) => setSelectedMonth(e.target.value)}
-            className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          >
-            {MONTHS_2025.map((month) => (
-              <option key={month.value} value={month.value}>
-                {month.label}
-              </option>
-            ))}
-          </select>
-        </div>
       </div>
 
       {/* 카드 그리드 */}

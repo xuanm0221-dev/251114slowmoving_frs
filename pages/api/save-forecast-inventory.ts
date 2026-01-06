@@ -34,11 +34,14 @@ export default async function handler(
   }
 
   try {
-    const { brand, data } = req.body;
+    const { brand, data, referenceMonth } = req.body;
 
     if (!brand || !data) {
       return res.status(400).json({ error: "Brand and data are required" });
     }
+
+    // 기준월이 없으면 기본값 사용 (2025.11)
+    const endMonth = (referenceMonth as string) || "2025.11";
 
     // JSON 파일 경로
     const filePath = path.join(
@@ -58,8 +61,27 @@ export default async function handler(
       existingData = { brands: {} };
     }
 
-    // 해당 브랜드 데이터 업데이트
-    existingData.brands[brand] = data;
+    // 해당 브랜드 데이터 업데이트 (기준월 이후만 업데이트)
+    const existingBrandData = existingData.brands[brand] || {};
+    const mergedData: ForecastInventoryData = {};
+    
+    // 기존 데이터에서 기준월 이전 및 기준월은 유지 (과거 데이터 보호)
+    Object.keys(existingBrandData).forEach((month) => {
+      if (month <= endMonth) {
+        mergedData[month] = existingBrandData[month];
+      }
+    });
+    
+    // 새 데이터에서 기준월 이후만 추가 (기준월 이후만 업데이트)
+    Object.keys(data).forEach((month) => {
+      // 기준월 이후만 추가 (기준월 이전은 절대 변경하지 않음)
+      if (month > endMonth) {
+        mergedData[month] = data[month];
+      }
+      // 기준월 이전 데이터가 포함되어 있으면 무시 (보안상 안전장치)
+    });
+    
+    existingData.brands[brand] = mergedData;
 
     // 메타데이터 업데이트 (마지막 수정 시간)
     if (!existingData.metadata) {

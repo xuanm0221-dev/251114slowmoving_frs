@@ -18,6 +18,7 @@ import {
 import type { Brand } from "@/types/sales";
 import { BRAND_CODE_MAP, DIMENSION_TABS } from "@/types/stagnantStock";
 import type { DimensionTab } from "@/types/stagnantStock";
+import { useReferenceMonth } from "@/contexts/ReferenceMonthContext";
 
 // 아이템 필터 타입
 type ItemFilterTab = "ACC합계" | "신발" | "모자" | "가방" | "기타";
@@ -340,14 +341,16 @@ const SalesTooltip = ({ active, payload, label, data2024, data2025 }: SalesToolt
   );
 };
 
-// 데이터 기준월 제한 상수 (2025년 11월까지만 표시)
-const MAX_MONTH = "202511";
-
 export default function InventorySeasonChart({ brand, dimensionTab = "스타일", onDimensionTabChange, thresholdPct = 0.01, minQty = 10, currentMonthMinQty = 10, itemTab = "ACC합계", onItemTabChange }: InventorySeasonChartProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<InventorySeasonChartResponse | null>(null);
   const [mode, setMode] = useState<ChartMode>("전년대비");
+
+  // 전역 기준월 사용
+  const { referenceMonth } = useReferenceMonth();
+  // API는 "YYYYMM" 형식을 사용하므로 변환
+  const MAX_MONTH = referenceMonth.replace(".", "");
 
   const brandCode = BRAND_CODE_MAP[brand] || "M";
 
@@ -378,13 +381,13 @@ export default function InventorySeasonChart({ brand, dimensionTab = "스타일"
       }
     };
     fetchData();
-  }, [brandCode, dimensionTab, thresholdPct, minQty, currentMonthMinQty, itemTab]);
+  }, [brandCode, dimensionTab, thresholdPct, minQty, currentMonthMinQty, itemTab, referenceMonth]);
 
   // 차트 데이터 생성
   const chartData = useMemo(() => {
     if (!data) return [];
 
-    // [필터링] 2025년 11월까지만 표시 (막대차트 및 정체재고 계산 기준월 제한)
+    // [필터링] 전역 기준월까지만 표시 (막대차트 및 정체재고 계산 기준월 제한)
     const filtered2025 = data.year2025.filter(d => d.month <= MAX_MONTH);
 
     return filtered2025.map((curr, idx) => {
