@@ -33,13 +33,12 @@ const DIMENSION_KEY_MAP: Record<DimensionTab, { salesKey: string; stockKey: stri
   },
 };
 
-// 현재 연도 기준으로 당해/차기 연도 계산
-function getYearConfig(): { currentYear: string; nextYear: string } {
-  const now = new Date();
-  const year = now.getFullYear();
+// 기준월 기준으로 당해/차기 연도 계산
+function getYearConfig(targetMonth: string): { currentYear: string; nextYear: string } {
+  const year = parseInt(targetMonth.slice(0, 4), 10); // 기준월의 연도 사용
   return {
-    currentYear: String(year).slice(-2), // "25"
-    nextYear: String(year + 1).slice(-2), // "26"
+    currentYear: String(year).slice(-2), // 기준월 연도 기준
+    nextYear: String(year + 1).slice(-2), // 기준월 연도 + 1
   };
 }
 
@@ -507,7 +506,7 @@ export default async function handler(
   const prevMonth = getPrevMonth(targetMonth); // 전월 계산
   const daysInMonth = getDaysInMonth(targetMonth); // 해당 월의 일수
 
-  const { currentYear, nextYear } = getYearConfig();
+  const { currentYear, nextYear } = getYearConfig(targetMonth);
 
   try {
     // 1. 사용 가능한 월 목록 조회

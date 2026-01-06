@@ -55,13 +55,14 @@ interface InventorySeasonChartResponse {
   };
 }
 
-// 현재 연도 기준으로 당해/차기 연도 계산
-function getYearConfig(): { currentYear: string; nextYear: string } {
-  const now = new Date();
-  const year = now.getFullYear();
+// 기준월 기준으로 당해/차기 연도 계산
+function getYearConfig(referenceMonth: string): { currentYear: string; nextYear: string } {
+  // referenceMonth 형식: "YYYY.MM" 또는 "YYYYMM"
+  const monthStr = referenceMonth.replace(".", ""); // "YYYYMM" 형식으로 변환
+  const year = parseInt(monthStr.slice(0, 4), 10); // 기준월의 연도 사용
   return {
-    currentYear: String(year).slice(-2), // "25"
-    nextYear: String(year + 1).slice(-2), // "26"
+    currentYear: String(year).slice(-2), // 기준월 연도 기준
+    nextYear: String(year + 1).slice(-2), // 기준월 연도 + 1
   };
 }
 
@@ -303,7 +304,7 @@ export default async function handler(
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  const { brand, thresholdPct, dimensionTab, itemFilter, minQty: minQtyParam, currentMonthMinQty: currentMonthMinQtyParam } = req.query;
+  const { brand, thresholdPct, dimensionTab, itemFilter, minQty: minQtyParam, currentMonthMinQty: currentMonthMinQtyParam, referenceMonth: referenceMonthParam } = req.query;
 
   // 파라미터 검증
   if (!brand || typeof brand !== "string") {
@@ -316,8 +317,16 @@ export default async function handler(
   const itemTab = (itemFilter as ItemFilterTab) || "ACC합계";
   const minQty = parseInt(minQtyParam as string, 10) || 10; // 최소 수량 기준 (기본값 10) - 전월말 기준
   const currentMonthMinQty = parseInt(currentMonthMinQtyParam as string, 10) || 10; // 당월수량 기준 (기본값 10)
+  
+  // 기준월 파라미터 (기본값: 현재 날짜 기준)
+  const referenceMonth = (referenceMonthParam as string) || (() => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, "0");
+    return `${year}.${month}`;
+  })();
 
-  const { currentYear, nextYear } = getYearConfig();
+  const { currentYear, nextYear } = getYearConfig(referenceMonth);
 
   try {
     // 2024년 데이터 조회

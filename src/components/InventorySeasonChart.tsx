@@ -367,6 +367,7 @@ export default function InventorySeasonChart({ brand, dimensionTab = "스타일"
           currentMonthMinQty: String(currentMonthMinQty),
           dimensionTab: dimensionTab,
           itemFilter: itemTab,
+          referenceMonth: referenceMonth,
         });
         const response = await fetch(`/api/inventory-season-chart?${params}`);
         if (!response.ok) {
