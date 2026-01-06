@@ -1,0 +1,3541 @@
+{
+  "brands": {
+    "MLB": {
+      "전체": {
+        "2024.01": {
+          "전체_core": 2482034413,
+          "FRS_core": 1505027942,
+          "HQ_OR_core": 977006471,
+          "OR_sales_core": 31896688.0,
+          "전체_outlet": 876062851,
+          "FRS_outlet": 657743084,
+          "HQ_OR_outlet": 218319767,
+          "OR_sales_outlet": 20461787.0
+        },
+        "2024.02": {
+          "전체_core": 746690325,
+          "FRS_core": 0,
+          "HQ_OR_core": 746690325,
+          "OR_sales_core": 28000705.0,
+          "전체_outlet": 100760673,
+          "FRS_outlet": 0,
+          "HQ_OR_outlet": 100760673,
+          "OR_sales_outlet": 14759797.0
+        },
+        "2024.03": {
+          "전체_core": 1173948876,
+          "FRS_core": 0,
+          "HQ_OR_core": 1173948876,
+          "OR_sales_core": 32642905.0,
+          "전체_outlet": 189680011,
+          "FRS_outlet": 0,
+          "HQ_OR_outlet": 189680011,
+          "OR_sales_outlet": 11228591.0
+        },
+        "2024.04": {
+          "전체_core": 421213452,
+          "FRS_core": 0,
+          "HQ_OR_core": 421213452,
+          "OR_sales_core": 26058126.0,
+          "전체_outlet": 101740091,
+          "FRS_outlet": 0,
+          "HQ_OR_outlet": 101740091,
+          "OR_sales_outlet": 12323027.0
+        },
+        "2024.05": {
+          "전체_core": 323325649,
+          "FRS_core": 0,
+          "HQ_OR_core": 323325649,
+          "OR_sales_core": 34029470.0,
+          "전체_outlet": 155171973,
+          "FRS_outlet": 0,
+          "HQ_OR_outlet": 155171973,
+          "OR_sales_outlet": 15187422.0
+        },
+        "2024.06": {
+          "전체_core": 1907923538,
+          "FRS_core": 1393544005,
+          "HQ_OR_core": 514379533,
+          "OR_sales_core": 29838456.0,
+          "전체_outlet": 1244038051,
+          "FRS_outlet": 790700111,
+          "HQ_OR_outlet": 453337940,
+          "OR_sales_outlet": 8116950.0
+        },
+        "2024.07": {
+          "전체_core": 2242072013,
+          "FRS_core": 1280420484,
+          "HQ_OR_core": 961651529,
+          "OR_sales_core": 19006356.0,
+          "전체_outlet": 1247227762,
+          "FRS_outlet": 1010212407,
+          "HQ_OR_outlet": 237015355,
+          "OR_sales_outlet": 10010039.0
+        },
+        "2024.08": {
+          "전체_core": 2219294706,
+          "FRS_core": 1433233243,
+          "HQ_OR_core": 786061463,
+          "OR_sales_core": 29254046.0,
+          "전체_outlet": 1175278481,
+          "FRS_outlet": 961653183,
+          "HQ_OR_outlet": 213625298,
+          "OR_sales_outlet": 20090591.0
+        },
+        "2024.09": {
+          "전체_core": 2177152942,
+          "FRS_core": 1578827119,
+          "HQ_OR_core": 598325823,
+          "OR_sales_core": 27457613.0,
+          "전체_outlet": 1131246857,
+          "FRS_outlet": 939890079,
+          "HQ_OR_outlet": 191356778,
+          "OR_sales_outlet": 9320741.0
+        },
+        "2024.10": {
+          "전체_core": 1948103306,
+          "FRS_core": 1404066666,
+          "HQ_OR_core": 544036640,
+          "OR_sales_core": 58876063.0,
+          "전체_outlet": 1131313659,
+          "FRS_outlet": 988043417,
+          "HQ_OR_outlet": 143270242,
+          "OR_sales_outlet": 29285532.0
+        },
+        "2024.11": {
+          "전체_core": 1900749980,
+          "FRS_core": 1327063916,
+          "HQ_OR_core": 573686064,
+          "OR_sales_core": 49632291.0,
+          "전체_outlet": 1037574126,
+          "FRS_outlet": 919715571,
+          "HQ_OR_outlet": 117858555,
+          "OR_sales_outlet": 17749091.0
+        },
+        "2024.12": {
+          "전체_core": 2033842235,
+          "FRS_core": 1330804522,
+          "HQ_OR_core": 703037713,
+          "OR_sales_core": 38524090.0,
+          "전체_outlet": 974133760,
+          "FRS_outlet": 861154477,
+          "HQ_OR_outlet": 112979283,
+          "OR_sales_outlet": 9734248.0
+        },
+        "2025.01": {
+          "전체_core": 1715689287,
+          "FRS_core": 1242639566,
+          "HQ_OR_core": 473049721,
+          "OR_sales_core": 48458855.0,
+          "전체_outlet": 1172181232,
+          "FRS_outlet": 1026949120,
+          "HQ_OR_outlet": 145232112,
+          "OR_sales_outlet": 20027891.0
+        },
+        "2025.02": {
+          "전체_core": 1715302210,
+          "FRS_core": 1307994536,
+          "HQ_OR_core": 407307674,
+          "OR_sales_core": 29527108.0,
+          "전체_outlet": 1098713953,
+          "FRS_outlet": 971599724,
+          "HQ_OR_outlet": 127114229,
+          "OR_sales_outlet": 9586739.0
+        },
+        "2025.03": {
+          "전체_core": 1625115167,
+          "FRS_core": 1332475884,
+          "HQ_OR_core": 292639283,
+          "OR_sales_core": 40958520.0,
+          "전체_outlet": 1009984231,
+          "FRS_outlet": 904510803,
+          "HQ_OR_outlet": 105473428,
+          "OR_sales_outlet": 11751259.0
+        },
+        "2025.04": {
+          "전체_core": 1666107387,
+          "FRS_core": 1325890076,
+          "HQ_OR_core": 340217311,
+          "OR_sales_core": 32397737.0,
+          "전체_outlet": 976400948,
+          "FRS_outlet": 870356651,
+          "HQ_OR_outlet": 106044297,
+          "OR_sales_outlet": 8421066.0
+        },
+        "2025.05": {
+          "전체_core": 1607072771,
+          "FRS_core": 1288196854,
+          "HQ_OR_core": 318875917,
+          "OR_sales_core": 51776212.0,
+          "전체_outlet": 845180274,
+          "FRS_outlet": 735337288,
+          "HQ_OR_outlet": 109842986,
+          "OR_sales_outlet": 13695784.0
+        },
+        "2025.06": {
+          "전체_core": 2098043735,
+          "FRS_core": 1469275699,
+          "HQ_OR_core": 628768036,
+          "OR_sales_core": 29101025.0,
+          "전체_outlet": 791380524,
+          "FRS_outlet": 690805899,
+          "HQ_OR_outlet": 100574625,
+          "OR_sales_outlet": 6767730.0
+        },
+        "2025.07": {
+          "전체_core": 2100210813,
+          "FRS_core": 1335005781,
+          "HQ_OR_core": 765205032,
+          "OR_sales_core": 23796611.0,
+          "전체_outlet": 1121715818,
+          "FRS_outlet": 956759416,
+          "HQ_OR_outlet": 164956402,
+          "OR_sales_outlet": 9777595.0
+        },
+        "2025.08": {
+          "전체_core": 2787902179,
+          "FRS_core": 1629238841,
+          "HQ_OR_core": 1158663338,
+          "OR_sales_core": 34965664.0,
+          "전체_outlet": 1025752403,
+          "FRS_outlet": 862369807,
+          "HQ_OR_outlet": 163382596,
+          "OR_sales_outlet": 9444962.0
+        },
+        "2025.09": {
+          "전체_core": 3139747241,
+          "FRS_core": 1766978276,
+          "HQ_OR_core": 1372768965,
+          "OR_sales_core": 35066530.0,
+          "전체_outlet": 930507292,
+          "FRS_outlet": 780959469,
+          "HQ_OR_outlet": 149547823,
+          "OR_sales_outlet": 8854365.0
+        },
+        "2025.10": {
+          "전체_core": 3309070161,
+          "FRS_core": 1671670516,
+          "HQ_OR_core": 1637399645,
+          "OR_sales_core": 85372692.0,
+          "전체_outlet": 926500891,
+          "FRS_outlet": 781972238,
+          "HQ_OR_outlet": 144528653,
+          "OR_sales_outlet": 18125294.0
+        },
+        "2025.11": {
+          "전체_core": 3327301566,
+          "FRS_core": 1684859679,
+          "HQ_OR_core": 1642441887,
+          "OR_sales_core": 49830028.0,
+          "전체_outlet": 842899895,
+          "FRS_outlet": 714213360,
+          "HQ_OR_outlet": 128686535,
+          "OR_sales_outlet": 8845485.0
+        }
+      },
+      "Shoes": {
+        "2024.01": {
+          "전체_core": 1621253557,
+          "FRS_core": 987502735,
+          "HQ_OR_core": 633750822,
+          "OR_sales_core": 19811200.0,
+          "전체_outlet": 559963914,
+          "FRS_outlet": 417420057,
+          "HQ_OR_outlet": 142543857,
+          "OR_sales_outlet": 12502236.0
+        },
+        "2024.02": {
+          "전체_core": 486678608,
+          "FRS_core": 0,
+          "HQ_OR_core": 486678608,
+          "OR_sales_core": 15346121.0,
+          "전체_outlet": 70341087,
+          "FRS_outlet": 0,
+          "HQ_OR_outlet": 70341087,
+          "OR_sales_outlet": 8976677.0
+        },
+        "2024.03": {
+          "전체_core": 825470032,
+          "FRS_core": 0,
+          "HQ_OR_core": 825470032,
+          "OR_sales_core": 15173263.0,
+          "전체_outlet": 116047321,
+          "FRS_outlet": 0,
+          "HQ_OR_outlet": 116047321,
+          "OR_sales_outlet": 7142916.0
+        },
+        "2024.04": {
+          "전체_core": 273694038,
+          "FRS_core": 0,
+          "HQ_OR_core": 273694038,
+          "OR_sales_core": 11750602.0,
+          "전체_outlet": 61544392,
+          "FRS_outlet": 0,
+          "HQ_OR_outlet": 61544392,
+          "OR_sales_outlet": 6994497.0
+        },
+        "2024.05": {
+          "전체_core": 207974859,
+          "FRS_core": 0,
+          "HQ_OR_core": 207974859,
+          "OR_sales_core": 15359114.0,
+          "전체_outlet": 107898378,
+          "FRS_outlet": 0,
+          "HQ_OR_outlet": 107898378,
+          "OR_sales_outlet": 9220265.0
+        },
+        "2024.06": {
+          "전체_core": 1221241706,
+          "FRS_core": 906205821,
+          "HQ_OR_core": 315035885,
+          "OR_sales_core": 12438842.0,
+          "전체_outlet": 903073936,
+          "FRS_outlet": 539805566,
+          "HQ_OR_outlet": 363268370,
+          "OR_sales_outlet": 4916077.0
+        },
+        "2024.07": {
+          "전체_core": 1621874852,
+          "FRS_core": 948557923,
+          "HQ_OR_core": 673316929,
+          "OR_sales_core": 8986188.0,
+          "전체_outlet": 759174062,
+          "FRS_outlet": 623766788,
+          "HQ_OR_outlet": 135407274,
+          "OR_sales_outlet": 4968111.0
+        },
+        "2024.08": {
+          "전체_core": 1550540602,
+          "FRS_core": 1038740963,
+          "HQ_OR_core": 511799639,
+          "OR_sales_core": 16329548.0,
+          "전체_outlet": 718852736,
+          "FRS_outlet": 594398933,
+          "HQ_OR_outlet": 124453803,
+          "OR_sales_outlet": 13397853.0
+        },
+        "2024.09": {
+          "전체_core": 1506378399,
+          "FRS_core": 1130909857,
+          "HQ_OR_core": 375468542,
+          "OR_sales_core": 16232967.0,
+          "전체_outlet": 670699400,
+          "FRS_outlet": 572446679,
+          "HQ_OR_outlet": 98252721,
+          "OR_sales_outlet": 4958468.0
+        },
+        "2024.10": {
+          "전체_core": 1315826191,
+          "FRS_core": 987452954,
+          "HQ_OR_core": 328373237,
+          "OR_sales_core": 38237937.0,
+          "전체_outlet": 672555885,
+          "FRS_outlet": 599371875,
+          "HQ_OR_outlet": 73184010,
+          "OR_sales_outlet": 17287670.0
+        },
+        "2024.11": {
+          "전체_core": 1318803723,
+          "FRS_core": 920809639,
+          "HQ_OR_core": 397994084,
+          "OR_sales_core": 30617692.0,
+          "전체_outlet": 610862100,
+          "FRS_outlet": 555373322,
+          "HQ_OR_outlet": 55488778,
+          "OR_sales_outlet": 9096891.0
+        },
+        "2024.12": {
+          "전체_core": 1390786700,
+          "FRS_core": 912084983,
+          "HQ_OR_core": 478701717,
+          "OR_sales_core": 25114334.0,
+          "전체_outlet": 567084884,
+          "FRS_outlet": 517990253,
+          "HQ_OR_outlet": 49094631,
+          "OR_sales_outlet": 4201519.0
+        },
+        "2025.01": {
+          "전체_core": 1209187201,
+          "FRS_core": 901591652,
+          "HQ_OR_core": 307595549,
+          "OR_sales_core": 35596159.0,
+          "전체_outlet": 683318018,
+          "FRS_outlet": 614470614,
+          "HQ_OR_outlet": 68847404,
+          "OR_sales_outlet": 11402943.0
+        },
+        "2025.02": {
+          "전체_core": 1238551777,
+          "FRS_core": 959733320,
+          "HQ_OR_core": 278818457,
+          "OR_sales_core": 20023161.0,
+          "전체_outlet": 644935719,
+          "FRS_outlet": 583323373,
+          "HQ_OR_outlet": 61612346,
+          "OR_sales_outlet": 4169583.0
+        },
+        "2025.03": {
+          "전체_core": 1154914519,
+          "FRS_core": 971050370,
+          "HQ_OR_core": 183864149,
+          "OR_sales_core": 25800722.0,
+          "전체_outlet": 596148593,
+          "FRS_outlet": 544529314,
+          "HQ_OR_outlet": 51619279,
+          "OR_sales_outlet": 5077401.0
+        },
+        "2025.04": {
+          "전체_core": 1218544307,
+          "FRS_core": 979709525,
+          "HQ_OR_core": 238834782,
+          "OR_sales_core": 18901496.0,
+          "전체_outlet": 593662845,
+          "FRS_outlet": 540457352,
+          "HQ_OR_outlet": 53205493,
+          "OR_sales_outlet": 3394101.0
+        },
+        "2025.05": {
+          "전체_core": 1171826771,
+          "FRS_core": 958637103,
+          "HQ_OR_core": 213189668,
+          "OR_sales_core": 30244512.0,
+          "전체_outlet": 515008573,
+          "FRS_outlet": 450187661,
+          "HQ_OR_outlet": 64820912,
+          "OR_sales_outlet": 7662301.0
+        },
+        "2025.06": {
+          "전체_core": 1537759831,
+          "FRS_core": 1071449159,
+          "HQ_OR_core": 466310672,
+          "OR_sales_core": 14662416.0,
+          "전체_outlet": 483455877,
+          "FRS_outlet": 424742085,
+          "HQ_OR_outlet": 58713792,
+          "OR_sales_outlet": 4584699.0
+        },
+        "2025.07": {
+          "전체_core": 1312556220,
+          "FRS_core": 908725586,
+          "HQ_OR_core": 403830634,
+          "OR_sales_core": 12663984.0,
+          "전체_outlet": 748889433,
+          "FRS_outlet": 640706735,
+          "HQ_OR_outlet": 108182698,
+          "OR_sales_outlet": 6603096.0
+        },
+        "2025.08": {
+          "전체_core": 1832730467,
+          "FRS_core": 1118370383,
+          "HQ_OR_core": 714360084,
+          "OR_sales_core": 19214513.0,
+          "전체_outlet": 686429056,
+          "FRS_outlet": 577234116,
+          "HQ_OR_outlet": 109194940,
+          "OR_sales_outlet": 6573273.0
+        },
+        "2025.09": {
+          "전체_core": 2144992402,
+          "FRS_core": 1211090571,
+          "HQ_OR_core": 933901831,
+          "OR_sales_core": 21551225.0,
+          "전체_outlet": 619426197,
+          "FRS_outlet": 521883549,
+          "HQ_OR_outlet": 97542648,
+          "OR_sales_outlet": 6961189.0
+        },
+        "2025.10": {
+          "전체_core": 2420866778,
+          "FRS_core": 1183092039,
+          "HQ_OR_core": 1237774739,
+          "OR_sales_core": 53992558.0,
+          "전체_outlet": 606679196,
+          "FRS_outlet": 516006943,
+          "HQ_OR_outlet": 90672253,
+          "OR_sales_outlet": 13150084.0
+        },
+        "2025.11": {
+          "전체_core": 2424981715,
+          "FRS_core": 1218707918,
+          "HQ_OR_core": 1206273797,
+          "OR_sales_core": 28455215.0,
+          "전체_outlet": 545134371,
+          "FRS_outlet": 467451547,
+          "HQ_OR_outlet": 77682824,
+          "OR_sales_outlet": 5836145.0
+        }
+      },
+      "Headwear": {
+        "2024.01": {
+          "전체_core": 613982399,
+          "FRS_core": 370067886,
+          "HQ_OR_core": 243914513,
+          "OR_sales_core": 8416483.0,
+          "전체_outlet": 193813351,
+          "FRS_outlet": 150676181,
+          "HQ_OR_outlet": 43137170,
+          "OR_sales_outlet": 5482443.0
+        },
+        "2024.02": {
+          "전체_core": 193473827,
+          "FRS_core": 0,
+          "HQ_OR_core": 193473827,
+          "OR_sales_core": 9191647.0,
+          "전체_outlet": 17743899,
+          "FRS_outlet": 0,
+          "HQ_OR_outlet": 17743899,
+          "OR_sales_outlet": 4524700.0
+        },
+        "2024.03": {
+          "전체_core": 240387854,
+          "FRS_core": 0,
+          "HQ_OR_core": 240387854,
+          "OR_sales_core": 13304068.0,
+          "전체_outlet": 48048895,
+          "FRS_outlet": 0,
+          "HQ_OR_outlet": 48048895,
+          "OR_sales_outlet": 2854459.0
+        },
+        "2024.04": {
+          "전체_core": 82951058,
+          "FRS_core": 0,
+          "HQ_OR_core": 82951058,
+          "OR_sales_core": 11055160.0,
+          "전체_outlet": 27476825,
+          "FRS_outlet": 0,
+          "HQ_OR_outlet": 27476825,
+          "OR_sales_outlet": 3663406.0
+        },
+        "2024.05": {
+          "전체_core": 80038973,
+          "FRS_core": 0,
+          "HQ_OR_core": 80038973,
+          "OR_sales_core": 12630975.0,
+          "전체_outlet": 35625122,
+          "FRS_outlet": 0,
+          "HQ_OR_outlet": 35625122,
+          "OR_sales_outlet": 3616857.0
+        },
+        "2024.06": {
+          "전체_core": 469435822,
+          "FRS_core": 347333806,
+          "HQ_OR_core": 122102016,
+          "OR_sales_core": 12439749.0,
+          "전체_outlet": 217573921,
+          "FRS_outlet": 170270374,
+          "HQ_OR_outlet": 47303547,
+          "OR_sales_outlet": 1949223.0
+        },
+        "2024.07": {
+          "전체_core": 376648550,
+          "FRS_core": 219138644,
+          "HQ_OR_core": 157509906,
+          "OR_sales_core": 6859772.0,
+          "전체_outlet": 345573989,
+          "FRS_outlet": 275561436,
+          "HQ_OR_outlet": 70012553,
+          "OR_sales_outlet": 3221108.0
+        },
+        "2024.08": {
+          "전체_core": 439629473,
+          "FRS_core": 254859437,
+          "HQ_OR_core": 184770036,
+          "OR_sales_core": 7897850.0,
+          "전체_outlet": 324550406,
+          "FRS_outlet": 264101797,
+          "HQ_OR_outlet": 60448609,
+          "OR_sales_outlet": 4347516.0
+        },
+        "2024.09": {
+          "전체_core": 454537861,
+          "FRS_core": 300338004,
+          "HQ_OR_core": 154199857,
+          "OR_sales_core": 8261234.0,
+          "전체_outlet": 304481327,
+          "FRS_outlet": 252151076,
+          "HQ_OR_outlet": 52330251,
+          "OR_sales_outlet": 2913386.0
+        },
+        "2024.10": {
+          "전체_core": 407444047,
+          "FRS_core": 263439067,
+          "HQ_OR_core": 144004980,
+          "OR_sales_core": 14427609.0,
+          "전체_outlet": 330233329,
+          "FRS_outlet": 280869324,
+          "HQ_OR_outlet": 49364005,
+          "OR_sales_outlet": 7581359.0
+        },
+        "2024.11": {
+          "전체_core": 365253092,
+          "FRS_core": 268873677,
+          "HQ_OR_core": 96379415,
+          "OR_sales_core": 14143307.0,
+          "전체_outlet": 302640712,
+          "FRS_outlet": 263696916,
+          "HQ_OR_outlet": 38943796,
+          "OR_sales_outlet": 5903055.0
+        },
+        "2024.12": {
+          "전체_core": 389739799,
+          "FRS_core": 274992968,
+          "HQ_OR_core": 114746831,
+          "OR_sales_core": 10610077.0,
+          "전체_outlet": 282425702,
+          "FRS_outlet": 248364023,
+          "HQ_OR_outlet": 34061679,
+          "OR_sales_outlet": 3644484.0
+        },
+        "2025.01": {
+          "전체_core": 303709271,
+          "FRS_core": 221161091,
+          "HQ_OR_core": 82548180,
+          "OR_sales_core": 9747232.0,
+          "전체_outlet": 312470047,
+          "FRS_outlet": 275766166,
+          "HQ_OR_outlet": 36703881,
+          "OR_sales_outlet": 5789315.0
+        },
+        "2025.02": {
+          "전체_core": 287790046,
+          "FRS_core": 213666934,
+          "HQ_OR_core": 74123112,
+          "OR_sales_core": 7493536.0,
+          "전체_outlet": 289828894,
+          "FRS_outlet": 257863622,
+          "HQ_OR_outlet": 31965272,
+          "OR_sales_outlet": 3651647.0
+        },
+        "2025.03": {
+          "전체_core": 285352483,
+          "FRS_core": 216212335,
+          "HQ_OR_core": 69140148,
+          "OR_sales_core": 12218113.0,
+          "전체_outlet": 260350199,
+          "FRS_outlet": 234496554,
+          "HQ_OR_outlet": 25853645,
+          "OR_sales_outlet": 4456889.0
+        },
+        "2025.04": {
+          "전체_core": 250482683,
+          "FRS_core": 193044996,
+          "HQ_OR_core": 57437687,
+          "OR_sales_core": 11114545.0,
+          "전체_outlet": 245454322,
+          "FRS_outlet": 218004884,
+          "HQ_OR_outlet": 27449438,
+          "OR_sales_outlet": 3708437.0
+        },
+        "2025.05": {
+          "전체_core": 260809895,
+          "FRS_core": 187639191,
+          "HQ_OR_core": 73170704,
+          "OR_sales_core": 15175474.0,
+          "전체_outlet": 211729971,
+          "FRS_outlet": 188122779,
+          "HQ_OR_outlet": 23607192,
+          "OR_sales_outlet": 3404609.0
+        },
+        "2025.06": {
+          "전체_core": 359363183,
+          "FRS_core": 250751481,
+          "HQ_OR_core": 108611702,
+          "OR_sales_core": 10479580.0,
+          "전체_outlet": 198687320,
+          "FRS_outlet": 176639056,
+          "HQ_OR_outlet": 22048264,
+          "OR_sales_outlet": 1204050.0
+        },
+        "2025.07": {
+          "전체_core": 592024405,
+          "FRS_core": 314409567,
+          "HQ_OR_core": 277614838,
+          "OR_sales_core": 8484314.0,
+          "전체_outlet": 211299885,
+          "FRS_outlet": 185881406,
+          "HQ_OR_outlet": 25418479,
+          "OR_sales_outlet": 1533380.0
+        },
+        "2025.08": {
+          "전체_core": 756271027,
+          "FRS_core": 375761252,
+          "HQ_OR_core": 380509775,
+          "OR_sales_core": 11269275.0,
+          "전체_outlet": 191732213,
+          "FRS_outlet": 167701748,
+          "HQ_OR_outlet": 24030465,
+          "OR_sales_outlet": 1263355.0
+        },
+        "2025.09": {
+          "전체_core": 818088093,
+          "FRS_core": 428780307,
+          "HQ_OR_core": 389307786,
+          "OR_sales_core": 10623703.0,
+          "전체_outlet": 175008918,
+          "FRS_outlet": 152265913,
+          "HQ_OR_outlet": 22743005,
+          "OR_sales_outlet": 1054272.0
+        },
+        "2025.10": {
+          "전체_core": 715822650,
+          "FRS_core": 373971338,
+          "HQ_OR_core": 341851312,
+          "OR_sales_core": 25402501.0,
+          "전체_outlet": 191990597,
+          "FRS_outlet": 165516156,
+          "HQ_OR_outlet": 26474441,
+          "OR_sales_outlet": 2992698.0
+        },
+        "2025.11": {
+          "전체_core": 743614680,
+          "FRS_core": 360113702,
+          "HQ_OR_core": 383500978,
+          "OR_sales_core": 18013245.0,
+          "전체_outlet": 177068127,
+          "FRS_outlet": 151860274,
+          "HQ_OR_outlet": 25207853,
+          "OR_sales_outlet": 1754845.0
+        }
+      },
+      "Bag": {
+        "2024.01": {
+          "전체_core": 223420548,
+          "FRS_core": 132352283,
+          "HQ_OR_core": 91068265,
+          "OR_sales_core": 3505272.0,
+          "전체_outlet": 96375153,
+          "FRS_outlet": 75006590,
+          "HQ_OR_outlet": 21368563,
+          "OR_sales_outlet": 1769937.0
+        },
+        "2024.02": {
+          "전체_core": 59911072,
+          "FRS_core": 0,
+          "HQ_OR_core": 59911072,
+          "OR_sales_core": 3338211.0,
+          "전체_outlet": 6194396,
+          "FRS_outlet": 0,
+          "HQ_OR_outlet": 6194396,
+          "OR_sales_outlet": 1248725.0
+        },
+        "2024.03": {
+          "전체_core": 99646374,
+          "FRS_core": 0,
+          "HQ_OR_core": 99646374,
+          "OR_sales_core": 4040301.0,
+          "전체_outlet": 12330691,
+          "FRS_outlet": 0,
+          "HQ_OR_outlet": 12330691,
+          "OR_sales_outlet": 1158170.0
+        },
+        "2024.04": {
+          "전체_core": 61452787,
+          "FRS_core": 0,
+          "HQ_OR_core": 61452787,
+          "OR_sales_core": 3134392.0,
+          "전체_outlet": 5757529,
+          "FRS_outlet": 0,
+          "HQ_OR_outlet": 5757529,
+          "OR_sales_outlet": 1584516.0
+        },
+        "2024.05": {
+          "전체_core": 32945515,
+          "FRS_core": 0,
+          "HQ_OR_core": 32945515,
+          "OR_sales_core": 5888277.0,
+          "전체_outlet": 4753341,
+          "FRS_outlet": 0,
+          "HQ_OR_outlet": 4753341,
+          "OR_sales_outlet": 2134652.0
+        },
+        "2024.06": {
+          "전체_core": 201467331,
+          "FRS_core": 127473613,
+          "HQ_OR_core": 73993718,
+          "OR_sales_core": 4797993.0,
+          "전체_outlet": 96703024,
+          "FRS_outlet": 64671549,
+          "HQ_OR_outlet": 32031475,
+          "OR_sales_outlet": 1131750.0
+        },
+        "2024.07": {
+          "전체_core": 226735784,
+          "FRS_core": 106409425,
+          "HQ_OR_core": 120326359,
+          "OR_sales_core": 3043501.0,
+          "전체_outlet": 108639533,
+          "FRS_outlet": 88900757,
+          "HQ_OR_outlet": 19738776,
+          "OR_sales_outlet": 1732463.0
+        },
+        "2024.08": {
+          "전체_core": 210840409,
+          "FRS_core": 128509664,
+          "HQ_OR_core": 82330745,
+          "OR_sales_core": 4869767.0,
+          "전체_outlet": 98584565,
+          "FRS_outlet": 81695633,
+          "HQ_OR_outlet": 16888932,
+          "OR_sales_outlet": 2150342.0
+        },
+        "2024.09": {
+          "전체_core": 193289074,
+          "FRS_core": 133649392,
+          "HQ_OR_core": 59639682,
+          "OR_sales_core": 2840496.0,
+          "전체_outlet": 126960480,
+          "FRS_outlet": 94022928,
+          "HQ_OR_outlet": 32937552,
+          "OR_sales_outlet": 1137015.0
+        },
+        "2024.10": {
+          "전체_core": 202074146,
+          "FRS_core": 138523520,
+          "HQ_OR_core": 63550626,
+          "OR_sales_core": 5962125.0,
+          "전체_outlet": 101524151,
+          "FRS_outlet": 87359231,
+          "HQ_OR_outlet": 14164920,
+          "OR_sales_outlet": 3670391.0
+        },
+        "2024.11": {
+          "전체_core": 196565810,
+          "FRS_core": 121638057,
+          "HQ_OR_core": 74927753,
+          "OR_sales_core": 4510498.0,
+          "전체_outlet": 99391606,
+          "FRS_outlet": 81521785,
+          "HQ_OR_outlet": 17869821,
+          "OR_sales_outlet": 1960801.0
+        },
+        "2024.12": {
+          "전체_core": 227784387,
+          "FRS_core": 127429214,
+          "HQ_OR_core": 100355173,
+          "OR_sales_core": 2319557.0,
+          "전체_outlet": 102425647,
+          "FRS_outlet": 77369064,
+          "HQ_OR_outlet": 25056583,
+          "OR_sales_outlet": 1226038.0
+        },
+        "2025.01": {
+          "전체_core": 186095157,
+          "FRS_core": 106914263,
+          "HQ_OR_core": 79180894,
+          "OR_sales_core": 2679006.0,
+          "전체_outlet": 151177181,
+          "FRS_outlet": 116594286,
+          "HQ_OR_outlet": 34582895,
+          "OR_sales_outlet": 2502372.0
+        },
+        "2025.02": {
+          "전체_core": 172521341,
+          "FRS_core": 121571985,
+          "HQ_OR_core": 50949356,
+          "OR_sales_core": 1864176.0,
+          "전체_outlet": 139516578,
+          "FRS_outlet": 110554611,
+          "HQ_OR_outlet": 28961967,
+          "OR_sales_outlet": 1589856.0
+        },
+        "2025.03": {
+          "전체_core": 170366563,
+          "FRS_core": 132971136,
+          "HQ_OR_core": 37395427,
+          "OR_sales_core": 2805043.0,
+          "전체_outlet": 129978479,
+          "FRS_outlet": 106276260,
+          "HQ_OR_outlet": 23702219,
+          "OR_sales_outlet": 2120398.0
+        },
+        "2025.04": {
+          "전체_core": 185478106,
+          "FRS_core": 142543775,
+          "HQ_OR_core": 42934331,
+          "OR_sales_core": 2271168.0,
+          "전체_outlet": 111060959,
+          "FRS_outlet": 90522993,
+          "HQ_OR_outlet": 20537966,
+          "OR_sales_outlet": 1234711.0
+        },
+        "2025.05": {
+          "전체_core": 163519623,
+          "FRS_core": 132030929,
+          "HQ_OR_core": 31488694,
+          "OR_sales_core": 6156884.0,
+          "전체_outlet": 93347958,
+          "FRS_outlet": 76677314,
+          "HQ_OR_outlet": 16670644,
+          "OR_sales_outlet": 2529651.0
+        },
+        "2025.06": {
+          "전체_core": 184212945,
+          "FRS_core": 132280975,
+          "HQ_OR_core": 51931970,
+          "OR_sales_core": 3775297.0,
+          "전체_outlet": 84739745,
+          "FRS_outlet": 69579518,
+          "HQ_OR_outlet": 15160227,
+          "OR_sales_outlet": 895534.0
+        },
+        "2025.07": {
+          "전체_core": 176409898,
+          "FRS_core": 99155974,
+          "HQ_OR_core": 77253924,
+          "OR_sales_core": 2523320.0,
+          "전체_outlet": 134424195,
+          "FRS_outlet": 107868349,
+          "HQ_OR_outlet": 26555846,
+          "OR_sales_outlet": 1565749.0
+        },
+        "2025.08": {
+          "전체_core": 173275072,
+          "FRS_core": 119480450,
+          "HQ_OR_core": 53794622,
+          "OR_sales_core": 4327397.0,
+          "전체_outlet": 121803518,
+          "FRS_outlet": 96248443,
+          "HQ_OR_outlet": 25555075,
+          "OR_sales_outlet": 1510687.0
+        },
+        "2025.09": {
+          "전체_core": 151398390,
+          "FRS_core": 110390392,
+          "HQ_OR_core": 41007998,
+          "OR_sales_core": 2720212.0,
+          "전체_outlet": 111934536,
+          "FRS_outlet": 87171837,
+          "HQ_OR_outlet": 24762699,
+          "OR_sales_outlet": 768278.0
+        },
+        "2025.10": {
+          "전체_core": 148202290,
+          "FRS_core": 98461465,
+          "HQ_OR_core": 49740825,
+          "OR_sales_core": 5641695.0,
+          "전체_outlet": 105343147,
+          "FRS_outlet": 82170225,
+          "HQ_OR_outlet": 23172922,
+          "OR_sales_outlet": 1740062.0
+        },
+        "2025.11": {
+          "전체_core": 131353750,
+          "FRS_core": 90115900,
+          "HQ_OR_core": 41237850,
+          "OR_sales_core": 2962158.0,
+          "전체_outlet": 99934931,
+          "FRS_outlet": 77829453,
+          "HQ_OR_outlet": 22105478,
+          "OR_sales_outlet": 781586.0
+        }
+      },
+      "Acc_etc": {
+        "2024.01": {
+          "전체_core": 23377909,
+          "FRS_core": 15105038,
+          "HQ_OR_core": 8272871,
+          "OR_sales_core": 163733.0,
+          "전체_outlet": 25910433,
+          "FRS_outlet": 14640256,
+          "HQ_OR_outlet": 11270177,
+          "OR_sales_outlet": 707171.0
+        },
+        "2024.02": {
+          "전체_core": 6626818,
+          "FRS_core": 0,
+          "HQ_OR_core": 6626818,
+          "OR_sales_core": 124726.0,
+          "전체_outlet": 6481291,
+          "FRS_outlet": 0,
+          "HQ_OR_outlet": 6481291,
+          "OR_sales_outlet": 9695.0
+        },
+        "2024.03": {
+          "전체_core": 8444616,
+          "FRS_core": 0,
+          "HQ_OR_core": 8444616,
+          "OR_sales_core": 125273.0,
+          "전체_outlet": 13253104,
+          "FRS_outlet": 0,
+          "HQ_OR_outlet": 13253104,
+          "OR_sales_outlet": 73046.0
+        },
+        "2024.04": {
+          "전체_core": 3115569,
+          "FRS_core": 0,
+          "HQ_OR_core": 3115569,
+          "OR_sales_core": 117972.0,
+          "전체_outlet": 6961345,
+          "FRS_outlet": 0,
+          "HQ_OR_outlet": 6961345,
+          "OR_sales_outlet": 80608.0
+        },
+        "2024.05": {
+          "전체_core": 2366302,
+          "FRS_core": 0,
+          "HQ_OR_core": 2366302,
+          "OR_sales_core": 151104.0,
+          "전체_outlet": 6895132,
+          "FRS_outlet": 0,
+          "HQ_OR_outlet": 6895132,
+          "OR_sales_outlet": 215648.0
+        },
+        "2024.06": {
+          "전체_core": 15778679,
+          "FRS_core": 12530765,
+          "HQ_OR_core": 3247914,
+          "OR_sales_core": 161872.0,
+          "전체_outlet": 26687170,
+          "FRS_outlet": 15952622,
+          "HQ_OR_outlet": 10734548,
+          "OR_sales_outlet": 119900.0
+        },
+        "2024.07": {
+          "전체_core": 16812827,
+          "FRS_core": 6314492,
+          "HQ_OR_core": 10498335,
+          "OR_sales_core": 116895.0,
+          "전체_outlet": 33840178,
+          "FRS_outlet": 21983426,
+          "HQ_OR_outlet": 11856752,
+          "OR_sales_outlet": 88357.0
+        },
+        "2024.08": {
+          "전체_core": 18284222,
+          "FRS_core": 11123179,
+          "HQ_OR_core": 7161043,
+          "OR_sales_core": 156881.0,
+          "전체_outlet": 33290774,
+          "FRS_outlet": 21456820,
+          "HQ_OR_outlet": 11833954,
+          "OR_sales_outlet": 194880.0
+        },
+        "2024.09": {
+          "전체_core": 22947608,
+          "FRS_core": 13929866,
+          "HQ_OR_core": 9017742,
+          "OR_sales_core": 122916.0,
+          "전체_outlet": 29105650,
+          "FRS_outlet": 21269396,
+          "HQ_OR_outlet": 7836254,
+          "OR_sales_outlet": 311872.0
+        },
+        "2024.10": {
+          "전체_core": 22758922,
+          "FRS_core": 14651125,
+          "HQ_OR_core": 8107797,
+          "OR_sales_core": 248392.0,
+          "전체_outlet": 27000294,
+          "FRS_outlet": 20442987,
+          "HQ_OR_outlet": 6557307,
+          "OR_sales_outlet": 746112.0
+        },
+        "2024.11": {
+          "전체_core": 20127355,
+          "FRS_core": 15742543,
+          "HQ_OR_core": 4384812,
+          "OR_sales_core": 360794.0,
+          "전체_outlet": 24679708,
+          "FRS_outlet": 19123548,
+          "HQ_OR_outlet": 5556160,
+          "OR_sales_outlet": 788344.0
+        },
+        "2024.12": {
+          "전체_core": 25531349,
+          "FRS_core": 16297357,
+          "HQ_OR_core": 9233992,
+          "OR_sales_core": 480122.0,
+          "전체_outlet": 22197527,
+          "FRS_outlet": 17431137,
+          "HQ_OR_outlet": 4766390,
+          "OR_sales_outlet": 662207.0
+        },
+        "2025.01": {
+          "전체_core": 16697658,
+          "FRS_core": 12972560,
+          "HQ_OR_core": 3725098,
+          "OR_sales_core": 436458.0,
+          "전체_outlet": 25215986,
+          "FRS_outlet": 20118054,
+          "HQ_OR_outlet": 5097932,
+          "OR_sales_outlet": 333261.0
+        },
+        "2025.02": {
+          "전체_core": 16439046,
+          "FRS_core": 13022297,
+          "HQ_OR_core": 3416749,
+          "OR_sales_core": 146235.0,
+          "전체_outlet": 24432762,
+          "FRS_outlet": 19858118,
+          "HQ_OR_outlet": 4574644,
+          "OR_sales_outlet": 175653.0
+        },
+        "2025.03": {
+          "전체_core": 14481602,
+          "FRS_core": 12242043,
+          "HQ_OR_core": 2239559,
+          "OR_sales_core": 134642.0,
+          "전체_outlet": 23506960,
+          "FRS_outlet": 19208675,
+          "HQ_OR_outlet": 4298285,
+          "OR_sales_outlet": 96571.0
+        },
+        "2025.04": {
+          "전체_core": 11602291,
+          "FRS_core": 10591780,
+          "HQ_OR_core": 1010511,
+          "OR_sales_core": 110528.0,
+          "전체_outlet": 26222822,
+          "FRS_outlet": 21371422,
+          "HQ_OR_outlet": 4851400,
+          "OR_sales_outlet": 83817.0
+        },
+        "2025.05": {
+          "전체_core": 10916482,
+          "FRS_core": 9889631,
+          "HQ_OR_core": 1026851,
+          "OR_sales_core": 199342.0,
+          "전체_outlet": 25093772,
+          "FRS_outlet": 20349534,
+          "HQ_OR_outlet": 4744238,
+          "OR_sales_outlet": 99223.0
+        },
+        "2025.06": {
+          "전체_core": 16707776,
+          "FRS_core": 14794084,
+          "HQ_OR_core": 1913692,
+          "OR_sales_core": 183732.0,
+          "전체_outlet": 24497582,
+          "FRS_outlet": 19845240,
+          "HQ_OR_outlet": 4652342,
+          "OR_sales_outlet": 83447.0
+        },
+        "2025.07": {
+          "전체_core": 19220290,
+          "FRS_core": 12714654,
+          "HQ_OR_core": 6505636,
+          "OR_sales_core": 124993.0,
+          "전체_outlet": 27102305,
+          "FRS_outlet": 22302926,
+          "HQ_OR_outlet": 4799379,
+          "OR_sales_outlet": 75370.0
+        },
+        "2025.08": {
+          "전체_core": 25625613,
+          "FRS_core": 15626756,
+          "HQ_OR_core": 9998857,
+          "OR_sales_core": 154479.0,
+          "전체_outlet": 25787616,
+          "FRS_outlet": 21185500,
+          "HQ_OR_outlet": 4602116,
+          "OR_sales_outlet": 97647.0
+        },
+        "2025.09": {
+          "전체_core": 25268356,
+          "FRS_core": 16717006,
+          "HQ_OR_core": 8551350,
+          "OR_sales_core": 171390.0,
+          "전체_outlet": 24137641,
+          "FRS_outlet": 19638170,
+          "HQ_OR_outlet": 4499471,
+          "OR_sales_outlet": 70626.0
+        },
+        "2025.10": {
+          "전체_core": 24178443,
+          "FRS_core": 16145674,
+          "HQ_OR_core": 8032769,
+          "OR_sales_core": 335938.0,
+          "전체_outlet": 22487951,
+          "FRS_outlet": 18278914,
+          "HQ_OR_outlet": 4209037,
+          "OR_sales_outlet": 242450.0
+        },
+        "2025.11": {
+          "전체_core": 27351421,
+          "FRS_core": 15922159,
+          "HQ_OR_core": 11429262,
+          "OR_sales_core": 399410.0,
+          "전체_outlet": 20762466,
+          "FRS_outlet": 17072086,
+          "HQ_OR_outlet": 3690380,
+          "OR_sales_outlet": 472909.0
+        }
+      }
+    },
+    "MLB KIDS": {
+      "전체": {
+        "2024.01": {
+          "전체_core": 96692706,
+          "FRS_core": 58313929,
+          "HQ_OR_core": 38378777,
+          "OR_sales_core": 956916.0,
+          "전체_outlet": 115786046,
+          "FRS_outlet": 77538917,
+          "HQ_OR_outlet": 38247129,
+          "OR_sales_outlet": 3638996.0
+        },
+        "2024.02": {
+          "전체_core": 34312543,
+          "FRS_core": 0,
+          "HQ_OR_core": 34312543,
+          "OR_sales_core": 1070750.0,
+          "전체_outlet": 8295315,
+          "FRS_outlet": 0,
+          "HQ_OR_outlet": 8295315,
+          "OR_sales_outlet": 2654007.0
+        },
+        "2024.03": {
+          "전체_core": 43632724,
+          "FRS_core": 0,
+          "HQ_OR_core": 43632724,
+          "OR_sales_core": 1269007.0,
+          "전체_outlet": 20451851,
+          "FRS_outlet": 0,
+          "HQ_OR_outlet": 20451851,
+          "OR_sales_outlet": 2077337.0
+        },
+        "2024.04": {
+          "전체_core": 11042450,
+          "FRS_core": 0,
+          "HQ_OR_core": 11042450,
+          "OR_sales_core": 1336757.0,
+          "전체_outlet": 8949980,
+          "FRS_outlet": 0,
+          "HQ_OR_outlet": 8949980,
+          "OR_sales_outlet": 1479527.0
+        },
+        "2024.05": {
+          "전체_core": 7013098,
+          "FRS_core": 0,
+          "HQ_OR_core": 7013098,
+          "OR_sales_core": 1783957.0,
+          "전체_outlet": 7855171,
+          "FRS_outlet": 0,
+          "HQ_OR_outlet": 7855171,
+          "OR_sales_outlet": 1645804.0
+        },
+        "2024.06": {
+          "전체_core": 75835978,
+          "FRS_core": 56605654,
+          "HQ_OR_core": 19230324,
+          "OR_sales_core": 1052207.0,
+          "전체_outlet": 108375006,
+          "FRS_outlet": 74307771,
+          "HQ_OR_outlet": 34067235,
+          "OR_sales_outlet": 1022119.0
+        },
+        "2024.07": {
+          "전체_core": 98962157,
+          "FRS_core": 64905757,
+          "HQ_OR_core": 34056400,
+          "OR_sales_core": 970984.0,
+          "전체_outlet": 96307424,
+          "FRS_outlet": 68935423,
+          "HQ_OR_outlet": 27372001,
+          "OR_sales_outlet": 690056.0
+        },
+        "2024.08": {
+          "전체_core": 102469315,
+          "FRS_core": 70786048,
+          "HQ_OR_core": 31683267,
+          "OR_sales_core": 1888851.0,
+          "전체_outlet": 91055284,
+          "FRS_outlet": 64714379,
+          "HQ_OR_outlet": 26340905,
+          "OR_sales_outlet": 2580549.0
+        },
+        "2024.09": {
+          "전체_core": 100359768,
+          "FRS_core": 77909797,
+          "HQ_OR_core": 22449971,
+          "OR_sales_core": 1464473.0,
+          "전체_outlet": 86018728,
+          "FRS_outlet": 63123156,
+          "HQ_OR_outlet": 22895572,
+          "OR_sales_outlet": 1372939.0
+        },
+        "2024.10": {
+          "전체_core": 92420278,
+          "FRS_core": 71983999,
+          "HQ_OR_core": 20436279,
+          "OR_sales_core": 1850462.0,
+          "전체_outlet": 78304133,
+          "FRS_outlet": 57774965,
+          "HQ_OR_outlet": 20529168,
+          "OR_sales_outlet": 1716616.0
+        },
+        "2024.11": {
+          "전체_core": 96963420,
+          "FRS_core": 72640135,
+          "HQ_OR_core": 24323285,
+          "OR_sales_core": 1724929.0,
+          "전체_outlet": 74773939,
+          "FRS_outlet": 54279830,
+          "HQ_OR_outlet": 20494109,
+          "OR_sales_outlet": 1184260.0
+        },
+        "2024.12": {
+          "전체_core": 103872492,
+          "FRS_core": 74682770,
+          "HQ_OR_core": 29189722,
+          "OR_sales_core": 1977254.0,
+          "전체_outlet": 70712005,
+          "FRS_outlet": 51600491,
+          "HQ_OR_outlet": 19111514,
+          "OR_sales_outlet": 1058641.0
+        },
+        "2025.01": {
+          "전체_core": 36188853,
+          "FRS_core": 16434217,
+          "HQ_OR_core": 19754636,
+          "OR_sales_core": 1542717.0,
+          "전체_outlet": 131684642,
+          "FRS_outlet": 103921993,
+          "HQ_OR_outlet": 27762649,
+          "OR_sales_outlet": 3804077.0
+        },
+        "2025.02": {
+          "전체_core": 38637099,
+          "FRS_core": 21577510,
+          "HQ_OR_core": 17059589,
+          "OR_sales_core": 869209.0,
+          "전체_outlet": 127247033,
+          "FRS_outlet": 100753977,
+          "HQ_OR_outlet": 26493056,
+          "OR_sales_outlet": 1399054.0
+        },
+        "2025.03": {
+          "전체_core": 37351645,
+          "FRS_core": 23514552,
+          "HQ_OR_core": 13837093,
+          "OR_sales_core": 1200905.0,
+          "전체_outlet": 118504154,
+          "FRS_outlet": 86108516,
+          "HQ_OR_outlet": 32395638,
+          "OR_sales_outlet": 2350087.0
+        },
+        "2025.04": {
+          "전체_core": 32754778,
+          "FRS_core": 23624497,
+          "HQ_OR_core": 9130281,
+          "OR_sales_core": 979031.0,
+          "전체_outlet": 115773117,
+          "FRS_outlet": 82403176,
+          "HQ_OR_outlet": 33369941,
+          "OR_sales_outlet": 1919979.0
+        },
+        "2025.05": {
+          "전체_core": 36218303,
+          "FRS_core": 21103778,
+          "HQ_OR_core": 15114525,
+          "OR_sales_core": 1605372.0,
+          "전체_outlet": 108320143,
+          "FRS_outlet": 76997945,
+          "HQ_OR_outlet": 31322198,
+          "OR_sales_outlet": 2274406.0
+        },
+        "2025.06": {
+          "전체_core": 47570282,
+          "FRS_core": 24490793,
+          "HQ_OR_core": 23079489,
+          "OR_sales_core": 882165.0,
+          "전체_outlet": 112167332,
+          "FRS_outlet": 78150966,
+          "HQ_OR_outlet": 34016366,
+          "OR_sales_outlet": 1223843.0
+        },
+        "2025.07": {
+          "전체_core": 63033041,
+          "FRS_core": 31090428,
+          "HQ_OR_core": 31942613,
+          "OR_sales_core": 908532.0,
+          "전체_outlet": 104228052,
+          "FRS_outlet": 70121961,
+          "HQ_OR_outlet": 34106091,
+          "OR_sales_outlet": 1150298.0
+        },
+        "2025.08": {
+          "전체_core": 68647452,
+          "FRS_core": 38233199,
+          "HQ_OR_core": 30414253,
+          "OR_sales_core": 1980015.0,
+          "전체_outlet": 97915307,
+          "FRS_outlet": 66165455,
+          "HQ_OR_outlet": 31749852,
+          "OR_sales_outlet": 1688632.0
+        },
+        "2025.09": {
+          "전체_core": 64918000,
+          "FRS_core": 39570737,
+          "HQ_OR_core": 25347263,
+          "OR_sales_core": 1570670.0,
+          "전체_outlet": 94243561,
+          "FRS_outlet": 63856386,
+          "HQ_OR_outlet": 30387175,
+          "OR_sales_outlet": 1305597.0
+        },
+        "2025.10": {
+          "전체_core": 59291724,
+          "FRS_core": 36513510,
+          "HQ_OR_core": 22778214,
+          "OR_sales_core": 3044881.0,
+          "전체_outlet": 85573991,
+          "FRS_outlet": 58807315,
+          "HQ_OR_outlet": 26766676,
+          "OR_sales_outlet": 2505960.0
+        },
+        "2025.11": {
+          "전체_core": 65825339,
+          "FRS_core": 36726868,
+          "HQ_OR_core": 29098471,
+          "OR_sales_core": 1775496.0,
+          "전체_outlet": 83187198,
+          "FRS_outlet": 56247882,
+          "HQ_OR_outlet": 26939316,
+          "OR_sales_outlet": 1281508.0
+        }
+      },
+      "Shoes": {
+        "2024.01": {
+          "전체_core": 70540343,
+          "FRS_core": 42390641,
+          "HQ_OR_core": 28149702,
+          "OR_sales_core": 642882.0,
+          "전체_outlet": 62581242,
+          "FRS_outlet": 41791655,
+          "HQ_OR_outlet": 20789587,
+          "OR_sales_outlet": 2268688.0
+        },
+        "2024.02": {
+          "전체_core": 28380227,
+          "FRS_core": 0,
+          "HQ_OR_core": 28380227,
+          "OR_sales_core": 647723.0,
+          "전체_outlet": 4145565,
+          "FRS_outlet": 0,
+          "HQ_OR_outlet": 4145565,
+          "OR_sales_outlet": 1423971.0
+        },
+        "2024.03": {
+          "전체_core": 31005100,
+          "FRS_core": 0,
+          "HQ_OR_core": 31005100,
+          "OR_sales_core": 803407.0,
+          "전체_outlet": 10102025,
+          "FRS_outlet": 0,
+          "HQ_OR_outlet": 10102025,
+          "OR_sales_outlet": 805633.0
+        },
+        "2024.04": {
+          "전체_core": 8403338,
+          "FRS_core": 0,
+          "HQ_OR_core": 8403338,
+          "OR_sales_core": 886917.0,
+          "전체_outlet": 4580108,
+          "FRS_outlet": 0,
+          "HQ_OR_outlet": 4580108,
+          "OR_sales_outlet": 517905.0
+        },
+        "2024.05": {
+          "전체_core": 4174678,
+          "FRS_core": 0,
+          "HQ_OR_core": 4174678,
+          "OR_sales_core": 1280921.0,
+          "전체_outlet": 3876845,
+          "FRS_outlet": 0,
+          "HQ_OR_outlet": 3876845,
+          "OR_sales_outlet": 687553.0
+        },
+        "2024.06": {
+          "전체_core": 49928227,
+          "FRS_core": 40407623,
+          "HQ_OR_core": 9520604,
+          "OR_sales_core": 718559.0,
+          "전체_outlet": 62188798,
+          "FRS_outlet": 40122089,
+          "HQ_OR_outlet": 22066709,
+          "OR_sales_outlet": 456389.0
+        },
+        "2024.07": {
+          "전체_core": 64845327,
+          "FRS_core": 45014996,
+          "HQ_OR_core": 19830331,
+          "OR_sales_core": 613058.0,
+          "전체_outlet": 53885898,
+          "FRS_outlet": 38063054,
+          "HQ_OR_outlet": 15822844,
+          "OR_sales_outlet": 332902.0
+        },
+        "2024.08": {
+          "전체_core": 70229987,
+          "FRS_core": 47603072,
+          "HQ_OR_core": 22626915,
+          "OR_sales_core": 1155787.0,
+          "전체_outlet": 51012516,
+          "FRS_outlet": 35786490,
+          "HQ_OR_outlet": 15226026,
+          "OR_sales_outlet": 1977043.0
+        },
+        "2024.09": {
+          "전체_core": 69082421,
+          "FRS_core": 53849215,
+          "HQ_OR_core": 15233206,
+          "OR_sales_core": 1048301.0,
+          "전체_outlet": 46873957,
+          "FRS_outlet": 34339610,
+          "HQ_OR_outlet": 12534347,
+          "OR_sales_outlet": 933925.0
+        },
+        "2024.10": {
+          "전체_core": 64299441,
+          "FRS_core": 49118972,
+          "HQ_OR_core": 15180469,
+          "OR_sales_core": 1231981.0,
+          "전체_outlet": 42754768,
+          "FRS_outlet": 31610002,
+          "HQ_OR_outlet": 11144766,
+          "OR_sales_outlet": 1007259.0
+        },
+        "2024.11": {
+          "전체_core": 59961979,
+          "FRS_core": 49822603,
+          "HQ_OR_core": 10139376,
+          "OR_sales_core": 1115981.0,
+          "전체_outlet": 41257126,
+          "FRS_outlet": 30271858,
+          "HQ_OR_outlet": 10985268,
+          "OR_sales_outlet": 588318.0
+        },
+        "2024.12": {
+          "전체_core": 67069108,
+          "FRS_core": 48560711,
+          "HQ_OR_core": 18508397,
+          "OR_sales_core": 1335552.0,
+          "전체_outlet": 38940725,
+          "FRS_outlet": 28725455,
+          "HQ_OR_outlet": 10215270,
+          "OR_sales_outlet": 588276.0
+        },
+        "2025.01": {
+          "전체_core": 24195123,
+          "FRS_core": 8297553,
+          "HQ_OR_core": 15897570,
+          "OR_sales_core": 1113698.0,
+          "전체_outlet": 80779878,
+          "FRS_outlet": 64385380,
+          "HQ_OR_outlet": 16394498,
+          "OR_sales_outlet": 2614209.0
+        },
+        "2025.02": {
+          "전체_core": 26025868,
+          "FRS_core": 14348128,
+          "HQ_OR_core": 11677740,
+          "OR_sales_core": 546876.0,
+          "전체_outlet": 78522555,
+          "FRS_outlet": 63060338,
+          "HQ_OR_outlet": 15462217,
+          "OR_sales_outlet": 767080.0
+        },
+        "2025.03": {
+          "전체_core": 25744533,
+          "FRS_core": 15730538,
+          "HQ_OR_core": 10013995,
+          "OR_sales_core": 788961.0,
+          "전체_outlet": 72235888,
+          "FRS_outlet": 55697439,
+          "HQ_OR_outlet": 16538449,
+          "OR_sales_outlet": 1243037.0
+        },
+        "2025.04": {
+          "전체_core": 23188563,
+          "FRS_core": 16249991,
+          "HQ_OR_core": 6938572,
+          "OR_sales_core": 642261.0,
+          "전체_outlet": 71778615,
+          "FRS_outlet": 53242378,
+          "HQ_OR_outlet": 18536237,
+          "OR_sales_outlet": 904700.0
+        },
+        "2025.05": {
+          "전체_core": 23735807,
+          "FRS_core": 13675399,
+          "HQ_OR_core": 10060408,
+          "OR_sales_core": 991752.0,
+          "전체_outlet": 68175657,
+          "FRS_outlet": 50532055,
+          "HQ_OR_outlet": 17643602,
+          "OR_sales_outlet": 1200509.0
+        },
+        "2025.06": {
+          "전체_core": 32437357,
+          "FRS_core": 15116557,
+          "HQ_OR_core": 17320800,
+          "OR_sales_core": 478232.0,
+          "전체_outlet": 69692321,
+          "FRS_outlet": 51277840,
+          "HQ_OR_outlet": 18414481,
+          "OR_sales_outlet": 636382.0
+        },
+        "2025.07": {
+          "전체_core": 42994966,
+          "FRS_core": 20331998,
+          "HQ_OR_core": 22662968,
+          "OR_sales_core": 430942.0,
+          "전체_outlet": 64722468,
+          "FRS_outlet": 46342360,
+          "HQ_OR_outlet": 18380108,
+          "OR_sales_outlet": 633507.0
+        },
+        "2025.08": {
+          "전체_core": 44400430,
+          "FRS_core": 27049857,
+          "HQ_OR_core": 17350573,
+          "OR_sales_core": 966106.0,
+          "전체_outlet": 60531264,
+          "FRS_outlet": 43896868,
+          "HQ_OR_outlet": 16634396,
+          "OR_sales_outlet": 1026680.0
+        },
+        "2025.09": {
+          "전체_core": 41067855,
+          "FRS_core": 25946730,
+          "HQ_OR_core": 15121125,
+          "OR_sales_core": 966017.0,
+          "전체_outlet": 56613867,
+          "FRS_outlet": 41389536,
+          "HQ_OR_outlet": 15224331,
+          "OR_sales_outlet": 765193.0
+        },
+        "2025.10": {
+          "전체_core": 39324399,
+          "FRS_core": 24215281,
+          "HQ_OR_core": 15109118,
+          "OR_sales_core": 1811865.0,
+          "전체_outlet": 50611768,
+          "FRS_outlet": 37513660,
+          "HQ_OR_outlet": 13098108,
+          "OR_sales_outlet": 1380978.0
+        },
+        "2025.11": {
+          "전체_core": 41813757,
+          "FRS_core": 23575575,
+          "HQ_OR_core": 18238182,
+          "OR_sales_core": 910778.0,
+          "전체_outlet": 48519738,
+          "FRS_outlet": 35137224,
+          "HQ_OR_outlet": 13382514,
+          "OR_sales_outlet": 628051.0
+        }
+      },
+      "Headwear": {
+        "2024.01": {
+          "전체_core": 15718083,
+          "FRS_core": 10172827,
+          "HQ_OR_core": 5545256,
+          "OR_sales_core": 135201.0,
+          "전체_outlet": 42527880,
+          "FRS_outlet": 27371963,
+          "HQ_OR_outlet": 15155917,
+          "OR_sales_outlet": 1137809.0
+        },
+        "2024.02": {
+          "전체_core": 3592892,
+          "FRS_core": 0,
+          "HQ_OR_core": 3592892,
+          "OR_sales_core": 180771.0,
+          "전체_outlet": 3837650,
+          "FRS_outlet": 0,
+          "HQ_OR_outlet": 3837650,
+          "OR_sales_outlet": 1079490.0
+        },
+        "2024.03": {
+          "전체_core": 9877070,
+          "FRS_core": 0,
+          "HQ_OR_core": 9877070,
+          "OR_sales_core": 323220.0,
+          "전체_outlet": 9520604,
+          "FRS_outlet": 0,
+          "HQ_OR_outlet": 9520604,
+          "OR_sales_outlet": 1194287.0
+        },
+        "2024.04": {
+          "전체_core": 1604288,
+          "FRS_core": 0,
+          "HQ_OR_core": 1604288,
+          "OR_sales_core": 300653.0,
+          "전체_outlet": 3971705,
+          "FRS_outlet": 0,
+          "HQ_OR_outlet": 3971705,
+          "OR_sales_outlet": 897171.0
+        },
+        "2024.05": {
+          "전체_core": 2153312,
+          "FRS_core": 0,
+          "HQ_OR_core": 2153312,
+          "OR_sales_core": 289093.0,
+          "전체_outlet": 3622313,
+          "FRS_outlet": 0,
+          "HQ_OR_outlet": 3622313,
+          "OR_sales_outlet": 863671.0
+        },
+        "2024.06": {
+          "전체_core": 15188961,
+          "FRS_core": 11090882,
+          "HQ_OR_core": 4098079,
+          "OR_sales_core": 176329.0,
+          "전체_outlet": 36548976,
+          "FRS_outlet": 26227660,
+          "HQ_OR_outlet": 10321316,
+          "OR_sales_outlet": 490340.0
+        },
+        "2024.07": {
+          "전체_core": 19968895,
+          "FRS_core": 12676106,
+          "HQ_OR_core": 7292789,
+          "OR_sales_core": 141843.0,
+          "전체_outlet": 33666029,
+          "FRS_outlet": 23727236,
+          "HQ_OR_outlet": 9938793,
+          "OR_sales_outlet": 306951.0
+        },
+        "2024.08": {
+          "전체_core": 20783564,
+          "FRS_core": 14512005,
+          "HQ_OR_core": 6271559,
+          "OR_sales_core": 181833.0,
+          "전체_outlet": 32068233,
+          "FRS_outlet": 22463165,
+          "HQ_OR_outlet": 9605068,
+          "OR_sales_outlet": 478895.0
+        },
+        "2024.09": {
+          "전체_core": 19773172,
+          "FRS_core": 15898677,
+          "HQ_OR_core": 3874495,
+          "OR_sales_core": 253419.0,
+          "전체_outlet": 31367524,
+          "FRS_outlet": 22418241,
+          "HQ_OR_outlet": 8949283,
+          "OR_sales_outlet": 392137.0
+        },
+        "2024.10": {
+          "전체_core": 17877405,
+          "FRS_core": 14938382,
+          "HQ_OR_core": 2939023,
+          "OR_sales_core": 457353.0,
+          "전체_outlet": 28335931,
+          "FRS_outlet": 20292240,
+          "HQ_OR_outlet": 8043691,
+          "OR_sales_outlet": 664012.0
+        },
+        "2024.11": {
+          "전체_core": 19377658,
+          "FRS_core": 14400313,
+          "HQ_OR_core": 4977345,
+          "OR_sales_core": 400594.0,
+          "전체_outlet": 26697063,
+          "FRS_outlet": 18469026,
+          "HQ_OR_outlet": 8228037,
+          "OR_sales_outlet": 538402.0
+        },
+        "2024.12": {
+          "전체_core": 18733046,
+          "FRS_core": 15023732,
+          "HQ_OR_core": 3709314,
+          "OR_sales_core": 406419.0,
+          "전체_outlet": 25279069,
+          "FRS_outlet": 17583342,
+          "HQ_OR_outlet": 7695727,
+          "OR_sales_outlet": 418764.0
+        },
+        "2025.01": {
+          "전체_core": 3433290,
+          "FRS_core": 2187373,
+          "HQ_OR_core": 1245917,
+          "OR_sales_core": 136101.0,
+          "전체_outlet": 36949740,
+          "FRS_outlet": 28140559,
+          "HQ_OR_outlet": 8809181,
+          "OR_sales_outlet": 984630.0
+        },
+        "2025.02": {
+          "전체_core": 5088915,
+          "FRS_core": 2004122,
+          "HQ_OR_core": 3084793,
+          "OR_sales_core": 96546.0,
+          "전체_outlet": 35488580,
+          "FRS_outlet": 26859567,
+          "HQ_OR_outlet": 8629013,
+          "OR_sales_outlet": 516542.0
+        },
+        "2025.03": {
+          "전체_core": 4968692,
+          "FRS_core": 3133784,
+          "HQ_OR_core": 1834908,
+          "OR_sales_core": 255586.0,
+          "전체_outlet": 32908326,
+          "FRS_outlet": 20919767,
+          "HQ_OR_outlet": 11988559,
+          "OR_sales_outlet": 992560.0
+        },
+        "2025.04": {
+          "전체_core": 4003869,
+          "FRS_core": 3227411,
+          "HQ_OR_core": 776458,
+          "OR_sales_core": 216617.0,
+          "전체_outlet": 31418696,
+          "FRS_outlet": 19658891,
+          "HQ_OR_outlet": 11759805,
+          "OR_sales_outlet": 881966.0
+        },
+        "2025.05": {
+          "전체_core": 3119612,
+          "FRS_core": 2535637,
+          "HQ_OR_core": 583975,
+          "OR_sales_core": 174492.0,
+          "전체_outlet": 28429238,
+          "FRS_outlet": 17625828,
+          "HQ_OR_outlet": 10803410,
+          "OR_sales_outlet": 856093.0
+        },
+        "2025.06": {
+          "전체_core": 5108928,
+          "FRS_core": 3197781,
+          "HQ_OR_core": 1911147,
+          "OR_sales_core": 101178.0,
+          "전체_outlet": 31608355,
+          "FRS_outlet": 18530545,
+          "HQ_OR_outlet": 13077810,
+          "OR_sales_outlet": 465166.0
+        },
+        "2025.07": {
+          "전체_core": 8901932,
+          "FRS_core": 3735100,
+          "HQ_OR_core": 5166832,
+          "OR_sales_core": 163385.0,
+          "전체_outlet": 29647649,
+          "FRS_outlet": 16223754,
+          "HQ_OR_outlet": 13423895,
+          "OR_sales_outlet": 395001.0
+        },
+        "2025.08": {
+          "전체_core": 10395372,
+          "FRS_core": 4181638,
+          "HQ_OR_core": 6213734,
+          "OR_sales_core": 227984.0,
+          "전체_outlet": 28482742,
+          "FRS_outlet": 15658234,
+          "HQ_OR_outlet": 12824508,
+          "OR_sales_outlet": 460397.0
+        },
+        "2025.09": {
+          "전체_core": 11604883,
+          "FRS_core": 6789702,
+          "HQ_OR_core": 4815181,
+          "OR_sales_core": 207867.0,
+          "전체_outlet": 29191857,
+          "FRS_outlet": 16199863,
+          "HQ_OR_outlet": 12991994,
+          "OR_sales_outlet": 460691.0
+        },
+        "2025.10": {
+          "전체_core": 9986328,
+          "FRS_core": 6199317,
+          "HQ_OR_core": 3787011,
+          "OR_sales_core": 556728.0,
+          "전체_outlet": 27028288,
+          "FRS_outlet": 15413452,
+          "HQ_OR_outlet": 11614836,
+          "OR_sales_outlet": 1035610.0
+        },
+        "2025.11": {
+          "전체_core": 10676257,
+          "FRS_core": 6093806,
+          "HQ_OR_core": 4582451,
+          "OR_sales_core": 357753.0,
+          "전체_outlet": 27033677,
+          "FRS_outlet": 15419609,
+          "HQ_OR_outlet": 11614068,
+          "OR_sales_outlet": 566199.0
+        }
+      },
+      "Bag": {
+        "2024.01": {
+          "전체_core": 8946360,
+          "FRS_core": 4936147,
+          "HQ_OR_core": 4010213,
+          "OR_sales_core": 161199.0,
+          "전체_outlet": 6526420,
+          "FRS_outlet": 5320398,
+          "HQ_OR_outlet": 1206022,
+          "OR_sales_outlet": 136596.0
+        },
+        "2024.02": {
+          "전체_core": 1917940,
+          "FRS_core": 0,
+          "HQ_OR_core": 1917940,
+          "OR_sales_core": 221651.0,
+          "전체_outlet": 155184,
+          "FRS_outlet": 0,
+          "HQ_OR_outlet": 155184,
+          "OR_sales_outlet": 96802.0
+        },
+        "2024.03": {
+          "전체_core": 2096754,
+          "FRS_core": 0,
+          "HQ_OR_core": 2096754,
+          "OR_sales_core": 123158.0,
+          "전체_outlet": 335930,
+          "FRS_outlet": 0,
+          "HQ_OR_outlet": 335930,
+          "OR_sales_outlet": 50186.0
+        },
+        "2024.04": {
+          "전체_core": 754345,
+          "FRS_core": 0,
+          "HQ_OR_core": 754345,
+          "OR_sales_core": 131141.0,
+          "전체_outlet": 159292,
+          "FRS_outlet": 0,
+          "HQ_OR_outlet": 159292,
+          "OR_sales_outlet": 39332.0
+        },
+        "2024.05": {
+          "전체_core": 344606,
+          "FRS_core": 0,
+          "HQ_OR_core": 344606,
+          "OR_sales_core": 193353.0,
+          "전체_outlet": 100998,
+          "FRS_outlet": 0,
+          "HQ_OR_outlet": 100998,
+          "OR_sales_outlet": 65346.0
+        },
+        "2024.06": {
+          "전체_core": 9226044,
+          "FRS_core": 4354913,
+          "HQ_OR_core": 4871131,
+          "OR_sales_core": 143525.0,
+          "전체_outlet": 5784281,
+          "FRS_outlet": 4928074,
+          "HQ_OR_outlet": 856207,
+          "OR_sales_outlet": 54296.0
+        },
+        "2024.07": {
+          "전체_core": 12413441,
+          "FRS_core": 6408393,
+          "HQ_OR_core": 6005048,
+          "OR_sales_core": 200269.0,
+          "전체_outlet": 5182635,
+          "FRS_outlet": 4371920,
+          "HQ_OR_outlet": 810715,
+          "OR_sales_outlet": 38024.0
+        },
+        "2024.08": {
+          "전체_core": 9879566,
+          "FRS_core": 7418703,
+          "HQ_OR_core": 2460863,
+          "OR_sales_core": 527429.0,
+          "전체_outlet": 4544623,
+          "FRS_outlet": 3810531,
+          "HQ_OR_outlet": 734092,
+          "OR_sales_outlet": 100677.0
+        },
+        "2024.09": {
+          "전체_core": 9385455,
+          "FRS_core": 6916197,
+          "HQ_OR_core": 2469258,
+          "OR_sales_core": 134941.0,
+          "전체_outlet": 4338162,
+          "FRS_outlet": 3663052,
+          "HQ_OR_outlet": 675110,
+          "OR_sales_outlet": 28711.0
+        },
+        "2024.10": {
+          "전체_core": 8287377,
+          "FRS_core": 6443293,
+          "HQ_OR_core": 1844084,
+          "OR_sales_core": 127533.0,
+          "전체_outlet": 4015849,
+          "FRS_outlet": 3385445,
+          "HQ_OR_outlet": 630404,
+          "OR_sales_outlet": 25177.0
+        },
+        "2024.11": {
+          "전체_core": 15863152,
+          "FRS_core": 6834065,
+          "HQ_OR_core": 9029087,
+          "OR_sales_core": 152189.0,
+          "전체_outlet": 3800244,
+          "FRS_outlet": 3188394,
+          "HQ_OR_outlet": 611850,
+          "OR_sales_outlet": 25969.0
+        },
+        "2024.12": {
+          "전체_core": 15581468,
+          "FRS_core": 9170859,
+          "HQ_OR_core": 6410609,
+          "OR_sales_core": 182695.0,
+          "전체_outlet": 3628890,
+          "FRS_outlet": 3063923,
+          "HQ_OR_outlet": 564967,
+          "OR_sales_outlet": 26710.0
+        },
+        "2025.01": {
+          "전체_core": 7650374,
+          "FRS_core": 5093575,
+          "HQ_OR_core": 2556799,
+          "OR_sales_core": 283673.0,
+          "전체_outlet": 9927557,
+          "FRS_outlet": 8079299,
+          "HQ_OR_outlet": 1848258,
+          "OR_sales_outlet": 162092.0
+        },
+        "2025.02": {
+          "전체_core": 6652062,
+          "FRS_core": 4403776,
+          "HQ_OR_core": 2248286,
+          "OR_sales_core": 220677.0,
+          "전체_outlet": 9289950,
+          "FRS_outlet": 7556196,
+          "HQ_OR_outlet": 1733754,
+          "OR_sales_outlet": 98423.0
+        },
+        "2025.03": {
+          "전체_core": 5820514,
+          "FRS_core": 3870310,
+          "HQ_OR_core": 1950204,
+          "OR_sales_core": 146570.0,
+          "전체_outlet": 9493269,
+          "FRS_outlet": 6461567,
+          "HQ_OR_outlet": 3031702,
+          "OR_sales_outlet": 97064.0
+        },
+        "2025.04": {
+          "전체_core": 4813863,
+          "FRS_core": 3429941,
+          "HQ_OR_core": 1383922,
+          "OR_sales_core": 113011.0,
+          "전체_outlet": 8811465,
+          "FRS_outlet": 6549565,
+          "HQ_OR_outlet": 2261900,
+          "OR_sales_outlet": 115222.0
+        },
+        "2025.05": {
+          "전체_core": 8690348,
+          "FRS_core": 4241357,
+          "HQ_OR_core": 4448991,
+          "OR_sales_core": 428773.0,
+          "전체_outlet": 8087014,
+          "FRS_outlet": 5991848,
+          "HQ_OR_outlet": 2095166,
+          "OR_sales_outlet": 192329.0
+        },
+        "2025.06": {
+          "전체_core": 9392362,
+          "FRS_core": 5563144,
+          "HQ_OR_core": 3829218,
+          "OR_sales_core": 300074.0,
+          "전체_outlet": 7251048,
+          "FRS_outlet": 5490844,
+          "HQ_OR_outlet": 1760204,
+          "OR_sales_outlet": 108111.0
+        },
+        "2025.07": {
+          "전체_core": 10482947,
+          "FRS_core": 6414332,
+          "HQ_OR_core": 4068615,
+          "OR_sales_core": 312911.0,
+          "전체_outlet": 6358059,
+          "FRS_outlet": 4807639,
+          "HQ_OR_outlet": 1550420,
+          "OR_sales_outlet": 111737.0
+        },
+        "2025.08": {
+          "전체_core": 12826500,
+          "FRS_core": 6390551,
+          "HQ_OR_core": 6435949,
+          "OR_sales_core": 777300.0,
+          "전체_outlet": 5476511,
+          "FRS_outlet": 4148282,
+          "HQ_OR_outlet": 1328229,
+          "OR_sales_outlet": 188985.0
+        },
+        "2025.09": {
+          "전체_core": 11203174,
+          "FRS_core": 6089079,
+          "HQ_OR_core": 5114095,
+          "OR_sales_core": 382294.0,
+          "전체_outlet": 5041859,
+          "FRS_outlet": 3807927,
+          "HQ_OR_outlet": 1233932,
+          "OR_sales_outlet": 63190.0
+        },
+        "2025.10": {
+          "전체_core": 9153866,
+          "FRS_core": 5378638,
+          "HQ_OR_core": 3775228,
+          "OR_sales_core": 645022.0,
+          "전체_outlet": 4713780,
+          "FRS_outlet": 3543906,
+          "HQ_OR_outlet": 1169874,
+          "OR_sales_outlet": 51027.0
+        },
+        "2025.11": {
+          "전체_core": 12480183,
+          "FRS_core": 6351951,
+          "HQ_OR_core": 6128232,
+          "OR_sales_core": 485508.0,
+          "전체_outlet": 4545042,
+          "FRS_outlet": 3441096,
+          "HQ_OR_outlet": 1103946,
+          "OR_sales_outlet": 57440.0
+        }
+      },
+      "Acc_etc": {
+        "2024.01": {
+          "전체_core": 1487920,
+          "FRS_core": 814314,
+          "HQ_OR_core": 673606,
+          "OR_sales_core": 17634.0,
+          "전체_outlet": 4150504,
+          "FRS_outlet": 3054901,
+          "HQ_OR_outlet": 1095603,
+          "OR_sales_outlet": 95903.0
+        },
+        "2024.02": {
+          "전체_core": 421484,
+          "FRS_core": 0,
+          "HQ_OR_core": 421484,
+          "OR_sales_core": 20605.0,
+          "전체_outlet": 156916,
+          "FRS_outlet": 0,
+          "HQ_OR_outlet": 156916,
+          "OR_sales_outlet": 53744.0
+        },
+        "2024.03": {
+          "전체_core": 653800,
+          "FRS_core": 0,
+          "HQ_OR_core": 653800,
+          "OR_sales_core": 19222.0,
+          "전체_outlet": 493292,
+          "FRS_outlet": 0,
+          "HQ_OR_outlet": 493292,
+          "OR_sales_outlet": 27231.0
+        },
+        "2024.04": {
+          "전체_core": 280479,
+          "FRS_core": 0,
+          "HQ_OR_core": 280479,
+          "OR_sales_core": 18046.0,
+          "전체_outlet": 238875,
+          "FRS_outlet": 0,
+          "HQ_OR_outlet": 238875,
+          "OR_sales_outlet": 25119.0
+        },
+        "2024.05": {
+          "전체_core": 340502,
+          "FRS_core": 0,
+          "HQ_OR_core": 340502,
+          "OR_sales_core": 20590.0,
+          "전체_outlet": 255015,
+          "FRS_outlet": 0,
+          "HQ_OR_outlet": 255015,
+          "OR_sales_outlet": 29234.0
+        },
+        "2024.06": {
+          "전체_core": 1492746,
+          "FRS_core": 752236,
+          "HQ_OR_core": 740510,
+          "OR_sales_core": 13794.0,
+          "전체_outlet": 3852951,
+          "FRS_outlet": 3029948,
+          "HQ_OR_outlet": 823003,
+          "OR_sales_outlet": 21094.0
+        },
+        "2024.07": {
+          "전체_core": 1734494,
+          "FRS_core": 806262,
+          "HQ_OR_core": 928232,
+          "OR_sales_core": 15814.0,
+          "전체_outlet": 3572862,
+          "FRS_outlet": 2773213,
+          "HQ_OR_outlet": 799649,
+          "OR_sales_outlet": 12179.0
+        },
+        "2024.08": {
+          "전체_core": 1576198,
+          "FRS_core": 1252268,
+          "HQ_OR_core": 323930,
+          "OR_sales_core": 23802.0,
+          "전체_outlet": 3429912,
+          "FRS_outlet": 2654193,
+          "HQ_OR_outlet": 775719,
+          "OR_sales_outlet": 23934.0
+        },
+        "2024.09": {
+          "전체_core": 2118720,
+          "FRS_core": 1245708,
+          "HQ_OR_core": 873012,
+          "OR_sales_core": 27812.0,
+          "전체_outlet": 3439085,
+          "FRS_outlet": 2702253,
+          "HQ_OR_outlet": 736832,
+          "OR_sales_outlet": 18166.0
+        },
+        "2024.10": {
+          "전체_core": 1956055,
+          "FRS_core": 1483352,
+          "HQ_OR_core": 472703,
+          "OR_sales_core": 33595.0,
+          "전체_outlet": 3197585,
+          "FRS_outlet": 2487278,
+          "HQ_OR_outlet": 710307,
+          "OR_sales_outlet": 20168.0
+        },
+        "2024.11": {
+          "전체_core": 1760631,
+          "FRS_core": 1583154,
+          "HQ_OR_core": 177477,
+          "OR_sales_core": 56165.0,
+          "전체_outlet": 3019506,
+          "FRS_outlet": 2350552,
+          "HQ_OR_outlet": 668954,
+          "OR_sales_outlet": 31571.0
+        },
+        "2024.12": {
+          "전체_core": 2488870,
+          "FRS_core": 1927468,
+          "HQ_OR_core": 561402,
+          "OR_sales_core": 52588.0,
+          "전체_outlet": 2863321,
+          "FRS_outlet": 2227771,
+          "HQ_OR_outlet": 635550,
+          "OR_sales_outlet": 24891.0
+        },
+        "2025.01": {
+          "전체_core": 910066,
+          "FRS_core": 855716,
+          "HQ_OR_core": 54350,
+          "OR_sales_core": 9245.0,
+          "전체_outlet": 4027467,
+          "FRS_outlet": 3316755,
+          "HQ_OR_outlet": 710712,
+          "OR_sales_outlet": 43146.0
+        },
+        "2025.02": {
+          "전체_core": 870254,
+          "FRS_core": 821484,
+          "HQ_OR_core": 48770,
+          "OR_sales_core": 5110.0,
+          "전체_outlet": 3945948,
+          "FRS_outlet": 3277876,
+          "HQ_OR_outlet": 668072,
+          "OR_sales_outlet": 17009.0
+        },
+        "2025.03": {
+          "전체_core": 817906,
+          "FRS_core": 779920,
+          "HQ_OR_core": 37986,
+          "OR_sales_core": 9788.0,
+          "전체_outlet": 3866671,
+          "FRS_outlet": 3029743,
+          "HQ_OR_outlet": 836928,
+          "OR_sales_outlet": 17426.0
+        },
+        "2025.04": {
+          "전체_core": 748483,
+          "FRS_core": 717154,
+          "HQ_OR_core": 31329,
+          "OR_sales_core": 7142.0,
+          "전체_outlet": 3764341,
+          "FRS_outlet": 2952342,
+          "HQ_OR_outlet": 811999,
+          "OR_sales_outlet": 18091.0
+        },
+        "2025.05": {
+          "전체_core": 672536,
+          "FRS_core": 651385,
+          "HQ_OR_core": 21151,
+          "OR_sales_core": 10355.0,
+          "전체_outlet": 3628234,
+          "FRS_outlet": 2848214,
+          "HQ_OR_outlet": 780020,
+          "OR_sales_outlet": 25475.0
+        },
+        "2025.06": {
+          "전체_core": 631635,
+          "FRS_core": 613311,
+          "HQ_OR_core": 18324,
+          "OR_sales_core": 2681.0,
+          "전체_outlet": 3615608,
+          "FRS_outlet": 2851737,
+          "HQ_OR_outlet": 763871,
+          "OR_sales_outlet": 14184.0
+        },
+        "2025.07": {
+          "전체_core": 653196,
+          "FRS_core": 608998,
+          "HQ_OR_core": 44198,
+          "OR_sales_core": 1294.0,
+          "전체_outlet": 3499876,
+          "FRS_outlet": 2748208,
+          "HQ_OR_outlet": 751668,
+          "OR_sales_outlet": 10053.0
+        },
+        "2025.08": {
+          "전체_core": 1025150,
+          "FRS_core": 611153,
+          "HQ_OR_core": 413997,
+          "OR_sales_core": 8625.0,
+          "전체_outlet": 3424790,
+          "FRS_outlet": 2462071,
+          "HQ_OR_outlet": 962719,
+          "OR_sales_outlet": 12570.0
+        },
+        "2025.09": {
+          "전체_core": 1042088,
+          "FRS_core": 745226,
+          "HQ_OR_core": 296862,
+          "OR_sales_core": 14492.0,
+          "전체_outlet": 3395978,
+          "FRS_outlet": 2459060,
+          "HQ_OR_outlet": 936918,
+          "OR_sales_outlet": 16523.0
+        },
+        "2025.10": {
+          "전체_core": 827131,
+          "FRS_core": 720274,
+          "HQ_OR_core": 106857,
+          "OR_sales_core": 31266.0,
+          "전체_outlet": 3220155,
+          "FRS_outlet": 2336297,
+          "HQ_OR_outlet": 883858,
+          "OR_sales_outlet": 38345.0
+        },
+        "2025.11": {
+          "전체_core": 855142,
+          "FRS_core": 705536,
+          "HQ_OR_core": 149606,
+          "OR_sales_core": 21457.0,
+          "전체_outlet": 3088741,
+          "FRS_outlet": 2249953,
+          "HQ_OR_outlet": 838788,
+          "OR_sales_outlet": 29818.0
+        }
+      }
+    },
+    "DISCOVERY": {
+      "전체": {
+        "2024.01": {
+          "전체_core": 0,
+          "FRS_core": 0,
+          "HQ_OR_core": 0,
+          "OR_sales_core": 0,
+          "전체_outlet": 0,
+          "FRS_outlet": 0,
+          "HQ_OR_outlet": 0,
+          "OR_sales_outlet": 0
+        },
+        "2024.02": {
+          "전체_core": 0,
+          "FRS_core": 0,
+          "HQ_OR_core": 0,
+          "OR_sales_core": 0,
+          "전체_outlet": 0,
+          "FRS_outlet": 0,
+          "HQ_OR_outlet": 0,
+          "OR_sales_outlet": 0
+        },
+        "2024.03": {
+          "전체_core": 0,
+          "FRS_core": 0,
+          "HQ_OR_core": 0,
+          "OR_sales_core": 0,
+          "전체_outlet": 0,
+          "FRS_outlet": 0,
+          "HQ_OR_outlet": 0,
+          "OR_sales_outlet": 0
+        },
+        "2024.04": {
+          "전체_core": 0,
+          "FRS_core": 0,
+          "HQ_OR_core": 0,
+          "OR_sales_core": 0,
+          "전체_outlet": 0,
+          "FRS_outlet": 0,
+          "HQ_OR_outlet": 0,
+          "OR_sales_outlet": 0
+        },
+        "2024.05": {
+          "전체_core": 0,
+          "FRS_core": 0,
+          "HQ_OR_core": 0,
+          "OR_sales_core": 0,
+          "전체_outlet": 0,
+          "FRS_outlet": 0,
+          "HQ_OR_outlet": 0,
+          "OR_sales_outlet": 0
+        },
+        "2024.06": {
+          "전체_core": 0,
+          "FRS_core": 0,
+          "HQ_OR_core": 0,
+          "OR_sales_core": 0,
+          "전체_outlet": 0,
+          "FRS_outlet": 0,
+          "HQ_OR_outlet": 0,
+          "OR_sales_outlet": 0
+        },
+        "2024.07": {
+          "전체_core": 0,
+          "FRS_core": 0,
+          "HQ_OR_core": 0,
+          "OR_sales_core": 0,
+          "전체_outlet": 0,
+          "FRS_outlet": 0,
+          "HQ_OR_outlet": 0,
+          "OR_sales_outlet": 0
+        },
+        "2024.08": {
+          "전체_core": 0,
+          "FRS_core": 0,
+          "HQ_OR_core": 0,
+          "OR_sales_core": 0,
+          "전체_outlet": 0,
+          "FRS_outlet": 0,
+          "HQ_OR_outlet": 0,
+          "OR_sales_outlet": 0
+        },
+        "2024.09": {
+          "전체_core": 2387769,
+          "FRS_core": 0,
+          "HQ_OR_core": 2387769,
+          "OR_sales_core": 990.0,
+          "전체_outlet": 0,
+          "FRS_outlet": 0,
+          "HQ_OR_outlet": 0,
+          "OR_sales_outlet": 0
+        },
+        "2024.10": {
+          "전체_core": 2372223,
+          "FRS_core": 0,
+          "HQ_OR_core": 2372223,
+          "OR_sales_core": 28377.0,
+          "전체_outlet": 0,
+          "FRS_outlet": 0,
+          "HQ_OR_outlet": 0,
+          "OR_sales_outlet": 0
+        },
+        "2024.11": {
+          "전체_core": 3658711,
+          "FRS_core": 411972,
+          "HQ_OR_core": 3246739,
+          "OR_sales_core": 38520.0,
+          "전체_outlet": 12480,
+          "FRS_outlet": 1560,
+          "HQ_OR_outlet": 10920,
+          "OR_sales_outlet": 0
+        },
+        "2024.12": {
+          "전체_core": 5661559,
+          "FRS_core": 1086972,
+          "HQ_OR_core": 4574587,
+          "OR_sales_core": 90318.0,
+          "전체_outlet": 12480,
+          "FRS_outlet": 3120,
+          "HQ_OR_outlet": 9360,
+          "OR_sales_outlet": 0
+        },
+        "2025.01": {
+          "전체_core": 5696880,
+          "FRS_core": 413000,
+          "HQ_OR_core": 5283880,
+          "OR_sales_core": 6830.0,
+          "전체_outlet": 5563171,
+          "FRS_outlet": 1568733,
+          "HQ_OR_outlet": 3994438,
+          "OR_sales_outlet": 67467.0
+        },
+        "2025.02": {
+          "전체_core": 6267723,
+          "FRS_core": 404885,
+          "HQ_OR_core": 5862838,
+          "OR_sales_core": 34838.0,
+          "전체_outlet": 5697374,
+          "FRS_outlet": 1425840,
+          "HQ_OR_outlet": 4271534,
+          "OR_sales_outlet": 128808.0
+        },
+        "2025.03": {
+          "전체_core": 7692892,
+          "FRS_core": 654924,
+          "HQ_OR_core": 7037968,
+          "OR_sales_core": 33636.0,
+          "전체_outlet": 6444298,
+          "FRS_outlet": 1354292,
+          "HQ_OR_outlet": 5090006,
+          "OR_sales_outlet": 60279.0
+        },
+        "2025.04": {
+          "전체_core": 1219279,
+          "FRS_core": 92796,
+          "HQ_OR_core": 1126483,
+          "OR_sales_core": 1725.0,
+          "전체_outlet": 12715994,
+          "FRS_outlet": 2601588,
+          "HQ_OR_outlet": 10114406,
+          "OR_sales_outlet": 227209.0
+        },
+        "2025.05": {
+          "전체_core": 1722427,
+          "FRS_core": 181683,
+          "HQ_OR_core": 1540744,
+          "OR_sales_core": 9317.0,
+          "전체_outlet": 13935501,
+          "FRS_outlet": 2698075,
+          "HQ_OR_outlet": 11237426,
+          "OR_sales_outlet": 207635.0
+        },
+        "2025.06": {
+          "전체_core": 3802015,
+          "FRS_core": 279353,
+          "HQ_OR_core": 3522662,
+          "OR_sales_core": 12719.0,
+          "전체_outlet": 14090718,
+          "FRS_outlet": 3290011,
+          "HQ_OR_outlet": 10800707,
+          "OR_sales_outlet": 177457.0
+        },
+        "2025.07": {
+          "전체_core": 12703629,
+          "FRS_core": 1829555,
+          "HQ_OR_core": 10874074,
+          "OR_sales_core": 60687.0,
+          "전체_outlet": 7460283,
+          "FRS_outlet": 2244350,
+          "HQ_OR_outlet": 5215933,
+          "OR_sales_outlet": 38271.0
+        },
+        "2025.08": {
+          "전체_core": 19151878,
+          "FRS_core": 3793973,
+          "HQ_OR_core": 15357905,
+          "OR_sales_core": 307621.0,
+          "전체_outlet": 7252625,
+          "FRS_outlet": 2305307,
+          "HQ_OR_outlet": 4947318,
+          "OR_sales_outlet": 57789.0
+        },
+        "2025.09": {
+          "전체_core": 24027049,
+          "FRS_core": 6065706,
+          "HQ_OR_core": 17961343,
+          "OR_sales_core": 223294.0,
+          "전체_outlet": 7234135,
+          "FRS_outlet": 2621234,
+          "HQ_OR_outlet": 4612901,
+          "OR_sales_outlet": 30979.0
+        },
+        "2025.10": {
+          "전체_core": 28560754,
+          "FRS_core": 5554615,
+          "HQ_OR_core": 23006139,
+          "OR_sales_core": 184562.0,
+          "전체_outlet": 7136866,
+          "FRS_outlet": 2247961,
+          "HQ_OR_outlet": 4888905,
+          "OR_sales_outlet": 33113.0
+        },
+        "2025.11": {
+          "전체_core": 30167633,
+          "FRS_core": 6172837,
+          "HQ_OR_core": 23994796,
+          "OR_sales_core": 112805.0,
+          "전체_outlet": 6989347,
+          "FRS_outlet": 2065565,
+          "HQ_OR_outlet": 4923782,
+          "OR_sales_outlet": 17934.0
+        }
+      },
+      "Shoes": {
+        "2024.01": {
+          "전체_core": 0,
+          "FRS_core": 0,
+          "HQ_OR_core": 0,
+          "OR_sales_core": 0,
+          "전체_outlet": 0,
+          "FRS_outlet": 0,
+          "HQ_OR_outlet": 0,
+          "OR_sales_outlet": 0
+        },
+        "2024.02": {
+          "전체_core": 0,
+          "FRS_core": 0,
+          "HQ_OR_core": 0,
+          "OR_sales_core": 0,
+          "전체_outlet": 0,
+          "FRS_outlet": 0,
+          "HQ_OR_outlet": 0,
+          "OR_sales_outlet": 0
+        },
+        "2024.03": {
+          "전체_core": 0,
+          "FRS_core": 0,
+          "HQ_OR_core": 0,
+          "OR_sales_core": 0,
+          "전체_outlet": 0,
+          "FRS_outlet": 0,
+          "HQ_OR_outlet": 0,
+          "OR_sales_outlet": 0
+        },
+        "2024.04": {
+          "전체_core": 0,
+          "FRS_core": 0,
+          "HQ_OR_core": 0,
+          "OR_sales_core": 0,
+          "전체_outlet": 0,
+          "FRS_outlet": 0,
+          "HQ_OR_outlet": 0,
+          "OR_sales_outlet": 0
+        },
+        "2024.05": {
+          "전체_core": 0,
+          "FRS_core": 0,
+          "HQ_OR_core": 0,
+          "OR_sales_core": 0,
+          "전체_outlet": 0,
+          "FRS_outlet": 0,
+          "HQ_OR_outlet": 0,
+          "OR_sales_outlet": 0
+        },
+        "2024.06": {
+          "전체_core": 0,
+          "FRS_core": 0,
+          "HQ_OR_core": 0,
+          "OR_sales_core": 0,
+          "전체_outlet": 0,
+          "FRS_outlet": 0,
+          "HQ_OR_outlet": 0,
+          "OR_sales_outlet": 0
+        },
+        "2024.07": {
+          "전체_core": 0,
+          "FRS_core": 0,
+          "HQ_OR_core": 0,
+          "OR_sales_core": 0,
+          "전체_outlet": 0,
+          "FRS_outlet": 0,
+          "HQ_OR_outlet": 0,
+          "OR_sales_outlet": 0
+        },
+        "2024.08": {
+          "전체_core": 0,
+          "FRS_core": 0,
+          "HQ_OR_core": 0,
+          "OR_sales_core": 0,
+          "전체_outlet": 0,
+          "FRS_outlet": 0,
+          "HQ_OR_outlet": 0,
+          "OR_sales_outlet": 0
+        },
+        "2024.09": {
+          "전체_core": 2047910,
+          "FRS_core": 0,
+          "HQ_OR_core": 2047910,
+          "OR_sales_core": 990.0,
+          "전체_outlet": 0,
+          "FRS_outlet": 0,
+          "HQ_OR_outlet": 0,
+          "OR_sales_outlet": 0
+        },
+        "2024.10": {
+          "전체_core": 2036630,
+          "FRS_core": 0,
+          "HQ_OR_core": 2036630,
+          "OR_sales_core": 16330.0,
+          "전체_outlet": 0,
+          "FRS_outlet": 0,
+          "HQ_OR_outlet": 0,
+          "OR_sales_outlet": 0
+        },
+        "2024.11": {
+          "전체_core": 2164840,
+          "FRS_core": 304800,
+          "HQ_OR_core": 1860040,
+          "OR_sales_core": 21190.0,
+          "전체_outlet": 12480,
+          "FRS_outlet": 1560,
+          "HQ_OR_outlet": 10920,
+          "OR_sales_outlet": 0
+        },
+        "2024.12": {
+          "전체_core": 1958230,
+          "FRS_core": 779540,
+          "HQ_OR_core": 1178690,
+          "OR_sales_core": 45140.0,
+          "전체_outlet": 12480,
+          "FRS_outlet": 3120,
+          "HQ_OR_outlet": 9360,
+          "OR_sales_outlet": 0
+        },
+        "2025.01": {
+          "전체_core": 0,
+          "FRS_core": 0,
+          "HQ_OR_core": 0,
+          "OR_sales_core": 0,
+          "전체_outlet": 4438860,
+          "FRS_outlet": 1268670,
+          "HQ_OR_outlet": 3170190,
+          "OR_sales_outlet": 41290.0
+        },
+        "2025.02": {
+          "전체_core": 0,
+          "FRS_core": 0,
+          "HQ_OR_core": 0,
+          "OR_sales_core": 0,
+          "전체_outlet": 4519800,
+          "FRS_outlet": 1163310,
+          "HQ_OR_outlet": 3356490,
+          "OR_sales_outlet": 99780.0
+        },
+        "2025.03": {
+          "전체_core": 1477080,
+          "FRS_core": 168270,
+          "HQ_OR_core": 1308810,
+          "OR_sales_core": 0,
+          "전체_outlet": 5210780,
+          "FRS_outlet": 1184160,
+          "HQ_OR_outlet": 4026620,
+          "OR_sales_outlet": 52050.0
+        },
+        "2025.04": {
+          "전체_core": 0,
+          "FRS_core": 0,
+          "HQ_OR_core": 0,
+          "OR_sales_core": 0,
+          "전체_outlet": 6648160,
+          "FRS_outlet": 2094680,
+          "HQ_OR_outlet": 4553480,
+          "OR_sales_outlet": 176100.0
+        },
+        "2025.05": {
+          "전체_core": 509170,
+          "FRS_core": 87910,
+          "HQ_OR_core": 421260,
+          "OR_sales_core": 2950.0,
+          "전체_outlet": 7718660,
+          "FRS_outlet": 2167650,
+          "HQ_OR_outlet": 5551010,
+          "OR_sales_outlet": 167530.0
+        },
+        "2025.06": {
+          "전체_core": 493940,
+          "FRS_core": 136990,
+          "HQ_OR_core": 356950,
+          "OR_sales_core": 8260.0,
+          "전체_outlet": 7586990,
+          "FRS_outlet": 2611040,
+          "HQ_OR_outlet": 4975950,
+          "OR_sales_outlet": 136820.0
+        },
+        "2025.07": {
+          "전체_core": 1850340,
+          "FRS_core": 816670,
+          "HQ_OR_core": 1033670,
+          "OR_sales_core": 19340.0,
+          "전체_outlet": 5993140,
+          "FRS_outlet": 2154160,
+          "HQ_OR_outlet": 3838980,
+          "OR_sales_outlet": 34820.0
+        },
+        "2025.08": {
+          "전체_core": 8115790,
+          "FRS_core": 2284790,
+          "HQ_OR_core": 5831000,
+          "OR_sales_core": 82130.0,
+          "전체_outlet": 5804310,
+          "FRS_outlet": 2209540,
+          "HQ_OR_outlet": 3594770,
+          "OR_sales_outlet": 47190.0
+        },
+        "2025.09": {
+          "전체_core": 10625240,
+          "FRS_core": 3573220,
+          "HQ_OR_core": 7052020,
+          "OR_sales_core": 44360.0,
+          "전체_outlet": 5796950,
+          "FRS_outlet": 2468640,
+          "HQ_OR_outlet": 3328310,
+          "OR_sales_outlet": 24550.0
+        },
+        "2025.10": {
+          "전체_core": 15477500,
+          "FRS_core": 3538320,
+          "HQ_OR_core": 11939180,
+          "OR_sales_core": 35950.0,
+          "전체_outlet": 5710090,
+          "FRS_outlet": 2134760,
+          "HQ_OR_outlet": 3575330,
+          "OR_sales_outlet": 27010.0
+        },
+        "2025.11": {
+          "전체_core": 17218460,
+          "FRS_core": 4188790,
+          "HQ_OR_core": 13029670,
+          "OR_sales_core": 37720.0,
+          "전체_outlet": 5565130,
+          "FRS_outlet": 1950830,
+          "HQ_OR_outlet": 3614300,
+          "OR_sales_outlet": 15660.0
+        }
+      },
+      "Headwear": {
+        "2024.01": {
+          "전체_core": 0,
+          "FRS_core": 0,
+          "HQ_OR_core": 0,
+          "OR_sales_core": 0,
+          "전체_outlet": 0,
+          "FRS_outlet": 0,
+          "HQ_OR_outlet": 0,
+          "OR_sales_outlet": 0
+        },
+        "2024.02": {
+          "전체_core": 0,
+          "FRS_core": 0,
+          "HQ_OR_core": 0,
+          "OR_sales_core": 0,
+          "전체_outlet": 0,
+          "FRS_outlet": 0,
+          "HQ_OR_outlet": 0,
+          "OR_sales_outlet": 0
+        },
+        "2024.03": {
+          "전체_core": 0,
+          "FRS_core": 0,
+          "HQ_OR_core": 0,
+          "OR_sales_core": 0,
+          "전체_outlet": 0,
+          "FRS_outlet": 0,
+          "HQ_OR_outlet": 0,
+          "OR_sales_outlet": 0
+        },
+        "2024.04": {
+          "전체_core": 0,
+          "FRS_core": 0,
+          "HQ_OR_core": 0,
+          "OR_sales_core": 0,
+          "전체_outlet": 0,
+          "FRS_outlet": 0,
+          "HQ_OR_outlet": 0,
+          "OR_sales_outlet": 0
+        },
+        "2024.05": {
+          "전체_core": 0,
+          "FRS_core": 0,
+          "HQ_OR_core": 0,
+          "OR_sales_core": 0,
+          "전체_outlet": 0,
+          "FRS_outlet": 0,
+          "HQ_OR_outlet": 0,
+          "OR_sales_outlet": 0
+        },
+        "2024.06": {
+          "전체_core": 0,
+          "FRS_core": 0,
+          "HQ_OR_core": 0,
+          "OR_sales_core": 0,
+          "전체_outlet": 0,
+          "FRS_outlet": 0,
+          "HQ_OR_outlet": 0,
+          "OR_sales_outlet": 0
+        },
+        "2024.07": {
+          "전체_core": 0,
+          "FRS_core": 0,
+          "HQ_OR_core": 0,
+          "OR_sales_core": 0,
+          "전체_outlet": 0,
+          "FRS_outlet": 0,
+          "HQ_OR_outlet": 0,
+          "OR_sales_outlet": 0
+        },
+        "2024.08": {
+          "전체_core": 0,
+          "FRS_core": 0,
+          "HQ_OR_core": 0,
+          "OR_sales_core": 0,
+          "전체_outlet": 0,
+          "FRS_outlet": 0,
+          "HQ_OR_outlet": 0,
+          "OR_sales_outlet": 0
+        },
+        "2024.09": {
+          "전체_core": 109500,
+          "FRS_core": 0,
+          "HQ_OR_core": 109500,
+          "OR_sales_core": 0,
+          "전체_outlet": 0,
+          "FRS_outlet": 0,
+          "HQ_OR_outlet": 0,
+          "OR_sales_outlet": 0
+        },
+        "2024.10": {
+          "전체_core": 147930,
+          "FRS_core": 0,
+          "HQ_OR_core": 147930,
+          "OR_sales_core": 8840.0,
+          "전체_outlet": 0,
+          "FRS_outlet": 0,
+          "HQ_OR_outlet": 0,
+          "OR_sales_outlet": 0
+        },
+        "2024.11": {
+          "전체_core": 497570,
+          "FRS_core": 34160,
+          "HQ_OR_core": 463410,
+          "OR_sales_core": 7960.0,
+          "전체_outlet": 0,
+          "FRS_outlet": 0,
+          "HQ_OR_outlet": 0,
+          "OR_sales_outlet": 0
+        },
+        "2024.12": {
+          "전체_core": 398100,
+          "FRS_core": 80380,
+          "HQ_OR_core": 317720,
+          "OR_sales_core": 25000.0,
+          "전체_outlet": 0,
+          "FRS_outlet": 0,
+          "HQ_OR_outlet": 0,
+          "OR_sales_outlet": 0
+        },
+        "2025.01": {
+          "전체_core": 2621990,
+          "FRS_core": 205120,
+          "HQ_OR_core": 2416870,
+          "OR_sales_core": 1960.0,
+          "전체_outlet": 362540,
+          "FRS_outlet": 83170,
+          "HQ_OR_outlet": 279370,
+          "OR_sales_outlet": 15810.0
+        },
+        "2025.02": {
+          "전체_core": 3126480,
+          "FRS_core": 200280,
+          "HQ_OR_core": 2926200,
+          "OR_sales_core": 15390.0,
+          "전체_outlet": 320160,
+          "FRS_outlet": 58100,
+          "HQ_OR_outlet": 262060,
+          "OR_sales_outlet": 17570.0
+        },
+        "2025.03": {
+          "전체_core": 3092110,
+          "FRS_core": 257610,
+          "HQ_OR_core": 2834500,
+          "OR_sales_core": 19830.0,
+          "전체_outlet": 332560,
+          "FRS_outlet": 34400,
+          "HQ_OR_outlet": 298160,
+          "OR_sales_outlet": 6380.0
+        },
+        "2025.04": {
+          "전체_core": 519970,
+          "FRS_core": 46560,
+          "HQ_OR_core": 473410,
+          "OR_sales_core": 390.0,
+          "전체_outlet": 2717990,
+          "FRS_outlet": 217310,
+          "HQ_OR_outlet": 2500680,
+          "OR_sales_outlet": 33870.0
+        },
+        "2025.05": {
+          "전체_core": 522330,
+          "FRS_core": 45780,
+          "HQ_OR_core": 476550,
+          "OR_sales_core": 1760.0,
+          "전체_outlet": 2785220,
+          "FRS_outlet": 209610,
+          "HQ_OR_outlet": 2575610,
+          "OR_sales_outlet": 26570.0
+        },
+        "2025.06": {
+          "전체_core": 1466960,
+          "FRS_core": 78450,
+          "HQ_OR_core": 1388510,
+          "OR_sales_core": 2110.0,
+          "전체_outlet": 2998150,
+          "FRS_outlet": 242490,
+          "HQ_OR_outlet": 2755660,
+          "OR_sales_outlet": 25410.0
+        },
+        "2025.07": {
+          "전체_core": 4711940,
+          "FRS_core": 461050,
+          "HQ_OR_core": 4250890,
+          "OR_sales_core": 28600.0,
+          "전체_outlet": 321700,
+          "FRS_outlet": 6980,
+          "HQ_OR_outlet": 314720,
+          "OR_sales_outlet": 550.0
+        },
+        "2025.08": {
+          "전체_core": 5102030,
+          "FRS_core": 585350,
+          "HQ_OR_core": 4516680,
+          "OR_sales_core": 128420.0,
+          "전체_outlet": 313900,
+          "FRS_outlet": 8800,
+          "HQ_OR_outlet": 305100,
+          "OR_sales_outlet": 4440.0
+        },
+        "2025.09": {
+          "전체_core": 7128450,
+          "FRS_core": 1154790,
+          "HQ_OR_core": 5973660,
+          "OR_sales_core": 126130.0,
+          "전체_outlet": 310080,
+          "FRS_outlet": 7500,
+          "HQ_OR_outlet": 302580,
+          "OR_sales_outlet": 2520.0
+        },
+        "2025.10": {
+          "전체_core": 6900900,
+          "FRS_core": 906780,
+          "HQ_OR_core": 5994120,
+          "OR_sales_core": 113450.0,
+          "전체_outlet": 306350,
+          "FRS_outlet": 7240,
+          "HQ_OR_outlet": 299110,
+          "OR_sales_outlet": 3730.0
+        },
+        "2025.11": {
+          "전체_core": 6786590,
+          "FRS_core": 903060,
+          "HQ_OR_core": 5883530,
+          "OR_sales_core": 58410.0,
+          "전체_outlet": 304490,
+          "FRS_outlet": 6720,
+          "HQ_OR_outlet": 297770,
+          "OR_sales_outlet": 850.0
+        }
+      },
+      "Bag": {
+        "2024.01": {
+          "전체_core": 0,
+          "FRS_core": 0,
+          "HQ_OR_core": 0,
+          "OR_sales_core": 0,
+          "전체_outlet": 0,
+          "FRS_outlet": 0,
+          "HQ_OR_outlet": 0,
+          "OR_sales_outlet": 0
+        },
+        "2024.02": {
+          "전체_core": 0,
+          "FRS_core": 0,
+          "HQ_OR_core": 0,
+          "OR_sales_core": 0,
+          "전체_outlet": 0,
+          "FRS_outlet": 0,
+          "HQ_OR_outlet": 0,
+          "OR_sales_outlet": 0
+        },
+        "2024.03": {
+          "전체_core": 0,
+          "FRS_core": 0,
+          "HQ_OR_core": 0,
+          "OR_sales_core": 0,
+          "전체_outlet": 0,
+          "FRS_outlet": 0,
+          "HQ_OR_outlet": 0,
+          "OR_sales_outlet": 0
+        },
+        "2024.04": {
+          "전체_core": 0,
+          "FRS_core": 0,
+          "HQ_OR_core": 0,
+          "OR_sales_core": 0,
+          "전체_outlet": 0,
+          "FRS_outlet": 0,
+          "HQ_OR_outlet": 0,
+          "OR_sales_outlet": 0
+        },
+        "2024.05": {
+          "전체_core": 0,
+          "FRS_core": 0,
+          "HQ_OR_core": 0,
+          "OR_sales_core": 0,
+          "전체_outlet": 0,
+          "FRS_outlet": 0,
+          "HQ_OR_outlet": 0,
+          "OR_sales_outlet": 0
+        },
+        "2024.06": {
+          "전체_core": 0,
+          "FRS_core": 0,
+          "HQ_OR_core": 0,
+          "OR_sales_core": 0,
+          "전체_outlet": 0,
+          "FRS_outlet": 0,
+          "HQ_OR_outlet": 0,
+          "OR_sales_outlet": 0
+        },
+        "2024.07": {
+          "전체_core": 0,
+          "FRS_core": 0,
+          "HQ_OR_core": 0,
+          "OR_sales_core": 0,
+          "전체_outlet": 0,
+          "FRS_outlet": 0,
+          "HQ_OR_outlet": 0,
+          "OR_sales_outlet": 0
+        },
+        "2024.08": {
+          "전체_core": 0,
+          "FRS_core": 0,
+          "HQ_OR_core": 0,
+          "OR_sales_core": 0,
+          "전체_outlet": 0,
+          "FRS_outlet": 0,
+          "HQ_OR_outlet": 0,
+          "OR_sales_outlet": 0
+        },
+        "2024.09": {
+          "전체_core": 107710,
+          "FRS_core": 0,
+          "HQ_OR_core": 107710,
+          "OR_sales_core": 0,
+          "전체_outlet": 0,
+          "FRS_outlet": 0,
+          "HQ_OR_outlet": 0,
+          "OR_sales_outlet": 0
+        },
+        "2024.10": {
+          "전체_core": 106820,
+          "FRS_core": 0,
+          "HQ_OR_core": 106820,
+          "OR_sales_core": 890.0,
+          "전체_outlet": 0,
+          "FRS_outlet": 0,
+          "HQ_OR_outlet": 0,
+          "OR_sales_outlet": 0
+        },
+        "2024.11": {
+          "전체_core": 498520,
+          "FRS_core": 50890,
+          "HQ_OR_core": 447630,
+          "OR_sales_core": 2270.0,
+          "전체_outlet": 0,
+          "FRS_outlet": 0,
+          "HQ_OR_outlet": 0,
+          "OR_sales_outlet": 0
+        },
+        "2024.12": {
+          "전체_core": 2967870,
+          "FRS_core": 171010,
+          "HQ_OR_core": 2796860,
+          "OR_sales_core": 8350.0,
+          "전체_outlet": 0,
+          "FRS_outlet": 0,
+          "HQ_OR_outlet": 0,
+          "OR_sales_outlet": 0
+        },
+        "2025.01": {
+          "전체_core": 3074890,
+          "FRS_core": 207880,
+          "HQ_OR_core": 2867010,
+          "OR_sales_core": 4870.0,
+          "전체_outlet": 494030,
+          "FRS_outlet": 156910,
+          "HQ_OR_outlet": 337120,
+          "OR_sales_outlet": 4850.0
+        },
+        "2025.02": {
+          "전체_core": 3049310,
+          "FRS_core": 201070,
+          "HQ_OR_core": 2848240,
+          "OR_sales_core": 19330.0,
+          "전체_outlet": 481380,
+          "FRS_outlet": 154540,
+          "HQ_OR_outlet": 326840,
+          "OR_sales_outlet": 8500.0
+        },
+        "2025.03": {
+          "전체_core": 3032230,
+          "FRS_core": 224360,
+          "HQ_OR_core": 2807870,
+          "OR_sales_core": 13590.0,
+          "전체_outlet": 480000,
+          "FRS_outlet": 99670,
+          "HQ_OR_outlet": 380330,
+          "OR_sales_outlet": 920.0
+        },
+        "2025.04": {
+          "전체_core": 610360,
+          "FRS_core": 36220,
+          "HQ_OR_core": 574140,
+          "OR_sales_core": 0,
+          "전체_outlet": 2780270,
+          "FRS_outlet": 256130,
+          "HQ_OR_outlet": 2524140,
+          "OR_sales_outlet": 15290.0
+        },
+        "2025.05": {
+          "전체_core": 605730,
+          "FRS_core": 36220,
+          "HQ_OR_core": 569510,
+          "OR_sales_core": 3350.0,
+          "전체_outlet": 2853510,
+          "FRS_outlet": 275900,
+          "HQ_OR_outlet": 2577610,
+          "OR_sales_outlet": 11190.0
+        },
+        "2025.06": {
+          "전체_core": 1759640,
+          "FRS_core": 47260,
+          "HQ_OR_core": 1712380,
+          "OR_sales_core": 590.0,
+          "전체_outlet": 2825920,
+          "FRS_outlet": 380980,
+          "HQ_OR_outlet": 2444940,
+          "OR_sales_outlet": 11790.0
+        },
+        "2025.07": {
+          "전체_core": 5856440,
+          "FRS_core": 532550,
+          "HQ_OR_core": 5323890,
+          "OR_sales_core": 12590.0,
+          "전체_outlet": 469350,
+          "FRS_outlet": 22820,
+          "HQ_OR_outlet": 446530,
+          "OR_sales_outlet": 1480.0
+        },
+        "2025.08": {
+          "전체_core": 5657970,
+          "FRS_core": 904510,
+          "HQ_OR_core": 4753460,
+          "OR_sales_core": 96010.0,
+          "전체_outlet": 465500,
+          "FRS_outlet": 21040,
+          "HQ_OR_outlet": 444460,
+          "OR_sales_outlet": 2070.0
+        },
+        "2025.09": {
+          "전체_core": 5547600,
+          "FRS_core": 1112610,
+          "HQ_OR_core": 4434990,
+          "OR_sales_core": 51310.0,
+          "전체_outlet": 462540,
+          "FRS_outlet": 80040,
+          "HQ_OR_outlet": 382500,
+          "OR_sales_outlet": 2960.0
+        },
+        "2025.10": {
+          "전체_core": 5475550,
+          "FRS_core": 891560,
+          "HQ_OR_core": 4583990,
+          "OR_sales_core": 26040.0,
+          "전체_outlet": 460700,
+          "FRS_outlet": 78200,
+          "HQ_OR_outlet": 382500,
+          "OR_sales_outlet": 0
+        },
+        "2025.11": {
+          "전체_core": 5466730,
+          "FRS_core": 866360,
+          "HQ_OR_core": 4600370,
+          "OR_sales_core": 13770.0,
+          "전체_outlet": 460700,
+          "FRS_outlet": 78200,
+          "HQ_OR_outlet": 382500,
+          "OR_sales_outlet": 0
+        }
+      },
+      "Acc_etc": {
+        "2024.01": {
+          "전체_core": 0,
+          "FRS_core": 0,
+          "HQ_OR_core": 0,
+          "OR_sales_core": 0,
+          "전체_outlet": 0,
+          "FRS_outlet": 0,
+          "HQ_OR_outlet": 0,
+          "OR_sales_outlet": 0
+        },
+        "2024.02": {
+          "전체_core": 0,
+          "FRS_core": 0,
+          "HQ_OR_core": 0,
+          "OR_sales_core": 0,
+          "전체_outlet": 0,
+          "FRS_outlet": 0,
+          "HQ_OR_outlet": 0,
+          "OR_sales_outlet": 0
+        },
+        "2024.03": {
+          "전체_core": 0,
+          "FRS_core": 0,
+          "HQ_OR_core": 0,
+          "OR_sales_core": 0,
+          "전체_outlet": 0,
+          "FRS_outlet": 0,
+          "HQ_OR_outlet": 0,
+          "OR_sales_outlet": 0
+        },
+        "2024.04": {
+          "전체_core": 0,
+          "FRS_core": 0,
+          "HQ_OR_core": 0,
+          "OR_sales_core": 0,
+          "전체_outlet": 0,
+          "FRS_outlet": 0,
+          "HQ_OR_outlet": 0,
+          "OR_sales_outlet": 0
+        },
+        "2024.05": {
+          "전체_core": 0,
+          "FRS_core": 0,
+          "HQ_OR_core": 0,
+          "OR_sales_core": 0,
+          "전체_outlet": 0,
+          "FRS_outlet": 0,
+          "HQ_OR_outlet": 0,
+          "OR_sales_outlet": 0
+        },
+        "2024.06": {
+          "전체_core": 0,
+          "FRS_core": 0,
+          "HQ_OR_core": 0,
+          "OR_sales_core": 0,
+          "전체_outlet": 0,
+          "FRS_outlet": 0,
+          "HQ_OR_outlet": 0,
+          "OR_sales_outlet": 0
+        },
+        "2024.07": {
+          "전체_core": 0,
+          "FRS_core": 0,
+          "HQ_OR_core": 0,
+          "OR_sales_core": 0,
+          "전체_outlet": 0,
+          "FRS_outlet": 0,
+          "HQ_OR_outlet": 0,
+          "OR_sales_outlet": 0
+        },
+        "2024.08": {
+          "전체_core": 0,
+          "FRS_core": 0,
+          "HQ_OR_core": 0,
+          "OR_sales_core": 0,
+          "전체_outlet": 0,
+          "FRS_outlet": 0,
+          "HQ_OR_outlet": 0,
+          "OR_sales_outlet": 0
+        },
+        "2024.09": {
+          "전체_core": 122649,
+          "FRS_core": 0,
+          "HQ_OR_core": 122649,
+          "OR_sales_core": 0,
+          "전체_outlet": 0,
+          "FRS_outlet": 0,
+          "HQ_OR_outlet": 0,
+          "OR_sales_outlet": 0
+        },
+        "2024.10": {
+          "전체_core": 80843,
+          "FRS_core": 0,
+          "HQ_OR_core": 80843,
+          "OR_sales_core": 2317.0,
+          "전체_outlet": 0,
+          "FRS_outlet": 0,
+          "HQ_OR_outlet": 0,
+          "OR_sales_outlet": 0
+        },
+        "2024.11": {
+          "전체_core": 497781,
+          "FRS_core": 22122,
+          "HQ_OR_core": 475659,
+          "OR_sales_core": 7100.0,
+          "전체_outlet": 0,
+          "FRS_outlet": 0,
+          "HQ_OR_outlet": 0,
+          "OR_sales_outlet": 0
+        },
+        "2024.12": {
+          "전체_core": 337359,
+          "FRS_core": 56042,
+          "HQ_OR_core": 281317,
+          "OR_sales_core": 11828.0,
+          "전체_outlet": 0,
+          "FRS_outlet": 0,
+          "HQ_OR_outlet": 0,
+          "OR_sales_outlet": 0
+        },
+        "2025.01": {
+          "전체_core": 0,
+          "FRS_core": 0,
+          "HQ_OR_core": 0,
+          "OR_sales_core": 0,
+          "전체_outlet": 267741,
+          "FRS_outlet": 59983,
+          "HQ_OR_outlet": 207758,
+          "OR_sales_outlet": 5517.0
+        },
+        "2025.02": {
+          "전체_core": 91933,
+          "FRS_core": 3535,
+          "HQ_OR_core": 88398,
+          "OR_sales_core": 118.0,
+          "전체_outlet": 376034,
+          "FRS_outlet": 49890,
+          "HQ_OR_outlet": 326144,
+          "OR_sales_outlet": 2958.0
+        },
+        "2025.03": {
+          "전체_core": 91472,
+          "FRS_core": 4684,
+          "HQ_OR_core": 86788,
+          "OR_sales_core": 216.0,
+          "전체_outlet": 420958,
+          "FRS_outlet": 36062,
+          "HQ_OR_outlet": 384896,
+          "OR_sales_outlet": 929.0
+        },
+        "2025.04": {
+          "전체_core": 88949,
+          "FRS_core": 10016,
+          "HQ_OR_core": 78933,
+          "OR_sales_core": 1335.0,
+          "전체_outlet": 569574,
+          "FRS_outlet": 33468,
+          "HQ_OR_outlet": 536106,
+          "OR_sales_outlet": 1949.0
+        },
+        "2025.05": {
+          "전체_core": 85197,
+          "FRS_core": 11773,
+          "HQ_OR_core": 73424,
+          "OR_sales_core": 1257.0,
+          "전체_outlet": 578111,
+          "FRS_outlet": 44915,
+          "HQ_OR_outlet": 533196,
+          "OR_sales_outlet": 2345.0
+        },
+        "2025.06": {
+          "전체_core": 81475,
+          "FRS_core": 16653,
+          "HQ_OR_core": 64822,
+          "OR_sales_core": 1759.0,
+          "전체_outlet": 679658,
+          "FRS_outlet": 55501,
+          "HQ_OR_outlet": 624157,
+          "OR_sales_outlet": 3437.0
+        },
+        "2025.07": {
+          "전체_core": 284909,
+          "FRS_core": 19285,
+          "HQ_OR_core": 265624,
+          "OR_sales_core": 157.0,
+          "전체_outlet": 676093,
+          "FRS_outlet": 60390,
+          "HQ_OR_outlet": 615703,
+          "OR_sales_outlet": 1421.0
+        },
+        "2025.08": {
+          "전체_core": 276088,
+          "FRS_core": 19323,
+          "HQ_OR_core": 256765,
+          "OR_sales_core": 1061.0,
+          "전체_outlet": 668915,
+          "FRS_outlet": 65927,
+          "HQ_OR_outlet": 602988,
+          "OR_sales_outlet": 4089.0
+        },
+        "2025.09": {
+          "전체_core": 725759,
+          "FRS_core": 225086,
+          "HQ_OR_core": 500673,
+          "OR_sales_core": 1494.0,
+          "전체_outlet": 664565,
+          "FRS_outlet": 65054,
+          "HQ_OR_outlet": 599511,
+          "OR_sales_outlet": 949.0
+        },
+        "2025.10": {
+          "전체_core": 706804,
+          "FRS_core": 217955,
+          "HQ_OR_core": 488849,
+          "OR_sales_core": 9122.0,
+          "전체_outlet": 659726,
+          "FRS_outlet": 27761,
+          "HQ_OR_outlet": 631965,
+          "OR_sales_outlet": 2373.0
+        },
+        "2025.11": {
+          "전체_core": 695853,
+          "FRS_core": 214627,
+          "HQ_OR_core": 481226,
+          "OR_sales_core": 2905.0,
+          "전체_outlet": 659027,
+          "FRS_outlet": 29815,
+          "HQ_OR_outlet": 629212,
+          "OR_sales_outlet": 1424.0
+        }
+      }
+    }
+  },
+  "unexpectedCategories": [],
+  "months": [
+    "2024.01",
+    "2024.02",
+    "2024.03",
+    "2024.04",
+    "2024.05",
+    "2024.06",
+    "2024.07",
+    "2024.08",
+    "2024.09",
+    "2024.10",
+    "2024.11",
+    "2024.12",
+    "2025.01",
+    "2025.02",
+    "2025.03",
+    "2025.04",
+    "2025.05",
+    "2025.06",
+    "2025.07",
+    "2025.08",
+    "2025.09",
+    "2025.10",
+    "2025.11"
+  ],
+  "daysInMonth": {
+    "2024.01": 31,
+    "2024.02": 29,
+    "2024.03": 31,
+    "2024.04": 30,
+    "2024.05": 31,
+    "2024.06": 30,
+    "2024.07": 31,
+    "2024.08": 31,
+    "2024.09": 30,
+    "2024.10": 31,
+    "2024.11": 30,
+    "2024.12": 31,
+    "2025.01": 31,
+    "2025.02": 28,
+    "2025.03": 31,
+    "2025.04": 30,
+    "2025.05": 31,
+    "2025.06": 30,
+    "2025.07": 31,
+    "2025.08": 31,
+    "2025.09": 30,
+    "2025.10": 31,
+    "2025.11": 30
+  }
+}
