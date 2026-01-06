@@ -195,6 +195,7 @@ stock_raw AS (
     TO_VARCHAR(s.shop_id) AS shop_id,
     s.prdt_scs_cd,
     s.stock_tag_amt_expected AS stock_amt,
+    p.operate_standard,
     p.remark1, p.remark2, p.remark3, p.remark4, p.remark5,
     p.remark6, p.remark7, p.remark8, p.remark9, p.remark10,
     p.remark11, p.remark12, p.remark13, p.remark14, p.remark15,
@@ -209,7 +210,7 @@ stock_raw AS (
     ${getCategoryFilter(selectedCategory)}
 ),
 
--- 재고 + 대리상 매핑 + remark 자동 계산 (23.12 기준, 3개월 단위)
+-- 재고 + 대리상 매핑 + remark 자동 계산 (23.12 기준, 3개월 단위, 2025년 12월부터 operate_standard 사용)
 stock_with_segment AS (
   SELECT 
     sr.yymm,
@@ -217,22 +218,25 @@ stock_with_segment AS (
     sr.prdt_scs_cd,
     sr.prdt_nm,
     sr.stock_amt,
-    CASE (FLOOR(DATEDIFF('month', TO_DATE('202312', 'YYYYMM'), TO_DATE(sr.yymm || '01', 'YYYYMMDD')) / 3) + 1)
-      WHEN 1 THEN sr.remark1
-      WHEN 2 THEN sr.remark2
-      WHEN 3 THEN sr.remark3
-      WHEN 4 THEN sr.remark4
-      WHEN 5 THEN sr.remark5
-      WHEN 6 THEN sr.remark6
-      WHEN 7 THEN sr.remark7
-      WHEN 8 THEN sr.remark8
-      WHEN 9 THEN sr.remark9
-      WHEN 10 THEN sr.remark10
-      WHEN 11 THEN sr.remark11
-      WHEN 12 THEN sr.remark12
-      WHEN 13 THEN sr.remark13
-      WHEN 14 THEN sr.remark14
-      WHEN 15 THEN sr.remark15
+    CASE 
+      -- 2025년 12월부터 operate_standard 사용
+      WHEN sr.yymm >= '202512' THEN sr.operate_standard
+      -- 2025년 11월까지는 remark 방식 유지
+      WHEN (FLOOR(DATEDIFF('month', TO_DATE('202312', 'YYYYMM'), TO_DATE(sr.yymm || '01', 'YYYYMMDD')) / 3) + 1) = 1 THEN sr.remark1
+      WHEN (FLOOR(DATEDIFF('month', TO_DATE('202312', 'YYYYMM'), TO_DATE(sr.yymm || '01', 'YYYYMMDD')) / 3) + 1) = 2 THEN sr.remark2
+      WHEN (FLOOR(DATEDIFF('month', TO_DATE('202312', 'YYYYMM'), TO_DATE(sr.yymm || '01', 'YYYYMMDD')) / 3) + 1) = 3 THEN sr.remark3
+      WHEN (FLOOR(DATEDIFF('month', TO_DATE('202312', 'YYYYMM'), TO_DATE(sr.yymm || '01', 'YYYYMMDD')) / 3) + 1) = 4 THEN sr.remark4
+      WHEN (FLOOR(DATEDIFF('month', TO_DATE('202312', 'YYYYMM'), TO_DATE(sr.yymm || '01', 'YYYYMMDD')) / 3) + 1) = 5 THEN sr.remark5
+      WHEN (FLOOR(DATEDIFF('month', TO_DATE('202312', 'YYYYMM'), TO_DATE(sr.yymm || '01', 'YYYYMMDD')) / 3) + 1) = 6 THEN sr.remark6
+      WHEN (FLOOR(DATEDIFF('month', TO_DATE('202312', 'YYYYMM'), TO_DATE(sr.yymm || '01', 'YYYYMMDD')) / 3) + 1) = 7 THEN sr.remark7
+      WHEN (FLOOR(DATEDIFF('month', TO_DATE('202312', 'YYYYMM'), TO_DATE(sr.yymm || '01', 'YYYYMMDD')) / 3) + 1) = 8 THEN sr.remark8
+      WHEN (FLOOR(DATEDIFF('month', TO_DATE('202312', 'YYYYMM'), TO_DATE(sr.yymm || '01', 'YYYYMMDD')) / 3) + 1) = 9 THEN sr.remark9
+      WHEN (FLOOR(DATEDIFF('month', TO_DATE('202312', 'YYYYMM'), TO_DATE(sr.yymm || '01', 'YYYYMMDD')) / 3) + 1) = 10 THEN sr.remark10
+      WHEN (FLOOR(DATEDIFF('month', TO_DATE('202312', 'YYYYMM'), TO_DATE(sr.yymm || '01', 'YYYYMMDD')) / 3) + 1) = 11 THEN sr.remark11
+      WHEN (FLOOR(DATEDIFF('month', TO_DATE('202312', 'YYYYMM'), TO_DATE(sr.yymm || '01', 'YYYYMMDD')) / 3) + 1) = 12 THEN sr.remark12
+      WHEN (FLOOR(DATEDIFF('month', TO_DATE('202312', 'YYYYMM'), TO_DATE(sr.yymm || '01', 'YYYYMMDD')) / 3) + 1) = 13 THEN sr.remark13
+      WHEN (FLOOR(DATEDIFF('month', TO_DATE('202312', 'YYYYMM'), TO_DATE(sr.yymm || '01', 'YYYYMMDD')) / 3) + 1) = 14 THEN sr.remark14
+      WHEN (FLOOR(DATEDIFF('month', TO_DATE('202312', 'YYYYMM'), TO_DATE(sr.yymm || '01', 'YYYYMMDD')) / 3) + 1) = 15 THEN sr.remark15
       ELSE NULL
     END AS op_std,
     sr.sesn,
@@ -260,6 +264,7 @@ sales_raw AS (
     TO_VARCHAR(s.shop_id) AS shop_id,
     s.prdt_scs_cd,
     s.tag_amt,
+    p.operate_standard,
     p.remark1, p.remark2, p.remark3, p.remark4, p.remark5,
     p.remark6, p.remark7, p.remark8, p.remark9, p.remark10,
     p.remark11, p.remark12, p.remark13, p.remark14, p.remark15,
@@ -272,29 +277,32 @@ sales_raw AS (
     ${getCategoryFilter(selectedCategory)}
 ),
 
--- 판매 + 대리상 매핑 + remark 자동 계산 (23.12 기준, 3개월 단위)
+-- 판매 + 대리상 매핑 + remark 자동 계산 (23.12 기준, 3개월 단위, 2025년 12월부터 operate_standard 사용)
 sales_with_segment AS (
   SELECT 
     sr.yymm,
     sdm.account_id,
     sr.prdt_scs_cd,
     sr.tag_amt,
-    CASE (FLOOR(DATEDIFF('month', TO_DATE('202312', 'YYYYMM'), TO_DATE(sr.yymm || '01', 'YYYYMMDD')) / 3) + 1)
-      WHEN 1 THEN sr.remark1
-      WHEN 2 THEN sr.remark2
-      WHEN 3 THEN sr.remark3
-      WHEN 4 THEN sr.remark4
-      WHEN 5 THEN sr.remark5
-      WHEN 6 THEN sr.remark6
-      WHEN 7 THEN sr.remark7
-      WHEN 8 THEN sr.remark8
-      WHEN 9 THEN sr.remark9
-      WHEN 10 THEN sr.remark10
-      WHEN 11 THEN sr.remark11
-      WHEN 12 THEN sr.remark12
-      WHEN 13 THEN sr.remark13
-      WHEN 14 THEN sr.remark14
-      WHEN 15 THEN sr.remark15
+    CASE 
+      -- 2025년 12월부터 operate_standard 사용
+      WHEN sr.yymm >= '202512' THEN sr.operate_standard
+      -- 2025년 11월까지는 remark 방식 유지
+      WHEN (FLOOR(DATEDIFF('month', TO_DATE('202312', 'YYYYMM'), TO_DATE(sr.yymm || '01', 'YYYYMMDD')) / 3) + 1) = 1 THEN sr.remark1
+      WHEN (FLOOR(DATEDIFF('month', TO_DATE('202312', 'YYYYMM'), TO_DATE(sr.yymm || '01', 'YYYYMMDD')) / 3) + 1) = 2 THEN sr.remark2
+      WHEN (FLOOR(DATEDIFF('month', TO_DATE('202312', 'YYYYMM'), TO_DATE(sr.yymm || '01', 'YYYYMMDD')) / 3) + 1) = 3 THEN sr.remark3
+      WHEN (FLOOR(DATEDIFF('month', TO_DATE('202312', 'YYYYMM'), TO_DATE(sr.yymm || '01', 'YYYYMMDD')) / 3) + 1) = 4 THEN sr.remark4
+      WHEN (FLOOR(DATEDIFF('month', TO_DATE('202312', 'YYYYMM'), TO_DATE(sr.yymm || '01', 'YYYYMMDD')) / 3) + 1) = 5 THEN sr.remark5
+      WHEN (FLOOR(DATEDIFF('month', TO_DATE('202312', 'YYYYMM'), TO_DATE(sr.yymm || '01', 'YYYYMMDD')) / 3) + 1) = 6 THEN sr.remark6
+      WHEN (FLOOR(DATEDIFF('month', TO_DATE('202312', 'YYYYMM'), TO_DATE(sr.yymm || '01', 'YYYYMMDD')) / 3) + 1) = 7 THEN sr.remark7
+      WHEN (FLOOR(DATEDIFF('month', TO_DATE('202312', 'YYYYMM'), TO_DATE(sr.yymm || '01', 'YYYYMMDD')) / 3) + 1) = 8 THEN sr.remark8
+      WHEN (FLOOR(DATEDIFF('month', TO_DATE('202312', 'YYYYMM'), TO_DATE(sr.yymm || '01', 'YYYYMMDD')) / 3) + 1) = 9 THEN sr.remark9
+      WHEN (FLOOR(DATEDIFF('month', TO_DATE('202312', 'YYYYMM'), TO_DATE(sr.yymm || '01', 'YYYYMMDD')) / 3) + 1) = 10 THEN sr.remark10
+      WHEN (FLOOR(DATEDIFF('month', TO_DATE('202312', 'YYYYMM'), TO_DATE(sr.yymm || '01', 'YYYYMMDD')) / 3) + 1) = 11 THEN sr.remark11
+      WHEN (FLOOR(DATEDIFF('month', TO_DATE('202312', 'YYYYMM'), TO_DATE(sr.yymm || '01', 'YYYYMMDD')) / 3) + 1) = 12 THEN sr.remark12
+      WHEN (FLOOR(DATEDIFF('month', TO_DATE('202312', 'YYYYMM'), TO_DATE(sr.yymm || '01', 'YYYYMMDD')) / 3) + 1) = 13 THEN sr.remark13
+      WHEN (FLOOR(DATEDIFF('month', TO_DATE('202312', 'YYYYMM'), TO_DATE(sr.yymm || '01', 'YYYYMMDD')) / 3) + 1) = 14 THEN sr.remark14
+      WHEN (FLOOR(DATEDIFF('month', TO_DATE('202312', 'YYYYMM'), TO_DATE(sr.yymm || '01', 'YYYYMMDD')) / 3) + 1) = 15 THEN sr.remark15
       ELSE NULL
     END AS op_std,
     sr.sesn,

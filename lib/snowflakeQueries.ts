@@ -235,6 +235,7 @@ sales_raw AS (
     s.tag_amt,
     p.sesn,
     s.prdt_scs_cd,
+    p.operate_standard,
     p.remark1, p.remark2, p.remark3, p.remark4, p.remark5,
     p.remark6, p.remark7, p.remark8, p.remark9, p.remark10,
     p.remark11, p.remark12, p.remark13, p.remark14, p.remark15
@@ -269,26 +270,29 @@ sales_with_remark_calc AS (
 sales_with_remark AS (
   SELECT 
     swr.*,
-    CASE swr.remark_num
-      WHEN 1 THEN swr.remark1
-      WHEN 2 THEN swr.remark2
-      WHEN 3 THEN swr.remark3
-      WHEN 4 THEN swr.remark4
-      WHEN 5 THEN swr.remark5
-      WHEN 6 THEN swr.remark6
-      WHEN 7 THEN swr.remark7
-      WHEN 8 THEN swr.remark8
-      WHEN 9 THEN swr.remark9
-      WHEN 10 THEN swr.remark10
-      WHEN 11 THEN swr.remark11
-      WHEN 12 THEN swr.remark12
-      WHEN 13 THEN swr.remark13
-      WHEN 14 THEN swr.remark14
-      WHEN 15 THEN swr.remark15
+    CASE 
+      -- 2025년 12월부터 operate_standard 사용
+      WHEN swr.sale_yyyymm >= '202512' THEN swr.operate_standard
+      -- 2025년 11월까지는 remark 방식 유지
+      WHEN swr.remark_num = 1 THEN swr.remark1
+      WHEN swr.remark_num = 2 THEN swr.remark2
+      WHEN swr.remark_num = 3 THEN swr.remark3
+      WHEN swr.remark_num = 4 THEN swr.remark4
+      WHEN swr.remark_num = 5 THEN swr.remark5
+      WHEN swr.remark_num = 6 THEN swr.remark6
+      WHEN swr.remark_num = 7 THEN swr.remark7
+      WHEN swr.remark_num = 8 THEN swr.remark8
+      WHEN swr.remark_num = 9 THEN swr.remark9
+      WHEN swr.remark_num = 10 THEN swr.remark10
+      WHEN swr.remark_num = 11 THEN swr.remark11
+      WHEN swr.remark_num = 12 THEN swr.remark12
+      WHEN swr.remark_num = 13 THEN swr.remark13
+      WHEN swr.remark_num = 14 THEN swr.remark14
+      WHEN swr.remark_num = 15 THEN swr.remark15
       ELSE NULL
     END AS op_std
   FROM sales_with_remark_calc swr
-  WHERE swr.remark_num >= 1 AND swr.remark_num <= 15
+  WHERE (swr.sale_yyyymm >= '202512' OR (swr.remark_num >= 1 AND swr.remark_num <= 15))
 ),
 
 -- Step 4: 주력/아울렛 분류
@@ -365,6 +369,7 @@ stock_raw AS (
     s.stock_qty_expected,
     p.sesn,
     s.prdt_scs_cd,
+    p.operate_standard,
     p.remark1, p.remark2, p.remark3, p.remark4, p.remark5,
     p.remark6, p.remark7, p.remark8, p.remark9, p.remark10,
     p.remark11, p.remark12, p.remark13, p.remark14, p.remark15
@@ -388,6 +393,7 @@ stock_mapped AS (
     sr.stock_qty_expected,
     sr.sesn,
     sr.prdt_scs_cd,
+    sr.operate_standard,
     sr.remark1, sr.remark2, sr.remark3, sr.remark4, sr.remark5,
     sr.remark6, sr.remark7, sr.remark8, sr.remark9, sr.remark10,
     sr.remark11, sr.remark12, sr.remark13, sr.remark14, sr.remark15,
@@ -423,26 +429,29 @@ stock_with_remark_calc AS (
 stock_with_remark AS (
   SELECT 
     swr.*,
-    CASE swr.remark_num
-      WHEN 1 THEN swr.remark1
-      WHEN 2 THEN swr.remark2
-      WHEN 3 THEN swr.remark3
-      WHEN 4 THEN swr.remark4
-      WHEN 5 THEN swr.remark5
-      WHEN 6 THEN swr.remark6
-      WHEN 7 THEN swr.remark7
-      WHEN 8 THEN swr.remark8
-      WHEN 9 THEN swr.remark9
-      WHEN 10 THEN swr.remark10
-      WHEN 11 THEN swr.remark11
-      WHEN 12 THEN swr.remark12
-      WHEN 13 THEN swr.remark13
-      WHEN 14 THEN swr.remark14
-      WHEN 15 THEN swr.remark15
+    CASE 
+      -- 2025년 12월부터 operate_standard 사용
+      WHEN swr.yymm >= '202512' THEN swr.operate_standard
+      -- 2025년 11월까지는 remark 방식 유지
+      WHEN swr.remark_num = 1 THEN swr.remark1
+      WHEN swr.remark_num = 2 THEN swr.remark2
+      WHEN swr.remark_num = 3 THEN swr.remark3
+      WHEN swr.remark_num = 4 THEN swr.remark4
+      WHEN swr.remark_num = 5 THEN swr.remark5
+      WHEN swr.remark_num = 6 THEN swr.remark6
+      WHEN swr.remark_num = 7 THEN swr.remark7
+      WHEN swr.remark_num = 8 THEN swr.remark8
+      WHEN swr.remark_num = 9 THEN swr.remark9
+      WHEN swr.remark_num = 10 THEN swr.remark10
+      WHEN swr.remark_num = 11 THEN swr.remark11
+      WHEN swr.remark_num = 12 THEN swr.remark12
+      WHEN swr.remark_num = 13 THEN swr.remark13
+      WHEN swr.remark_num = 14 THEN swr.remark14
+      WHEN swr.remark_num = 15 THEN swr.remark15
       ELSE NULL
     END AS op_std
   FROM stock_with_remark_calc swr
-  WHERE swr.remark_num >= 1 AND swr.remark_num <= 15
+  WHERE (swr.yymm >= '202512' OR (swr.remark_num >= 1 AND swr.remark_num <= 15))
 ),
 
 -- Step 5: 주력/아울렛 분류

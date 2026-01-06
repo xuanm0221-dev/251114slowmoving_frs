@@ -124,11 +124,22 @@ def main():
     
     OUTPUT_PATH.mkdir(parents=True, exist_ok=True)
     
+    # 스냅샷 파일에서 2025년 11월까지 데이터 로드
+    snapshot_path = OUTPUT_PATH / "snapshots" / "accessory_inventory_summary_202511.json"
+    snapshot_data = None
+    if snapshot_path.exists():
+        print("\n" + "=" * 40)
+        print("스냅샷 데이터 로드 중 (2025년 11월까지)...")
+        print("=" * 40)
+        with open(snapshot_path, 'r', encoding='utf-8') as f:
+            snapshot_data = json.load(f)
+        print(f"[완료] 스냅샷 로드: {snapshot_path}")
+    
     print("\n판매 OR 데이터 로드 중 (Snowflake)...")
     sales_or_dict = load_sales_or_data()
     print(f"OR 판매 키 수: {len(sales_or_dict):,}")
     
-    print("\n재고 데이터 처리 중 (Snowflake)...")
+    print("\n재고 데이터 처리 중 (Snowflake, 2025년 12월부터)...")
     inv_agg, unexpected = process_inventory_data()
     
     if unexpected:
@@ -136,6 +147,33 @@ def main():
     
     print("\nJSON 변환 중...")
     result = convert_to_json(inv_agg, sales_or_dict, unexpected)
+    
+    # 스냅샷 데이터와 병합 (2025년 11월까지는 스냅샷 사용)
+    if snapshot_data:
+        print("스냅샷 데이터와 병합 중...")
+        # 2025년 11월까지는 스냅샷 데이터 사용
+        for brand in snapshot_data.get("brands", {}):
+            if brand not in result["brands"]:
+                result["brands"][brand] = {}
+            for item_tab in snapshot_data["brands"][brand]:
+                if item_tab not in result["brands"][brand]:
+                    result["brands"][brand][item_tab] = {}
+                # 2025년 11월까지 데이터는 스냅샷에서 가져오기
+                for month in snapshot_data["brands"][brand][item_tab]:
+                    if month <= "2025.11":
+                        result["brands"][brand][item_tab][month] = snapshot_data["brands"][brand][item_tab][month]
+        
+        # months와 daysInMonth도 병합
+        snapshot_months = set(snapshot_data.get("months", []))
+        current_months = set(result.get("months", []))
+        result["months"] = sorted(list(snapshot_months | current_months))
+        
+        # daysInMonth 병합
+        for month in snapshot_data.get("daysInMonth", {}):
+            if month <= "2025.11":
+                result["daysInMonth"][month] = snapshot_data["daysInMonth"][month]
+        
+        print("[완료] 스냅샷 데이터 병합 완료 (2025년 11월까지 고정)")
     
     output_file = OUTPUT_PATH / "accessory_inventory_summary.json"
     with open(output_file, 'w', encoding='utf-8') as f:

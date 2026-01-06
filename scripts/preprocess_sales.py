@@ -109,9 +109,21 @@ def main():
     # 출력 폴더 생성
     OUTPUT_PATH.mkdir(parents=True, exist_ok=True)
     
-    # 판매 데이터 처리 (Snowflake에서 조회)
+    # 스냅샷 파일에서 2025년 11월까지 데이터 로드
+    snapshot_path = OUTPUT_PATH / "snapshots" / "accessory_sales_summary_202511.json"
+    snapshot_data = None
+    if snapshot_path.exists():
+        print("=" * 40)
+        print("스냅샷 데이터 로드 중 (2025년 11월까지)...")
+        print("=" * 40)
+        with open(snapshot_path, 'r', encoding='utf-8') as f:
+            snapshot_data = json.load(f)
+        print(f"[완료] 스냅샷 로드: {snapshot_path}")
+        print()
+    
+    # 판매 데이터 처리 (Snowflake에서 조회 - 2025년 12월부터만)
     print("=" * 40)
-    print("판매(retail) 데이터 처리 중...")
+    print("판매(retail) 데이터 처리 중 (Snowflake, 2025년 12월부터)...")
     print("=" * 40)
     sales_agg_dict, sales_unexpected = process_retail_data()
     
@@ -125,6 +137,28 @@ def main():
     print()
     print("판매 데이터 JSON 변환 중...")
     sales_json = convert_sales_to_json_structure(sales_agg_dict, sales_unexpected)
+    
+    # 스냅샷 데이터와 병합 (2025년 11월까지는 스냅샷 사용)
+    if snapshot_data:
+        print("스냅샷 데이터와 병합 중...")
+        # 2025년 11월까지는 스냅샷 데이터 사용
+        for brand in snapshot_data.get("brands", {}):
+            if brand not in sales_json["brands"]:
+                sales_json["brands"][brand] = {}
+            for item_tab in snapshot_data["brands"][brand]:
+                if item_tab not in sales_json["brands"][brand]:
+                    sales_json["brands"][brand][item_tab] = {}
+                # 2025년 11월까지 데이터는 스냅샷에서 가져오기
+                for month in snapshot_data["brands"][brand][item_tab]:
+                    if month <= "2025.11":
+                        sales_json["brands"][brand][item_tab][month] = snapshot_data["brands"][brand][item_tab][month]
+        
+        # months 목록도 병합
+        snapshot_months = set(snapshot_data.get("months", []))
+        current_months = set(sales_json.get("months", []))
+        sales_json["months"] = sorted(list(snapshot_months | current_months))
+        
+        print("[완료] 스냅샷 데이터 병합 완료 (2025년 11월까지 고정)")
     
     sales_output_file = OUTPUT_PATH / "accessory_sales_summary.json"
     with open(sales_output_file, 'w', encoding='utf-8') as f:

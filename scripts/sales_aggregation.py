@@ -65,6 +65,7 @@ sales_with_master AS (
     FLOOR(DATEDIFF('month', TO_DATE('202312', 'YYYYMM'), s.sale_dt) / 3) + 1 AS remark_num,
     -- 해당 판매일의 연도 YY (2024 → 24)
     SUBSTR(TO_CHAR(s.sale_dt, 'YYYY'), 3, 2) AS row_yy,
+    p.operate_standard,
     p.remark1, p.remark2, p.remark3, p.remark4, p.remark5,
     p.remark6, p.remark7, p.remark8, p.remark9, p.remark10,
     p.remark11, p.remark12, p.remark13, p.remark14, p.remark15
@@ -84,30 +85,33 @@ sales_with_master AS (
     AND d.fr_or_cls IN ('FR', 'OR')  -- HQ 제외
 ),
 
--- Step 2: 동적 remark 선택
+-- Step 2: 동적 remark 선택 (2025년 12월부터 operate_standard 사용)
 sales_with_remark AS (
   SELECT 
     s.*,
-    CASE s.remark_num
-      WHEN 1 THEN s.remark1
-      WHEN 2 THEN s.remark2
-      WHEN 3 THEN s.remark3
-      WHEN 4 THEN s.remark4
-      WHEN 5 THEN s.remark5
-      WHEN 6 THEN s.remark6
-      WHEN 7 THEN s.remark7
-      WHEN 8 THEN s.remark8
-      WHEN 9 THEN s.remark9
-      WHEN 10 THEN s.remark10
-      WHEN 11 THEN s.remark11
-      WHEN 12 THEN s.remark12
-      WHEN 13 THEN s.remark13
-      WHEN 14 THEN s.remark14
-      WHEN 15 THEN s.remark15
+    CASE 
+      -- 2025년 12월부터 operate_standard 사용
+      WHEN s.sale_ym >= '202512' THEN s.operate_standard
+      -- 2025년 11월까지는 remark 방식 유지
+      WHEN s.remark_num = 1 THEN s.remark1
+      WHEN s.remark_num = 2 THEN s.remark2
+      WHEN s.remark_num = 3 THEN s.remark3
+      WHEN s.remark_num = 4 THEN s.remark4
+      WHEN s.remark_num = 5 THEN s.remark5
+      WHEN s.remark_num = 6 THEN s.remark6
+      WHEN s.remark_num = 7 THEN s.remark7
+      WHEN s.remark_num = 8 THEN s.remark8
+      WHEN s.remark_num = 9 THEN s.remark9
+      WHEN s.remark_num = 10 THEN s.remark10
+      WHEN s.remark_num = 11 THEN s.remark11
+      WHEN s.remark_num = 12 THEN s.remark12
+      WHEN s.remark_num = 13 THEN s.remark13
+      WHEN s.remark_num = 14 THEN s.remark14
+      WHEN s.remark_num = 15 THEN s.remark15
       ELSE NULL
     END AS op_std
   FROM sales_with_master s
-  WHERE s.remark_num >= 1 AND s.remark_num <= 15
+  WHERE (s.sale_ym >= '202512' OR (s.remark_num >= 1 AND s.remark_num <= 15))
 ),
 
 -- Step 3: 주력/아울렛 판정
