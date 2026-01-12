@@ -43,6 +43,47 @@ export default async function handler(
     // 기준월이 없으면 기본값 사용 (2025.11)
     const endMonth = (referenceMonth as string) || "2025.11";
 
+    // 스냅샷이 저장된 월 목록 가져오기
+    const snapshotsDir = path.join(process.cwd(), "public", "data", "snapshots");
+    let maxSnapshotMonth: string | null = null;
+    
+    if (fs.existsSync(snapshotsDir)) {
+      const files = fs.readdirSync(snapshotsDir);
+      const snapshotMonths = files
+        .filter((file) => file.match(/accessory_forecast_inventory_summary_(\d{6})\.json/))
+        .map((file) => {
+          const match = file.match(/_(\d{6})\.json/);
+          if (match) {
+            const yyyymm = match[1];
+            return `${yyyymm.slice(0, 4)}.${yyyymm.slice(4)}`;
+          }
+          return null;
+        })
+        .filter((month): month is string => month !== null);
+      
+      if (snapshotMonths.length > 0) {
+        // 가장 최근 스냅샷 월 찾기
+        maxSnapshotMonth = snapshotMonths.sort((a, b) => {
+          const [yearA, monthA] = a.split(".").map(Number);
+          const [yearB, monthB] = b.split(".").map(Number);
+          if (yearA !== yearB) return yearB - yearA;
+          return monthB - monthA;
+        })[0];
+      }
+    }
+
+    // 보호할 최대 월 결정: 스냅샷이 있으면 스냅샷 월, 없으면 기준월
+    // 스냅샷 월이 기준월보다 크면 스냅샷 월을 보호, 아니면 기준월을 보호
+    const protectedMonth = maxSnapshotMonth && maxSnapshotMonth > endMonth 
+      ? maxSnapshotMonth 
+      : endMonth;
+    
+    // 로깅: 보호되는 월 정보
+    if (maxSnapshotMonth) {
+      console.log(`[입고예정 저장] 스냅샷 보호: ${maxSnapshotMonth}월 이하 데이터는 변경되지 않습니다.`);
+    }
+    console.log(`[입고예정 저장] 보호 월: ${protectedMonth}, 기준월: ${endMonth}, 브랜드: ${brand}`);
+
     // JSON 파일 경로
     const filePath = path.join(
       process.cwd(),
@@ -61,24 +102,24 @@ export default async function handler(
       existingData = { brands: {} };
     }
 
-    // 해당 브랜드 데이터 업데이트 (기준월 이후만 업데이트)
+    // 해당 브랜드 데이터 업데이트 (보호된 월 이하는 절대 변경하지 않음)
     const existingBrandData = existingData.brands[brand] || {};
     const mergedData: ForecastInventoryData = {};
     
-    // 기존 데이터에서 기준월 이전 및 기준월은 유지 (과거 데이터 보호)
+    // 기존 데이터에서 보호된 월 이하는 유지 (스냅샷 보호)
     Object.keys(existingBrandData).forEach((month) => {
-      if (month <= endMonth) {
+      if (month <= protectedMonth) {
         mergedData[month] = existingBrandData[month];
       }
     });
     
-    // 새 데이터에서 기준월 이후만 추가 (기준월 이후만 업데이트)
+    // 새 데이터에서 보호된 월 이후만 추가
     Object.keys(data).forEach((month) => {
-      // 기준월 이후만 추가 (기준월 이전은 절대 변경하지 않음)
-      if (month > endMonth) {
+      // 보호된 월 이후만 추가 (보호된 월 이하는 절대 변경하지 않음)
+      if (month > protectedMonth) {
         mergedData[month] = data[month];
       }
-      // 기준월 이전 데이터가 포함되어 있으면 무시 (보안상 안전장치)
+      // 보호된 월 이하 데이터가 포함되어 있으면 무시 (보안상 안전장치)
     });
     
     existingData.brands[brand] = mergedData;
