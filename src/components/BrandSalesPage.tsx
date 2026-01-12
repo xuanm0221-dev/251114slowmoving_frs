@@ -46,7 +46,7 @@ import {
   buildEditableMonths 
 } from "@/lib/forecastInventoryStorage";
 import { PRODUCT_TYPE_RULES } from "@/constants/businessRules";
-import { formatUpdateDate, formatUpdateDateTime, generateOneYearMonths, generateMonthsFromReference, generateMonthsForYearAndNextHalf } from "@/lib/utils";
+import { formatUpdateDate, formatUpdateDateTime, generateOneYearMonths, generateMonthsFromReference, generateMonthsForYearAndNextHalf, getMonthAfter } from "@/lib/utils";
 import { useReferenceMonth } from "@/contexts/ReferenceMonthContext";
 
 interface BrandSalesPageProps {
@@ -426,8 +426,8 @@ export default function BrandSalesPage({ brand, title }: BrandSalesPageProps) {
     );
   }, [salesTabData, inventoryTabDataWithForecast, inventoryData?.daysInMonth, stockWeekWindow, productTypeTab, stockWeeksChartMonths]);
 
-  // 타겟월 (26.03) deltaInventory 계산
-  const TARGET_MONTH = "2026.03";
+  // 타겟월 (기준월에서 4개월 후) deltaInventory 계산
+  const TARGET_MONTH = getMonthAfter(referenceMonth, 4);
 
   const deltaInventoryResult = useMemo(() => {
     if (!salesBrandData || !inventoryTabDataWithForecast || !inventoryData?.daysInMonth) {
@@ -472,6 +472,7 @@ export default function BrandSalesPage({ brand, title }: BrandSalesPageProps) {
     inventoryData?.daysInMonth,
     targetStockWeeks,
     stockWeekWindow,
+    referenceMonth,
   ]);
 
   return (
@@ -538,6 +539,7 @@ export default function BrandSalesPage({ brand, title }: BrandSalesPageProps) {
                 targetStockWeeks={targetStockWeeks}
                 setTargetStockWeeks={setTargetStockWeeks}
                 deltaInventory={deltaInventoryResult?.deltaInventory ?? null}
+                targetMonth={TARGET_MONTH}
               />
             </div>
 

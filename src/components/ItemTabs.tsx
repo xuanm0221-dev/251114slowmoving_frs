@@ -21,6 +21,7 @@ interface ItemTabsProps {
   targetStockWeeks: number;
   setTargetStockWeeks: (value: number) => void;
   deltaInventory: number | null;
+  targetMonth: string;
 }
 
 export default function ItemTabs({ 
@@ -36,6 +37,7 @@ export default function ItemTabs({
   targetStockWeeks,
   setTargetStockWeeks,
   deltaInventory,
+  targetMonth,
 }: ItemTabsProps) {
   // 현재 브랜드의 색상 정보 가져오기
   const brandInfo = BRANDS.find(b => b.key === brand);
@@ -75,15 +77,16 @@ export default function ItemTabs({
       <button
         onClick={() => setShowAllItems(!showAllItems)}
         className={cn(
-          "px-3 py-2 rounded-lg font-medium text-sm transition-all duration-200 flex items-center gap-1.5 border",
+          "px-3 py-1.5 rounded-lg font-medium text-sm transition-all duration-200 flex flex-col items-center justify-center gap-0.5 border",
           showAllItems
             ? "bg-purple-600 text-white border-purple-600"
             : "bg-white text-purple-600 border-purple-300 hover:bg-purple-50"
         )}
         title="차트에서 모든 아이템 비교"
       >
-        <span>📊</span>
-        <span>재고주수 한번에 보기</span>
+        <span className="text-center leading-tight whitespace-nowrap">
+          재고주수<br />한번에 보기
+        </span>
       </button>
 
       {/* 성장률 + 재고주수 기준 기간 */}
@@ -150,7 +153,7 @@ export default function ItemTabs({
           <div className="flex items-center gap-2">
             <span className="text-emerald-600 text-lg">🎯</span>
             <label className="text-sm font-medium text-gray-700 whitespace-nowrap">
-              <BilingualLabel primary="목표재고주수" secondary="目标weekcover" align="left" />
+              <BilingualLabel primary="목표재고주수" secondary={`目标weekcover(${targetMonth.slice(2)})`} align="left" />
             </label>
           </div>
           <div className="flex items-center gap-1.5">
@@ -166,7 +169,7 @@ export default function ItemTabs({
               className="w-16 px-3 py-1.5 bg-white border border-emerald-300 rounded-md text-sm font-semibold text-gray-800 text-center focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all"
               min="0"
               step="1"
-              title="목표 재고주수 (26년 3월 기준)"
+              title={`목표 재고주수 (${targetMonth.slice(2, 4)}년 ${parseInt(targetMonth.slice(5))}월 기준)`}
             />
             <span className="text-xs text-gray-500 font-medium">주</span>
           </div>
@@ -190,7 +193,7 @@ export default function ItemTabs({
                   ? "bg-emerald-100 text-emerald-700 border border-emerald-300"
                   : "bg-red-100 text-red-700 border border-red-300"
               )}
-              title="26년 3월 목표 재고 대비 증감액 (백만 위안)"
+              title={`${targetMonth.slice(2, 4)}년 ${parseInt(targetMonth.slice(5))}월 목표 재고 대비 증감액 (백만 위안)`}
             >
               {deltaInventory === null
                 ? "-"

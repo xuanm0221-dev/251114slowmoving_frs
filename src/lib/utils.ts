@@ -181,9 +181,24 @@ export function generateMonthsForYearAndNextHalf(referenceMonth: string): string
   return months;
 }
 
-
-
-
+/**
+ * 기준월에서 N개월 후 계산
+ * @param referenceMonth 기준월 (예: "2025.12")
+ * @param monthsAfter N개월 후 (예: 4)
+ * @returns N개월 후의 월 (예: "2026.04")
+ */
+export function getMonthAfter(referenceMonth: string, monthsAfter: number): string {
+  const [year, month] = referenceMonth.split(".").map(Number);
+  let targetYear = year;
+  let targetMonth = month + monthsAfter;
+  
+  while (targetMonth > 12) {
+    targetMonth -= 12;
+    targetYear += 1;
+  }
+  
+  return `${targetYear}.${String(targetMonth).padStart(2, "0")}`;
+}
 
 
 
