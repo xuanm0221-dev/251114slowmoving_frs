@@ -52,16 +52,16 @@
         "Acc_etc": 0
       },
       "2026.01": {
-        "Shoes": 12672940,
-        "Headwear": 2673524,
+        "Shoes": 8539480,
+        "Headwear": 1697906,
         "Bag": 5346000,
-        "Acc_etc": 0
+        "Acc_etc": 156078
       },
       "2026.02": {
         "Shoes": 7749920,
-        "Headwear": 4133455,
+        "Headwear": 3942255,
         "Bag": 0,
-        "Acc_etc": 156078
+        "Acc_etc": 0
       },
       "2026.03": {
         "Shoes": 912430,
@@ -70,10 +70,10 @@
         "Acc_etc": 0
       },
       "2026.04": {
-        "Shoes": 21335290,
-        "Headwear": 6851259,
-        "Bag": 5346000,
-        "Acc_etc": 156078
+        "Shoes": 0,
+        "Headwear": 0,
+        "Bag": 0,
+        "Acc_etc": 0
       }
     },
     "DISCOVERY": {
@@ -120,7 +120,7 @@
       "lastUpdated": "2026-01-06T13:58:26.297Z"
     },
     "MLB KIDS": {
-      "lastUpdated": "2026-01-06T13:46:22.544Z"
+      "lastUpdated": "2026-01-12T13:01:57.972Z"
     }
   }
 }
