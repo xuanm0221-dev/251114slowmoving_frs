@@ -92,10 +92,23 @@ const getMonthsForChart = (
   // 연도에 따라 필터링
   let filteredMonths: string[];
   if (yearTab === "당년") {
-    // 당년: 기준월이 속한 연도의 1월부터 기준월까지 + 다음 연도 1월~6월
-    filteredMonths = generateMonthsForYearAndNextHalf(referenceMonth);
+    // 당년: 기준월이 속한 연도의 1월~12월 전체 + 다음 연도 1월~6월
+    const [refYear, refMonth] = referenceMonth.split(".").map(Number);
+    const allMonths: string[] = [];
+    
+    // 기준월이 속한 연도의 1월~12월 전체
+    for (let month = 1; month <= 12; month++) {
+      allMonths.push(`${refYear}.${String(month).padStart(2, "0")}`);
+    }
+    
+    // 다음 연도 1월~6월
+    const nextYear = refYear + 1;
+    for (let month = 1; month <= 6; month++) {
+      allMonths.push(`${nextYear}.${String(month).padStart(2, "0")}`);
+    }
+    
     // 실제 데이터가 있는 월만 포함 (forecast 월은 salesBrandData에 포함되어 있음)
-    filteredMonths = filteredMonths.filter(m => monthSet.has(m));
+    filteredMonths = allMonths.filter(m => monthSet.has(m));
   } else {
     // 전년: 2024.01 ~ 2024.12
     filteredMonths = Array.from(monthSet).filter(m => m >= "2024.01" && m <= "2024.12");
@@ -129,9 +142,22 @@ interface TooltipProps {
       "2_재고주수"?: number | null;
     };
   }>;
+  inventoryBrandData?: InventoryBrandData;
+  salesBrandData?: SalesBrandData;
+  selectedTab?: ItemTab;
+  daysInMonth?: { [month: string]: number };
+  stockWeekWindow?: StockWeekWindow;
 }
 
-const CustomTooltip = ({ active, payload }: TooltipProps) => {
+const CustomTooltip = ({ 
+  active, 
+  payload, 
+  inventoryBrandData,
+  salesBrandData,
+  selectedTab,
+  daysInMonth,
+  stockWeekWindow
+}: TooltipProps) => {
   if (!active || !payload || payload.length === 0) {
     return null;
   }
@@ -157,10 +183,194 @@ const CustomTooltip = ({ active, payload }: TooltipProps) => {
 
   const stockWeeks = data["2_재고주수"];
 
+  // 전년 동월 데이터 조회 (이미 계산된 데이터 활용)
+  const getPrevYearValue = (dataType: "inventory" | "sales", field: "주력" | "아울렛") => {
+    if (!inventoryBrandData || !salesBrandData || !selectedTab) return 0;
+    
+    const [yearStr, monthPart] = data.month.split(".");
+    const month = monthPart.replace("(F)", "").trim(); // "01(F)" → "01"
+    // 2자리 연도(25)를 4자리(2025)로 변환 후 전년 계산
+    const year = yearStr.length === 2 ? Number(`20${yearStr}`) : Number(yearStr);
+    const prevYear = year - 1;
+    const prevMonth = `${prevYear}.${month}`;  // "2024.08" 형식
+    
+    if (dataType === "inventory") {
+      const itemData = inventoryBrandData[selectedTab];
+      const monthData = itemData?.[prevMonth];
+      const fieldKey = field === "주력" ? "전체_core" : "전체_outlet";
+      return monthData?.[fieldKey] || 0;
+    } else {
+      const itemData = salesBrandData[selectedTab];
+      const monthData = itemData?.[prevMonth];
+      const fieldKey = field === "주력" ? "전체_core" : "전체_outlet";
+      return monthData?.[fieldKey] || 0;
+    }
+  };
+
+  // 전년 재고주수 조회 (computeStockWeeksForRowType 재사용)
+  const getPrevYearStockWeeks = () => {
+    if (!inventoryBrandData || !salesBrandData || !selectedTab || !daysInMonth) return null;
+    
+    const [yearStr, monthPart] = data.month.split(".");
+    const month = monthPart.replace("(F)", "").trim(); // "01(F)" → "01"
+    // 2자리 연도(25)를 4자리(2025)로 변환 후 전년 계산
+    const year = yearStr.length === 2 ? Number(`20${yearStr}`) : Number(yearStr);
+    const prevYear = year - 1;
+    const prevMonth = `${prevYear}.${month}`;  // "2024.08" 형식
+    
+    const invItem = inventoryBrandData[selectedTab];
+    const salesItem = salesBrandData[selectedTab];
+    const invData = invItem?.[prevMonth];
+    const slsData = salesItem?.[prevMonth];
+    
+    if (!invData || !slsData) return null;
+    
+    const result = computeStockWeeksForRowType(
+      prevMonth,
+      "total", // rowType
+      invData,
+      slsData,
+      invItem,
+      salesItem,
+      daysInMonth,
+      stockWeekWindow || 1,
+      0 // stockWeek
+    );
+    
+    return result?.weeks || null;
+  };
+
+  // 전년 동월 전체 데이터 조회 (26년 예상 구간용)
+  const getPrevYearTotalValue = (dataType: "inventory" | "sales"): number => {
+    if (!inventoryBrandData || !salesBrandData || !selectedTab) {
+      console.log("🚨 데이터 없음:", { inventoryBrandData, salesBrandData, selectedTab });
+      return 0;
+    }
+    
+    const [yearStr, monthPart] = data.month.split(".");
+    const month = monthPart.replace("(F)", "").trim(); // "01(F)" → "01"
+    // 2자리 연도(26)를 4자리(2026)로 변환 후 전년 계산
+    const year = yearStr.length === 2 ? Number(`20${yearStr}`) : Number(yearStr);
+    const prevYear = year - 1;
+    const prevMonth = `${prevYear}.${month}`;  // "2025.01" 형식
+    
+    console.log("🔍 전년 전체 데이터 조회:", { 
+      currentMonth: data.month, 
+      yearStr,
+      year,
+      prevYear,
+      prevMonth, 
+      dataType,
+      selectedTab 
+    });
+    
+    if (dataType === "inventory") {
+      const itemData = inventoryBrandData[selectedTab];
+      const monthData = itemData?.[prevMonth];
+      const core = monthData?.["전체_core"] || 0;
+      const outlet = monthData?.["전체_outlet"] || 0;
+      const total = core + outlet;
+      
+      console.log("📦 재고 전체 데이터:", { 
+        prevMonth, 
+        core,
+        outlet,
+        total,
+        monthData,
+        availableMonths: itemData ? Object.keys(itemData).filter(k => k.startsWith("2025")) : []
+      });
+      
+      return total;
+    } else {
+      const itemData = salesBrandData[selectedTab];
+      const monthData = itemData?.[prevMonth];
+      const core = monthData?.["전체_core"] || 0;
+      const outlet = monthData?.["전체_outlet"] || 0;
+      const total = core + outlet;
+      
+      console.log("💰 판매 전체 데이터:", { 
+        prevMonth, 
+        core,
+        outlet,
+        total,
+        monthData 
+      });
+      
+      return total;
+    }
+  };
+
+  // YOY 계산 (재고자산, 판매매출용)
+  const calculateYoY = (currentValue: number, prevValue: number): string | null => {
+    // 25.01~26.12 표시
+    const [yearStr, monthPart] = data.month.split(".");
+    const month = monthPart.replace("(F)", "").trim(); // "01(F)" → "01"
+    // 2자리 연도(25)를 4자리(2025)로 변환
+    const year = yearStr.length === 2 ? Number(`20${yearStr}`) : Number(yearStr);
+    
+    console.log("📊 YOY 계산:", { 
+      month: data.month,
+      yearStr,
+      year,
+      currentValue, 
+      prevValue,
+      isForecast: data.isForecast
+    });
+    
+    if (year < 2025) {
+      console.log("⏭️ 24년 이전 제외");
+      return null;
+    }
+    if (year > 2026) {
+      console.log("⏭️ 26년 이후 제외");
+      return null;
+    }
+    
+    if (prevValue === 0) {
+      console.log("⚠️ prevValue가 0이므로 YOY 계산 불가");
+      return null;
+    }
+    
+    const yoy = Math.round((currentValue / prevValue) * 100);
+    console.log("✅ YOY 계산 완료:", `${yoy}%`);
+    return `${yoy}%`;
+  };
+
+  // 재고주수 차이 계산
+  const calculateStockWeeksDiff = (currentWeeks: number | null | undefined, prevWeeks: number | null | undefined): string | null => {
+    // 25.01~26.12 표시
+    const [yearStr, monthPart] = data.month.split(".");
+    const month = monthPart.replace("(F)", "").trim(); // "01(F)" → "01"
+    // 2자리 연도(25)를 4자리(2025)로 변환
+    const year = yearStr.length === 2 ? Number(`20${yearStr}`) : Number(yearStr);
+    if (year < 2025) return null; // 24년 이전 제외
+    if (year > 2026) return null; // 26년 이후 제외
+    
+    if (currentWeeks === null || currentWeeks === undefined || prevWeeks === null || prevWeeks === undefined) return null;
+    const diff = Math.round(currentWeeks - prevWeeks);
+    return diff >= 0 ? `+${diff}주` : `${diff}주`;
+  };
+
+  // 전년 데이터 조회
+  const prevInventoryCore = getPrevYearValue("inventory", "주력");
+  const prevInventoryOutlet = getPrevYearValue("inventory", "아울렛");
+  const prevSalesCore = getPrevYearValue("sales", "주력");
+  const prevSalesOutlet = getPrevYearValue("sales", "아울렛");
+  const prevStockWeeks = getPrevYearStockWeeks();
+
   // 예상 구간: 전체만 표시
   if (isForecast) {
     const inventoryTotal = data["0_재고자산_전체"] || 0;
     const salesTotal = data["1_판매매출_전체"] || 0;
+
+    // 전년 전체 데이터 및 YOY 계산
+    const prevInventoryTotal = getPrevYearTotalValue("inventory");
+    const prevSalesTotal = getPrevYearTotalValue("sales");
+    // prevStockWeeks는 이미 285번 라인에서 계산됨
+    
+    const inventoryTotalYoY = calculateYoY(inventoryTotal, prevInventoryTotal);
+    const salesTotalYoY = calculateYoY(salesTotal, prevSalesTotal);
+    const stockWeeksDiff = calculateStockWeeksDiff(stockWeeks, prevStockWeeks);
 
     return (
       <div className="bg-white border border-gray-200 rounded-lg p-3 text-xs shadow-lg">
@@ -173,21 +383,21 @@ const CustomTooltip = ({ active, payload }: TooltipProps) => {
               className="w-3 h-3 rounded" 
               style={{ backgroundColor: COLORS.forecast_inventory }}
             ></div>
-            <span>{yearLabel} 재고자산 전체: {formatValue(inventoryTotal)}</span>
+            <span>{yearLabel} 재고자산 전체: {formatValue(inventoryTotal)} {inventoryTotalYoY ? `(${inventoryTotalYoY})` : ''}</span>
           </div>
           <div className="flex items-center gap-2">
             <div 
               className="w-3 h-3 rounded" 
               style={{ backgroundColor: COLORS.forecast_sales }}
             ></div>
-            <span>{yearLabel} 판매매출 전체: {formatValue(salesTotal)}</span>
+            <span>{yearLabel} 판매매출 전체: {formatValue(salesTotal)} {salesTotalYoY ? `(${salesTotalYoY})` : ''}</span>
           </div>
           <div className="flex items-center gap-2 border-t border-gray-200 pt-1.5 mt-1">
             <div 
               className="w-3 h-3 rounded-full" 
               style={{ backgroundColor: "#DC2626" }}
             ></div>
-            <span className="font-medium text-red-600">재고주수: {formatStockWeeks(stockWeeks)}</span>
+            <span className="font-medium text-red-600">재고주수: {formatStockWeeks(stockWeeks)} {stockWeeksDiff ? `(${stockWeeksDiff})` : ''}</span>
           </div>
         </div>
       </div>
@@ -200,22 +410,12 @@ const CustomTooltip = ({ active, payload }: TooltipProps) => {
   const salesCore = data["1_판매매출_주력"] || 0;
   const salesOutlet = data["1_판매매출_아울렛"] || 0;
 
-  // 비중 계산
-  const inventoryTotal = inventoryCore + inventoryOutlet;
-  const salesTotal = salesCore + salesOutlet;
-
-  const inventoryCorePercent = inventoryTotal > 0 
-    ? ((inventoryCore / inventoryTotal) * 100).toFixed(1) 
-    : "0.0";
-  const inventoryOutletPercent = inventoryTotal > 0 
-    ? ((inventoryOutlet / inventoryTotal) * 100).toFixed(1) 
-    : "0.0";
-  const salesCorePercent = salesTotal > 0 
-    ? ((salesCore / salesTotal) * 100).toFixed(1) 
-    : "0.0";
-  const salesOutletPercent = salesTotal > 0 
-    ? ((salesOutlet / salesTotal) * 100).toFixed(1) 
-    : "0.0";
+  // YOY 계산 (이미 위에서 전년 데이터 조회함)
+  const inventoryOutletYoY = calculateYoY(inventoryOutlet, prevInventoryOutlet);
+  const inventoryCoreYoY = calculateYoY(inventoryCore, prevInventoryCore);
+  const salesOutletYoY = calculateYoY(salesOutlet, prevSalesOutlet);
+  const salesCoreYoY = calculateYoY(salesCore, prevSalesCore);
+  const stockWeeksDiff = calculateStockWeeksDiff(stockWeeks, prevStockWeeks);
 
   return (
     <div className="bg-white border border-gray-200 rounded-lg p-3 text-xs shadow-lg">
@@ -228,35 +428,35 @@ const CustomTooltip = ({ active, payload }: TooltipProps) => {
             className="w-3 h-3 rounded" 
             style={{ backgroundColor: COLORS.curr_outlet }}
           ></div>
-          <span>{yearLabel} 재고자산 아울렛: {formatValue(inventoryOutlet)} ({inventoryOutletPercent}%)</span>
+          <span>{yearLabel} 재고자산 아울렛: {formatValue(inventoryOutlet)} {inventoryOutletYoY ? `(${inventoryOutletYoY})` : ''}</span>
         </div>
         <div className="flex items-center gap-2">
           <div 
             className="w-3 h-3 rounded" 
             style={{ backgroundColor: COLORS.curr_core }}
           ></div>
-          <span>{yearLabel} 재고자산 주력: {formatValue(inventoryCore)} ({inventoryCorePercent}%)</span>
+          <span>{yearLabel} 재고자산 주력: {formatValue(inventoryCore)} {inventoryCoreYoY ? `(${inventoryCoreYoY})` : ''}</span>
         </div>
         <div className="flex items-center gap-2">
           <div 
             className="w-3 h-3 rounded" 
             style={{ backgroundColor: COLORS.prev_outlet }}
           ></div>
-          <span>{yearLabel} 판매매출 아울렛: {formatValue(salesOutlet)} ({salesOutletPercent}%)</span>
+          <span>{yearLabel} 판매매출 아울렛: {formatValue(salesOutlet)} {salesOutletYoY ? `(${salesOutletYoY})` : ''}</span>
         </div>
         <div className="flex items-center gap-2">
           <div 
             className="w-3 h-3 rounded" 
             style={{ backgroundColor: COLORS.prev_core }}
           ></div>
-          <span>{yearLabel} 판매매출 주력: {formatValue(salesCore)} ({salesCorePercent}%)</span>
+          <span>{yearLabel} 판매매출 주력: {formatValue(salesCore)} {salesCoreYoY ? `(${salesCoreYoY})` : ''}</span>
         </div>
         <div className="flex items-center gap-2 border-t border-gray-200 pt-1.5 mt-1">
           <div 
             className="w-3 h-3 rounded-full" 
             style={{ backgroundColor: "#DC2626" }}
           ></div>
-          <span className="font-medium text-red-600">재고주수: {formatStockWeeks(stockWeeks)}</span>
+          <span className="font-medium text-red-600">재고주수: {formatStockWeeks(stockWeeks)} {stockWeeksDiff ? `(${stockWeeksDiff})` : ''}</span>
         </div>
       </div>
     </div>
@@ -623,7 +823,15 @@ export default function InventoryChart({
               }}
             />
             <Tooltip 
-              content={<CustomTooltip />}
+              content={
+                <CustomTooltip 
+                  inventoryBrandData={inventoryBrandData}
+                  salesBrandData={salesBrandData}
+                  selectedTab={selectedTab}
+                  daysInMonth={daysInMonth}
+                  stockWeekWindow={stockWeekWindow}
+                />
+              }
             />
             {/* 예상 구간 막대 (25.12부터) - 전체만 표시, 같은 stackId 사용하여 폭 일관성 유지 */}
             {/* 예상 구간에서는 0_재고자산_전체만 값이 있고 주력/아울렛은 0이므로 같은 stackId 사용해도 전체 막대만 표시됨 */}

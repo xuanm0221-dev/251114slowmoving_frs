@@ -406,9 +406,23 @@ export default function BrandSalesPage({ brand, title }: BrandSalesPageProps) {
   }, [salesData?.months, salesBrandData]);
 
   // 차트용 재고주수 데이터 계산 (히트맵과 동일한 계산 로직 사용)
-  // 기준월이 속한 연도의 1월~12월 + 다음 연도 1월~6월
+  // 기준월이 속한 연도의 1월~12월 전체 + 다음 연도 1월~6월
   const stockWeeksChartMonths = useMemo(() => {
-    return generateMonthsForYearAndNextHalf(referenceMonth);
+    const [refYear, refMonth] = referenceMonth.split(".").map(Number);
+    const months: string[] = [];
+    
+    // 기준월이 속한 연도의 1월~12월 전체
+    for (let month = 1; month <= 12; month++) {
+      months.push(`${refYear}.${String(month).padStart(2, "0")}`);
+    }
+    
+    // 다음 연도 1월~6월
+    const nextYear = refYear + 1;
+    for (let month = 1; month <= 6; month++) {
+      months.push(`${nextYear}.${String(month).padStart(2, "0")}`);
+    }
+    
+    return months;
   }, [referenceMonth]);
 
   const stockWeeksChartData = useMemo(() => {

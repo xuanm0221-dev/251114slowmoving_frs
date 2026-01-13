@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { 
   InventoryItemTabData, 
   SalesItemTabData, 
@@ -29,6 +30,8 @@ export default function InventoryStockSummaryTable({
   months,
   referenceMonth,
 }: InventoryStockSummaryTableProps) {
+  // 2024년 데이터 표시 여부 상태 (기본값: 접힌 상태)
+  const [show2024, setShow2024] = useState(false);
   // 재고자산(M) 계산: 전체재고 ÷ 1,000,000
   const getInventoryValue = (month: string): number => {
     const monthData = inventoryData[month];
@@ -112,10 +115,76 @@ export default function InventoryStockSummaryTable({
     return salesData[month]?.isForecast === true;
   };
 
-  // 표에 표시할 월 필터링 (24.01부터 26.12까지)
-  const displayMonths = months.filter(
-    (m) => m >= "2024.01" && m <= "2026.12"
-  );
+  // YOY 계산 헬퍼 (재고자산용)
+  const getInventoryYoY = (month: string): number | null => {
+    const [year, monthNum] = month.split(".").map(Number);
+    
+    // 2025년 또는 2026년만 YOY 계산
+    if (year !== 2025 && year !== 2026) return null;
+    
+    const currentValue = getInventoryValue(month);
+    if (currentValue === 0) return null;
+    
+    // 전년 동월
+    const prevYear = year - 1;
+    const prevMonth = `${prevYear}.${String(monthNum).padStart(2, "0")}`;
+    const prevValue = getInventoryValue(prevMonth);
+    
+    if (prevValue === 0) return null;
+    return Math.round((currentValue / prevValue) * 100);
+  };
+
+  // YOY 계산 헬퍼 (판매매출용)
+  const getSalesYoY = (month: string): number | null => {
+    const [year, monthNum] = month.split(".").map(Number);
+    
+    // 2025년 또는 2026년만 YOY 계산
+    if (year !== 2025 && year !== 2026) return null;
+    
+    const currentValue = getSalesValue(month);
+    if (currentValue === 0) return null;
+    
+    // 전년 동월
+    const prevYear = year - 1;
+    const prevMonth = `${prevYear}.${String(monthNum).padStart(2, "0")}`;
+    const prevValue = getSalesValue(prevMonth);
+    
+    if (prevValue === 0) return null;
+    return Math.round((currentValue / prevValue) * 100);
+  };
+
+  // YOY 계산 헬퍼 (입고금액용)
+  const getArrivalYoY = (month: string): number | null => {
+    const [year, monthNum] = month.split(".").map(Number);
+    
+    // 2025년 또는 2026년만 YOY 계산
+    if (year !== 2025 && year !== 2026) return null;
+    
+    const currentValue = getArrivalValue(month);
+    if (currentValue === null || currentValue === 0) return null;
+    
+    // 전년 동월
+    const prevYear = year - 1;
+    const prevMonth = `${prevYear}.${String(monthNum).padStart(2, "0")}`;
+    const prevValue = getArrivalValue(prevMonth);
+    
+    if (prevValue === null || prevValue === 0) return null;
+    return Math.round((currentValue / prevValue) * 100);
+  };
+
+  // 표에 표시할 월 필터링 (24.01부터 26.12까지, 2024년은 토글 상태에 따라)
+  const displayMonths = months.filter((m) => {
+    // 24.01~26.12 범위 확인
+    if (m < "2024.01" || m > "2026.12") return false;
+    
+    // 2024년 데이터는 토글 상태에 따라 표시
+    if (m >= "2024.01" && m <= "2024.12") {
+      return show2024;
+    }
+    
+    // 2025년, 2026년은 항상 표시
+    return true;
+  });
 
   if (displayMonths.length === 0) {
     return (
@@ -129,22 +198,43 @@ export default function InventoryStockSummaryTable({
     { 
       label: "재고자산(M)", 
       labelChinese: "库存",
-      getValue: getInventoryValue 
+      getValue: getInventoryValue,
+      getYoY: getInventoryYoY
     },
     { 
       label: "판매매출(M)", 
       labelChinese: "零售",
-      getValue: getSalesValue 
+      getValue: getSalesValue,
+      getYoY: getSalesYoY
     },
     { 
       label: "재고입고금액(M)", 
       labelChinese: "入库",
-      getValue: getArrivalValue 
+      getValue: getArrivalValue,
+      getYoY: getArrivalYoY
     },
   ];
 
   return (
-    <div className="overflow-x-auto rounded-lg border border-gray-200">
+    <div>
+      {/* 2024년 데이터 토글 버튼 */}
+      <div className="flex items-center gap-2 mb-3">
+        <button
+          onClick={() => setShow2024(!show2024)}
+          className={cn(
+            "flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-lg border transition-colors",
+            show2024
+              ? "bg-indigo-50 border-indigo-300 text-indigo-700 hover:bg-indigo-100"
+              : "bg-white border-gray-300 text-gray-600 hover:bg-gray-50"
+          )}
+        >
+          <span className="text-xs">{show2024 ? "▼" : "▶"}</span>
+          <span>2024년 데이터</span>
+          <span className="text-xs text-gray-500">(24.01~24.12)</span>
+        </button>
+      </div>
+
+      <div className="overflow-x-auto rounded-lg border border-gray-200">
       <table className="sales-table min-w-max">
         <thead>
           <tr>
@@ -179,6 +269,7 @@ export default function InventoryStockSummaryTable({
               </td>
               {displayMonths.map((month) => {
                 const value = row.getValue(month);
+                const yoy = row.getYoY ? row.getYoY(month) : null;
                 const isForecast = isForecastMonth(month);
                 const isForecastRow = row.label === "재고입고금액(M)";
                 
@@ -198,7 +289,14 @@ export default function InventoryStockSummaryTable({
                         : ""
                     }
                   >
-                    {value === null ? "" : formatAmountM(value)}
+                    <div className="flex flex-col items-center">
+                      <span>{value === null ? "" : formatAmountM(value)}</span>
+                      {yoy !== null && (
+                        <span className="text-[10px] text-gray-400 mt-0.5 font-normal">
+                          ({yoy}%)
+                        </span>
+                      )}
+                    </div>
                   </td>
                 );
               })}
@@ -206,6 +304,7 @@ export default function InventoryStockSummaryTable({
           ))}
         </tbody>
       </table>
+      </div>
     </div>
   );
 }
