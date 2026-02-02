@@ -39,12 +39,11 @@ export default function ForecastInventoryTable({
     setEditingData(data);
   }, [data]);
 
-  // editingData가 변경될 때마다 부모에게 알림 (기준월 이후 데이터만 전달)
+  // editingData가 변경될 때마다 부모에게 알림 (기준월 포함 데이터 전달)
   useEffect(() => {
-    // 기준월 이후 데이터만 필터링하여 전달
     const filteredData: ForecastInventoryData = {};
     Object.keys(editingData).forEach((month) => {
-      if (month > referenceMonth) {
+      if (month >= referenceMonth) {
         filteredData[month] = editingData[month];
       }
     });
@@ -69,8 +68,8 @@ export default function ForecastInventoryTable({
   };
 
   const handleCellChange = (month: string, dataKey: string, value: string) => {
-    // 기준월 이후의 월만 편집 가능
-    if (month <= referenceMonth) {
+    // 기준월 이전만 편집 불가 (기준월 포함 편집 가능)
+    if (month < referenceMonth) {
       return;
     }
 
@@ -138,7 +137,7 @@ export default function ForecastInventoryTable({
                 </td>
                 {months.map((month) => {
                   const value = getCellValue(month, row.dataKey);
-                  const isEditable = row.editable && month > referenceMonth;
+                  const isEditable = row.editable && month >= referenceMonth;
                   
                   if (!row.editable) {
                     // 아이템합계는 읽기 전용
@@ -172,7 +171,7 @@ export default function ForecastInventoryTable({
                     );
                   }
 
-                  // 편집 가능한 셀 (기준월 이후만)
+                  // 편집 가능한 셀 (기준월 포함)
                   return (
                     <td
                       key={month}

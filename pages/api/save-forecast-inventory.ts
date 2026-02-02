@@ -102,24 +102,22 @@ export default async function handler(
       existingData = { brands: {} };
     }
 
-    // 해당 브랜드 데이터 업데이트 (보호된 월 이하는 절대 변경하지 않음)
+    // 해당 브랜드 데이터 업데이트 (기준월 이전은 유지, 기준월 포함은 클라이언트 데이터 반영)
     const existingBrandData = existingData.brands[brand] || {};
     const mergedData: ForecastInventoryData = {};
-    
+
     // 기존 데이터에서 보호된 월 이하는 유지 (스냅샷 보호)
     Object.keys(existingBrandData).forEach((month) => {
       if (month <= protectedMonth) {
         mergedData[month] = existingBrandData[month];
       }
     });
-    
-    // 새 데이터에서 보호된 월 이후만 추가
+
+    // 클라이언트 데이터: 기준월(endMonth) 이상이면서, 스냅샷 보호 구간이 아니면 반영 (기준월 수기 입력 허용)
     Object.keys(data).forEach((month) => {
-      // 보호된 월 이후만 추가 (보호된 월 이하는 절대 변경하지 않음)
-      if (month > protectedMonth) {
+      if (month >= endMonth && (month > protectedMonth || protectedMonth === endMonth)) {
         mergedData[month] = data[month];
       }
-      // 보호된 월 이하 데이터가 포함되어 있으면 무시 (보안상 안전장치)
     });
     
     existingData.brands[brand] = mergedData;

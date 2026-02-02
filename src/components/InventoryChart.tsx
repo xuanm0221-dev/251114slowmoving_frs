@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
   ComposedChart,
   Bar,
@@ -21,7 +21,7 @@ import {
   InventoryMonthData,
   SalesMonthData,
 } from "@/types/sales";
-import { cn, generateMonthsForYearAndNextHalf } from "@/lib/utils";
+import { cn, generateMonthsAroundReference } from "@/lib/utils";
 import { computeStockWeeksForRowType, StockWeekWindow } from "@/utils/stockWeeks";
 
 interface InventoryChartProps {
@@ -68,18 +68,27 @@ const CHANNEL_LABELS: Record<ChannelTab, string> = {
 };
 
 // 연도 탭 타입
-type YearTab = "당년" | "전년";
+type YearTab = "24년" | "25년" | "26년";
 
 // 연도 탭 목록
-const YEAR_TABS: YearTab[] = ["당년", "전년"];
+const YEAR_TABS: YearTab[] = ["24년", "25년", "26년"];
 
-// ✅ 선택된 탭의 재고/판매에서 실제 존재하는 월 목록을 뽑아서 연도에 따라 필터링
+// 기준월 연도 → 연도 탭 (기준월 26.01 → 26년 탭 선택용)
+function getYearTabFromReferenceMonth(referenceMonth: string): YearTab {
+  const refYear = parseInt(referenceMonth.split(".")[0], 10);
+  if (refYear === 2024) return "24년";
+  if (refYear === 2025) return "25년";
+  if (refYear === 2026) return "26년";
+  return "25년";
+}
+
+// 선택된 탭의 재고/판매에서 실제 존재하는 월 목록을 뽑아서 연도 탭에 따라 필터링 (계산 로직 없음, 월 목록만 생성)
 const getMonthsForChart = (
   inventoryBrandData: InventoryBrandData,
   salesBrandData: SalesBrandData,
   selectedTab: ItemTab,
   yearTab: YearTab,
-  referenceMonth: string // 기준월 추가
+  referenceMonth: string
 ): string[] => {
   const invItem = inventoryBrandData[selectedTab] || {};
   const salesItem = salesBrandData[selectedTab] || {};
@@ -89,30 +98,17 @@ const getMonthsForChart = (
     ...Object.keys(salesItem),
   ]);
 
-  // 연도에 따라 필터링
-  let filteredMonths: string[];
-  if (yearTab === "당년") {
-    // 당년: 기준월이 속한 연도의 1월~12월 전체 + 다음 연도 1월~6월
-    const [refYear, refMonth] = referenceMonth.split(".").map(Number);
-    const allMonths: string[] = [];
-    
-    // 기준월이 속한 연도의 1월~12월 전체
-    for (let month = 1; month <= 12; month++) {
-      allMonths.push(`${refYear}.${String(month).padStart(2, "0")}`);
-    }
-    
-    // 다음 연도 1월~6월
-    const nextYear = refYear + 1;
-    for (let month = 1; month <= 6; month++) {
-      allMonths.push(`${nextYear}.${String(month).padStart(2, "0")}`);
-    }
-    
-    // 실제 데이터가 있는 월만 포함 (forecast 월은 salesBrandData에 포함되어 있음)
-    filteredMonths = allMonths.filter(m => monthSet.has(m));
+  let candidateMonths: string[];
+  if (yearTab === "24년") {
+    candidateMonths = Array.from({ length: 12 }, (_, i) => `2024.${String(i + 1).padStart(2, "0")}`);
+  } else if (yearTab === "25년") {
+    candidateMonths = Array.from({ length: 12 }, (_, i) => `2025.${String(i + 1).padStart(2, "0")}`);
   } else {
-    // 전년: 2024.01 ~ 2024.12
-    filteredMonths = Array.from(monthSet).filter(m => m >= "2024.01" && m <= "2024.12");
+    // 26년: 기준월 이전 11개월 + 기준월 + 기준월 이후 6개월
+    candidateMonths = generateMonthsAroundReference(referenceMonth, 11, 6);
   }
+
+  const filteredMonths = candidateMonths.filter(m => monthSet.has(m));
 
   return filteredMonths.sort((a, b) => {
     const [ya, ma] = a.split(".").map(Number);
@@ -167,7 +163,7 @@ const CustomTooltip = ({
   if (!data) return null;
 
   const isForecast = data.isForecast || false;
-  const yearLabel = data.yearLabel || "25년";
+  const yearLabel = data.yearLabel || "25년"; // chartData에서 전달된 yearLabel 사용
 
   // 포맷팅
   const formatValue = (value: number) => {
@@ -474,8 +470,12 @@ export default function InventoryChart({
   stockWeek,
   referenceMonth,
 }: InventoryChartProps) {
-  // 연도 탭 상태 (당년/전년)
-  const [yearTab, setYearTab] = useState<YearTab>("당년");
+  // 연도 탭 상태: 기준월 연도에 맞춰 초기값 및 기준월 변경 시 동기화
+  const [yearTab, setYearTab] = useState<YearTab>(() => getYearTabFromReferenceMonth(referenceMonth));
+
+  useEffect(() => {
+    setYearTab(getYearTabFromReferenceMonth(referenceMonth));
+  }, [referenceMonth]);
 
   const months = useMemo(
     () => getMonthsForChart(inventoryBrandData, salesBrandData, selectedTab, yearTab, referenceMonth),
@@ -582,7 +582,7 @@ export default function InventoryChart({
   // 차트 데이터 생성 (전년 막대 = 판매매출, 당년 막대 = 재고자산 + forecast)
   const chartData = useMemo(() => {
     // 연도 라벨 (툴팁용)
-    const yearLabel = yearTab === "당년" ? "25년" : "24년";
+    const yearLabel = yearTab;
     const rowType = getStockWeeksRowType();
 
     return months.map((monthYm) => {
@@ -649,18 +649,12 @@ export default function InventoryChart({
     });
   }, [months, inventoryBrandData, salesBrandData, selectedTab, channelTab, yearTab, daysInMonth, stockWeekWindow, stockWeek]);
 
-  // Y축 최대값 계산 (재고자산 + 판매매출 통합) - 2024년+2025년 모두 고려하여 동일한 Y축 범위 유지
+  // Y축 최대값 계산: 현재 차트에 표시 중인 월(months)만 사용 (계산 로직 동일)
   const maxYAxis = useMemo(() => {
     let maxInv = 0;
     let maxSales = 0;
-    
-    // 2024년 + 기준월이 속한 연도의 1월부터 기준월까지 + 다음 연도 1월~6월까지 모든 월 데이터에서 재고자산 최대값 계산
-    const targetMonths = generateMonthsForYearAndNextHalf(referenceMonth);
-    const allInvMonths = Object.keys(inventoryBrandData[selectedTab] || {}).filter(
-      (m) => m >= "2024.01" && m <= "2024.12" || targetMonths.includes(m)
-    );
-    
-    allInvMonths.forEach((monthYm) => {
+
+    months.forEach((monthYm) => {
       const invData = inventoryBrandData[selectedTab]?.[monthYm];
       const slsData = salesBrandData[selectedTab]?.[monthYm];
       if (invData) {
@@ -668,26 +662,16 @@ export default function InventoryChart({
         const total = inventory.core + inventory.outlet;
         if (total > maxInv) maxInv = total;
       }
-    });
-    
-    // 2024년 + 기준월이 속한 연도의 1월부터 기준월까지 + 다음 연도 1월~6월까지 모든 월 데이터에서 판매매출 최대값 계산
-    const allSalesMonths = Object.keys(salesBrandData[selectedTab] || {}).filter(
-      (m) => m >= "2024.01" && m <= "2024.12" || targetMonths.includes(m)
-    );
-    
-    allSalesMonths.forEach((monthYm) => {
-      const slsData = salesBrandData[selectedTab]?.[monthYm];
       if (slsData) {
         const sales = getChannelSales(slsData);
         const total = sales.core + sales.outlet;
         if (total > maxSales) maxSales = total;
       }
     });
-    
-    // 재고자산과 판매매출 중 최대값 사용
+
     const max = Math.max(maxInv, maxSales);
     return Math.max(Math.ceil(max * 1.1), 100);
-  }, [inventoryBrandData, salesBrandData, selectedTab, channelTab]);
+  }, [months, inventoryBrandData, salesBrandData, selectedTab, channelTab]);
 
   // 재고주수 최대값 계산 (우측 Y축용)
   const maxStockWeeks = useMemo(() => {
@@ -722,7 +706,7 @@ export default function InventoryChart({
           <span className="text-green-500 text-xl">📊</span>
           <div className="flex flex-col">
             <h2 className="text-xl font-bold text-gray-800">
-              월별 {channelLabel} 재고자산 추이 ({itemLabel}) - {yearTab === "당년" ? "2025년" : "2024년"}
+              월별 {channelLabel} 재고자산 추이 ({itemLabel}) - {yearTab}
             </h2>
             <span className="text-[10px] text-gray-400 leading-tight">库存趋势</span>
           </div>
@@ -756,7 +740,7 @@ export default function InventoryChart({
         {/* 구분선 */}
         <div className="h-8 w-px bg-gray-300"></div>
 
-        {/* 연도 탭 (당년/전년) */}
+        {/* 연도 탭 (24년/25년/26년) */}
         <div className="flex flex-wrap items-center gap-2">
           {YEAR_TABS.map((tab) => (
             <button
@@ -773,7 +757,7 @@ export default function InventoryChart({
               <span className={cn(
                 "text-[10px] leading-tight",
                 yearTab === tab ? "text-indigo-200" : "text-gray-400"
-              )}>{tab === "당년" ? "25年" : "24年"}</span>
+              )}>{tab.replace("년", "年")}</span>
             </button>
           ))}
         </div>
@@ -840,45 +824,43 @@ export default function InventoryChart({
               dataKey="0_재고자산_전체" 
               stackId="inventory"
               fill={COLORS.forecast_inventory}
-              name="25년 재고자산 전체 (예상)"
+              name={`${yearTab} 재고자산 전체 (예상)`}
             />
             <Bar 
               yAxisId="left"
               dataKey="1_판매매출_전체" 
               stackId="sales"
               fill={COLORS.forecast_sales}
-              name="25년 판매매출 전체 (예상)"
+              name={`${yearTab} 판매매출 전체 (예상)`}
             />
             {/* 실적 구간 막대 (주력 + 아울렛 스택) */}
-            {/* 실적 구간에서는 0_재고자산_주력/아울렛만 값이 있고 전체는 0이므로 주력/아울렛 스택 막대만 표시됨 */}
             <Bar 
               yAxisId="left"
               dataKey="0_재고자산_주력" 
               stackId="inventory" 
               fill={COLORS.curr_core}
-              name="25년 재고자산 주력"
+              name={`${yearTab} 재고자산 주력`}
             />
             <Bar 
               yAxisId="left"
               dataKey="0_재고자산_아울렛" 
               stackId="inventory" 
               fill={COLORS.curr_outlet}
-              name="25년 재고자산 아울렛"
+              name={`${yearTab} 재고자산 아울렛`}
             />
-            {/* 25년 판매매출 막대 (주력 + 아울렛 스택) - 좌측 Y축 사용 (통합) */}
             <Bar 
               yAxisId="left"
               dataKey="1_판매매출_주력" 
               stackId="sales" 
               fill={COLORS.prev_core}
-              name="25년 판매매출 주력"
+              name={`${yearTab} 판매매출 주력`}
             />
             <Bar 
               yAxisId="left"
               dataKey="1_판매매출_아울렛" 
               stackId="sales" 
               fill={COLORS.prev_outlet}
-              name="25년 판매매출 아울렛"
+              name={`${yearTab} 판매매출 아울렛`}
             />
             {/* 재고주수 꺾은선 그래프 - 우측 Y축 사용 */}
             <Line
@@ -898,15 +880,15 @@ export default function InventoryChart({
 
       {/* 범례 설명 */}
       <div className="mt-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
-        <div className="flex flex-wrap items-start gap-4 text-xs text-gray-600">
+          <div className="flex flex-wrap items-start gap-4 text-xs text-gray-600">
           <div className="flex items-start gap-2">
             <div className="flex flex-col">
-              <span className="font-medium">{yearTab === "당년" ? "25년" : "24년"} 재고자산</span>
-              <span className="text-gray-400 text-[10px] leading-tight">{yearTab === "당년" ? "25年" : "24年"}库存</span>
+              <span className="font-medium">{yearTab} 재고자산</span>
+              <span className="text-gray-400 text-[10px] leading-tight">{yearTab.replace("년", "年")}库存</span>
             </div>
             <div className="flex flex-col gap-1">
               <div className="flex items-center gap-2">
-                {yearTab === "당년" && (
+                {yearTab === "26년" && (
                   <div className="flex items-center gap-1">
                     <span className="w-4 h-3 rounded" style={{ backgroundColor: COLORS.forecast_inventory }}></span>
                     <span>전체</span>
@@ -922,20 +904,20 @@ export default function InventoryChart({
                 </div>
               </div>
               <div className="flex items-center gap-2 text-gray-400 text-[10px]">
-                {yearTab === "당년" && <span className="ml-5">预估</span>}
-                <span className={yearTab === "당년" ? "ml-3" : ""}>主力</span>
+                {yearTab === "26년" && <span className="ml-5">预估</span>}
+                <span className={yearTab === "26년" ? "ml-3" : ""}>主力</span>
                 <span className="ml-3">奥莱</span>
               </div>
             </div>
           </div>
           <div className="flex items-start gap-2">
             <div className="flex flex-col">
-              <span className="font-medium">{yearTab === "당년" ? "25년" : "24년"}판매매출</span>
-              <span className="text-gray-400 text-[10px] leading-tight">{yearTab === "당년" ? "25年" : "24年"}零售</span>
+              <span className="font-medium">{yearTab}판매매출</span>
+              <span className="text-gray-400 text-[10px] leading-tight">{yearTab.replace("년", "年")}零售</span>
             </div>
             <div className="flex flex-col gap-1">
               <div className="flex items-center gap-2">
-                {yearTab === "당년" && (
+                {yearTab === "26년" && (
                   <div className="flex items-center gap-1">
                     <span className="w-4 h-3 rounded" style={{ backgroundColor: COLORS.forecast_sales }}></span>
                     <span>전체</span>
@@ -951,8 +933,8 @@ export default function InventoryChart({
                 </div>
               </div>
               <div className="flex items-center gap-2 text-gray-400 text-[10px]">
-                {yearTab === "당년" && <span className="ml-5">预估</span>}
-                <span className={yearTab === "당년" ? "ml-3" : ""}>主力</span>
+                {yearTab === "26년" && <span className="ml-5">预估</span>}
+                <span className={yearTab === "26년" ? "ml-3" : ""}>主力</span>
                 <span className="ml-3">奥莱</span>
               </div>
             </div>

@@ -46,7 +46,7 @@ import {
   buildEditableMonths 
 } from "@/lib/forecastInventoryStorage";
 import { PRODUCT_TYPE_RULES } from "@/constants/businessRules";
-import { formatUpdateDate, formatUpdateDateTime, generateOneYearMonths, generateMonthsFromReference, generateMonthsForYearAndNextHalf, getMonthAfter } from "@/lib/utils";
+import { formatUpdateDate, formatUpdateDateTime, generateOneYearMonths, generateMonthsFromReference, generateMonthsForYearAndNextHalf, generateMonthsAroundReference, getMonthAfter } from "@/lib/utils";
 import { useReferenceMonth } from "@/contexts/ReferenceMonthContext";
 
 interface BrandSalesPageProps {
@@ -199,20 +199,18 @@ export default function BrandSalesPage({ brand, title }: BrandSalesPageProps) {
   const handleSaveForecastInventory = async () => {
     if (!editingForecastInventory) return;
     
-    // 기준월 이후 데이터만 필터링 (기준월 이전은 절대 포함하지 않음)
+    // 기준월 포함 데이터만 필터링 (기준월 이전은 절대 포함하지 않음)
     const filteredData: ForecastInventoryData = {};
     Object.keys(editingForecastInventory).forEach((month) => {
-      if (month > referenceMonth) {
+      if (month >= referenceMonth) {
         filteredData[month] = editingForecastInventory[month];
       } else {
-        // 기준월 이전 데이터가 포함되어 있으면 경고 (디버깅용)
         console.warn(`[입고예정 저장] 기준월(${referenceMonth}) 이전 데이터(${month})는 저장되지 않습니다.`);
       }
     });
     
-    // 필터링된 데이터가 없으면 저장하지 않음
     if (Object.keys(filteredData).length === 0) {
-      alert("저장할 기준월 이후 데이터가 없습니다.");
+      alert("저장할 기준월 포함 데이터가 없습니다.");
       return;
     }
     
@@ -301,9 +299,9 @@ export default function BrandSalesPage({ brand, title }: BrandSalesPageProps) {
   // 기준월: 전역 Context에서 가져온 기준월 사용
   const latestActualYm = referenceMonth;
   
-  // 편집 가능한 월 목록 (기준월 + 1부터 12개월)
+  // 편집 가능한 월 목록 (기준월 포함 12개월: 기준월 + 다음 11개월)
   const forecastInventoryMonths: string[] = useMemo(() => {
-    return buildEditableMonths(referenceMonth, 12);
+    return [referenceMonth, ...buildEditableMonths(referenceMonth, 11)];
   }, [referenceMonth]);
 
   const actualArrivalBrandData: ActualArrivalData | undefined = actualArrivalData ?? undefined;
@@ -405,24 +403,9 @@ export default function BrandSalesPage({ brand, title }: BrandSalesPageProps) {
     });
   }, [salesData?.months, salesBrandData]);
 
-  // 차트용 재고주수 데이터 계산 (히트맵과 동일한 계산 로직 사용)
-  // 기준월이 속한 연도의 1월~12월 전체 + 다음 연도 1월~6월
+  // 차트용 재고주수 월 목록: 기준월 포함 최근 12개월(실적) + 기준월 다음 6개월(예상) = 총 18개월
   const stockWeeksChartMonths = useMemo(() => {
-    const [refYear, refMonth] = referenceMonth.split(".").map(Number);
-    const months: string[] = [];
-    
-    // 기준월이 속한 연도의 1월~12월 전체
-    for (let month = 1; month <= 12; month++) {
-      months.push(`${refYear}.${String(month).padStart(2, "0")}`);
-    }
-    
-    // 다음 연도 1월~6월
-    const nextYear = refYear + 1;
-    for (let month = 1; month <= 6; month++) {
-      months.push(`${nextYear}.${String(month).padStart(2, "0")}`);
-    }
-    
-    return months;
+    return generateMonthsAroundReference(referenceMonth, 11, 6);
   }, [referenceMonth]);
 
   const stockWeeksChartData = useMemo(() => {
@@ -800,7 +783,7 @@ export default function BrandSalesPage({ brand, title }: BrandSalesPageProps) {
                   }
                 >
                   {salesTabData && allMonths.length > 0 ? (
-                    <SalesTable data={salesTabData} months={allMonths} />
+                    <SalesTable data={salesTabData} months={allMonths} referenceMonth={referenceMonth} />
                   ) : (
                     <div className="flex items-center justify-center py-10">
                       <p className="text-gray-500">판매 데이터가 없습니다.</p>
@@ -868,7 +851,7 @@ export default function BrandSalesPage({ brand, title }: BrandSalesPageProps) {
                       <div className="flex flex-col gap-2">
                         <div className="flex flex-wrap gap-4">
                           <span className="text-gray-400">
-                            기준월 ({referenceMonth}) 이후 12개월 입고예정 (수기입력 가능)
+                            기준월 ({referenceMonth}) 포함 12개월 입고예정 (수기입력 가능)
                           </span>
                           <span className="text-gray-400">금액단위: 1위안</span>
                         </div>

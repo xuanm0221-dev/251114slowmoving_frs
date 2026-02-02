@@ -220,6 +220,13 @@ export function buildSalesAggregationQuery(
   startMonth: string = '202401',
   endMonth: string = '202511'
 ): string {
+  const startDate = `${startMonth.substring(0, 4)}-${startMonth.substring(4, 6)}-01`;
+  const endYear = parseInt(endMonth.substring(0, 4), 10);
+  const endMonthNum = parseInt(endMonth.substring(4, 6), 10);
+  const nextMonth = endMonthNum === 12 ? 1 : endMonthNum + 1;
+  const nextYear = endMonthNum === 12 ? endYear + 1 : endYear;
+  const endDateExclusive = `${nextYear}-${String(nextMonth).padStart(2, "0")}-01`;
+
   return `
 WITH 
 ${SHOP_MAPPING_CTES},
@@ -242,8 +249,8 @@ sales_raw AS (
   FROM CHN.DW_SALE s
   INNER JOIN FNF.CHN.MST_PRDT_SCS p 
     ON s.prdt_scs_cd = p.prdt_scs_cd
-  WHERE s.sale_dt >= '2024-01-01'
-    AND s.sale_dt < '2026-01-01'
+  WHERE s.sale_dt >= '${startDate}'
+    AND s.sale_dt < '${endDateExclusive}'
     AND s.brd_cd = '${brandCode}'
     AND p.parent_prdt_kind_cd = 'A'
     AND p.prdt_kind_nm_en IN ('Shoes', 'Headwear', 'Bag', 'Acc_etc')

@@ -21,7 +21,7 @@ import {
   StockWeekWindow,
 } from "@/types/sales";
 import { StockWeeksChartPoint, computeStockWeeksForChart, ProductTypeTab, getWindowMonths, getDaysInMonthFromYm, calculateWeeks } from "@/utils/stockWeeks";
-import { generateMonthsForYearAndNextHalf } from "@/lib/utils";
+import { generateMonthsAroundReference } from "@/lib/utils";
 
 interface StockWeeksChartProps {
   selectedTab: ItemTab;
@@ -83,9 +83,9 @@ export default function StockWeeksChart({
   setProductTypeTab,
   referenceMonth,
 }: StockWeeksChartProps) {
-  // 기준월이 속한 연도의 1월~12월 + 다음 연도 1월~6월 = 총 18개월
+  // 기준월 포함 최근 12개월(실적) + 기준월 다음 6개월(예상) = 총 18개월
   const chartMonths = useMemo(() => {
-    return generateMonthsForYearAndNextHalf(referenceMonth);
+    return generateMonthsAroundReference(referenceMonth, 11, 6);
   }, [referenceMonth]);
 
   // 단일 아이템 차트 데이터: props로 받은 데이터 그대로 사용
@@ -161,8 +161,8 @@ export default function StockWeeksChart({
             <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
               <span className="text-purple-500">📈</span>
               <BilingualLabel 
-                primary="2025년 월별 재고주수 추이 (전체 아이템 비교)" 
-                secondary="2025年 ACC weekcover" 
+                primary="월별 재고주수 추이 (전체 아이템 비교)" 
+                secondary="ACC weekcover" 
                 align="left"
               />
             </h2>
@@ -315,8 +315,8 @@ export default function StockWeeksChart({
           <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
             <span className="text-purple-500">📈</span>
             <BilingualLabel 
-              primary={`2025년 월별 재고주수 추이 (${itemLabel})`}
-              secondary="2025年 ACC weekcover" 
+              primary={`월별 재고주수 추이 (${itemLabel})`}
+              secondary="ACC weekcover" 
               align="left"
             />
           </h2>

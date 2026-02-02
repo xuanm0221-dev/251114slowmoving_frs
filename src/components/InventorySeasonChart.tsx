@@ -347,10 +347,8 @@ export default function InventorySeasonChart({ brand, dimensionTab = "스타일"
   const [data, setData] = useState<InventorySeasonChartResponse | null>(null);
   const [mode, setMode] = useState<ChartMode>("전년대비");
 
-  // 전역 기준월 사용
+  // 전역 기준월 사용 (API가 기준월 포함 12개월 반환)
   const { referenceMonth } = useReferenceMonth();
-  // API는 "YYYYMM" 형식을 사용하므로 변환
-  const MAX_MONTH = referenceMonth.replace(".", "");
 
   const brandCode = BRAND_CODE_MAP[brand] || "M";
 
@@ -384,25 +382,25 @@ export default function InventorySeasonChart({ brand, dimensionTab = "스타일"
     fetchData();
   }, [brandCode, dimensionTab, thresholdPct, minQty, currentMonthMinQty, itemTab, referenceMonth]);
 
-  // 차트 데이터 생성
+  // 차트 데이터 생성 (API가 기준월 포함 12개월·전년 12개월 반환)
   const chartData = useMemo(() => {
     if (!data) return [];
 
-    // [필터링] 전역 기준월까지만 표시 (막대차트 및 정체재고 계산 기준월 제한)
-    const filtered2025 = data.year2025.filter(d => d.month <= MAX_MONTH);
-
-    return filtered2025.map((curr, idx) => {
+    const months2025 = data.year2025;
+    return months2025.map((curr, idx) => {
       const prev = data.year2024[idx];
-      const monthNum = parseInt(curr.month.slice(-2));
+      const monthLabel = curr.month.length === 6
+        ? `${curr.month.slice(0, 4)}-${curr.month.slice(4, 6)}`
+        : curr.month;
+      const monthNum = parseInt(curr.month.slice(-2), 10);
 
       if (mode === "전년대비") {
         // 전년대비 모드: 왼쪽=전년 재고, 오른쪽=당년 재고
-        // [YOY 미포함] 전년대비 탭에서는 YOY 라인을 표시하지 않음
-        // [24년 1~5월 제외] 전년 데이터가 없는 1~5월은 전년 막대 표시 안함
-        const showPrevData = monthNum >= 6; // 6월 이상만 전년 데이터 표시
+        // 전년 데이터는 동일 인덱스(동월)로 매칭
+        const showPrevData = !!prev && (prev.total_stock_amt > 0 || prev.total_sales_amt > 0);
         
         return {
-          month: `2025-${String(monthNum).padStart(2, "0")}`,
+          month: monthLabel,
           monthIdx: idx,
           // 전년 재고 (왼쪽 막대) - 1~5월은 0
           prev_당월수량미달: showPrevData ? (prev?.당월수량미달?.stock_amt || 0) / 1_000_000 : 0,
@@ -438,7 +436,7 @@ export default function InventorySeasonChart({ brand, dimensionTab = "스타일"
         const sales정체재고 = curr.정체재고?.sales_amt || 0;
 
         return {
-          month: `2025-${String(monthNum).padStart(2, "0")}`,
+          month: monthLabel,
           monthIdx: idx,
           // 당년 판매 (왼쪽 막대)
           sales_당월수량미달: sales당월수량미달 / 1_000_000,
@@ -660,20 +658,27 @@ export default function InventorySeasonChart({ brand, dimensionTab = "스타일"
       }
     });
 
-    // 적절한 Y축 최대값 계산 (깔끔한 숫자로 반올림)
+    // 적절한 Y축 최대값 계산 (깔끔한 숫자로 올림, 상한은 막대 최대값의 1.2배 이내로 캡)
+    const NICE_STEPS = [1, 2, 2.5, 5, 10];
     const calcNiceMax = (max: number): number => {
       if (max <= 0) return 1000;
-      // 최대값의 1.15배를 기준으로 깔끔한 숫자로 올림
       const target = max * 1.15;
       const magnitude = Math.pow(10, Math.floor(Math.log10(target)));
       const normalized = target / magnitude;
-      let niceNormalized;
+      let niceNormalized: number;
       if (normalized <= 1) niceNormalized = 1;
       else if (normalized <= 2) niceNormalized = 2;
       else if (normalized <= 2.5) niceNormalized = 2.5;
       else if (normalized <= 5) niceNormalized = 5;
       else niceNormalized = 10;
-      return niceNormalized * magnitude;
+      let niceMax = niceNormalized * magnitude;
+      const cap = max * 1.2;
+      if (niceMax > cap) {
+        const idx = NICE_STEPS.indexOf(niceNormalized);
+        const prevNice = NICE_STEPS[Math.max(0, idx - 1)];
+        niceMax = prevNice * magnitude;
+      }
+      return niceMax;
     };
 
     // 균등 간격 ticks 생성

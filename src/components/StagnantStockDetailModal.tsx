@@ -29,8 +29,8 @@ interface ItemDetailData {
     season: string;
     dimensionKey: string;
   };
-  currentYear: ItemMonthlyData[];
-  previousYear: ItemMonthlyData[];
+  months: ItemMonthlyData[];
+  previousYearSameMonth: ItemMonthlyData | null;
   meta: {
     brand: string;
     dimensionTab: string;
@@ -43,6 +43,7 @@ interface StagnantStockDetailModalProps {
   item: StagnantStockItem;
   brand: string;
   dimensionTab: string;
+  referenceMonth: string;
 }
 
 // 숫자 포맷팅
@@ -71,12 +72,19 @@ function getDaysInMonth(yyyymm: string): number {
   return new Date(year, month, 0).getDate();
 }
 
+/** YYYYMM -> yy.MM 라벨 */
+function yymmToLabel(yymm: string): string {
+  if (yymm.length !== 6) return yymm;
+  return `${yymm.slice(2, 4)}.${yymm.slice(4, 6)}`;
+}
+
 export default function StagnantStockDetailModal({
   isOpen,
   onClose,
   item,
   brand,
   dimensionTab,
+  referenceMonth,
 }: StagnantStockDetailModalProps) {
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<ItemDetailData | null>(null);
@@ -94,6 +102,7 @@ export default function StagnantStockDetailModal({
           brand,
           prdt_cd: item.prdt_cd,
           dimensionTab,
+          referenceMonth,
         });
 
         if (item.color_cd) {
@@ -118,28 +127,27 @@ export default function StagnantStockDetailModal({
     };
 
     fetchData();
-  }, [isOpen, item, brand, dimensionTab]);
+  }, [isOpen, item, brand, dimensionTab, referenceMonth]);
 
   if (!isOpen) return null;
 
-  // 차트 데이터 생성 (K 단위)
+  // 차트 데이터 생성 (K 단위, 기준월 포함 12개월)
   const chartData = data
-    ? data.currentYear.map((curr, idx) => {
-        const prev = data.previousYear[idx];
-        const monthNum = parseInt(curr.month.slice(-2));
-        return {
-          month: `${monthNum}월`,
-          curr_stock: curr.stock_amt / 1_000,
-          curr_sales: curr.sales_amt / 1_000,
-          prev_stock: prev ? prev.stock_amt / 1_000 : 0,
-          prev_sales: prev ? prev.sales_amt / 1_000 : 0,
-        };
-      })
+    ? data.months.map((curr) => ({
+        month: yymmToLabel(curr.month),
+        curr_stock: curr.stock_amt / 1_000,
+        curr_sales: curr.sales_amt / 1_000,
+      }))
     : [];
 
-  // 최근 월 데이터 (25년 11월 또는 마지막 월)
-  const latestData = data?.currentYear[data.currentYear.length - 1];
-  const latestPrevData = data?.previousYear[data.previousYear.length - 1];
+  // 기준월 데이터 / 전년 동월
+  const latestData = data?.months.length ? data.months[data.months.length - 1] : undefined;
+  const latestPrevData = data?.previousYearSameMonth ?? undefined;
+
+  const refYearLabel = referenceMonth.includes(".")
+    ? referenceMonth.split(".")[0].slice(2, 4)
+    : referenceMonth.slice(2, 4);
+  const prevYearLabel = String(parseInt(refYearLabel, 10) - 1).padStart(2, "0");
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
@@ -214,8 +222,8 @@ export default function StagnantStockDetailModal({
                     <thead className="bg-gray-100">
                       <tr className="border-b border-gray-300">
                         <th className="text-left py-2 px-3 font-medium text-gray-600"></th>
-                        <th className="text-right py-2 px-3 font-medium text-gray-600">당년 (25년)</th>
-                        <th className="text-right py-2 px-3 font-medium text-gray-600">전년 (24년)</th>
+                        <th className="text-right py-2 px-3 font-medium text-gray-600">당년 ({refYearLabel}년)</th>
+                        <th className="text-right py-2 px-3 font-medium text-gray-600">전년 ({prevYearLabel}년)</th>
                         <th className="text-right py-2 px-3 font-medium text-gray-600">YOY</th>
                       </tr>
                     </thead>
@@ -315,7 +323,7 @@ export default function StagnantStockDetailModal({
                         labelStyle={{ color: "#374151" }}
                       />
                       <Legend />
-                      <Bar yAxisId="left" dataKey="curr_stock" fill="#3b82f6" name="25년 재고" />
+                      <Bar yAxisId="left" dataKey="curr_stock" fill="#3b82f6" name="재고" />
                       <Line
                         yAxisId="right"
                         type="monotone"
@@ -323,7 +331,7 @@ export default function StagnantStockDetailModal({
                         stroke="#f59e0b"
                         strokeWidth={2}
                         dot={{ fill: "#f59e0b", r: 4 }}
-                        name="25년 판매"
+                        name="판매"
                       />
                     </ComposedChart>
                   </ResponsiveContainer>

@@ -66,19 +66,59 @@ function getYearConfig(referenceMonth: string): { currentYear: string; nextYear:
   };
 }
 
+/** 기준월(YYYY.MM 또는 YYYYMM)에서 N개월 이전 월을 YYYYMM으로 반환 */
+function getMonthBeforeYYYYMM(referenceMonth: string, monthsBefore: number): string {
+  const normalized = referenceMonth.replace(".", "");
+  const y = parseInt(normalized.slice(0, 4), 10);
+  const m = parseInt(normalized.slice(4, 6), 10);
+  let targetYear = y;
+  let targetMonth = m - monthsBefore;
+  while (targetMonth <= 0) {
+    targetMonth += 12;
+    targetYear -= 1;
+  }
+  return `${targetYear}${String(targetMonth).padStart(2, "0")}`;
+}
+
+/** 기준월 포함 최근 12개월 YYYYMM 배열 (기준월-11 ~ 기준월) */
+function getTwelveMonthsEndingAt(referenceMonth: string): string[] {
+  const months: string[] = [];
+  for (let i = 11; i >= 0; i--) {
+    months.push(getMonthBeforeYYYYMM(referenceMonth, i));
+  }
+  return months;
+}
+
 // 재고 쿼리 (월별, 시즌별 집계) - dimensionTab에 따라 집계 기준 변경
 // 당월수량미달: 스타일 기준 당월수량 < currentMonthMinQty인 상품
 function buildMonthlyStockQuery(
   brand: string,
-  yearPrefix: string, // "2024" or "2025"
+  yearPrefix: string, // "2024" or "2025" (시즌 구분용)
   thresholdRatio: number,
   currentYear: string,
   nextYear: string,
   dimensionTab: DimensionTab = "스타일",
   itemFilter: ItemFilterTab = "ACC합계",
   minQty: number = 10,  // 최소 수량 기준 (정체재고 판단용) - 전월말 기준
-  currentMonthMinQty: number = 10  // 당월수량 기준 (당월수량미달 판단용)
+  currentMonthMinQty: number = 10,  // 당월수량 기준 (당월수량미달 판단용)
+  startMonth?: string,  // YYYYMM, 미지정 시 yearPrefix 01~12
+  endMonth?: string    // YYYYMM
 ): string {
+  const yymmCondition = startMonth != null && endMonth != null
+    ? `a.yymm >= '${startMonth}' AND a.yymm <= '${endMonth}'`
+    : `a.yymm >= '${yearPrefix}01' AND a.yymm <= '${yearPrefix}12'`;
+  const salesYymmCondition = startMonth != null && endMonth != null
+    ? `TO_CHAR(s.sale_dt, 'YYYYMM') >= '${startMonth}' AND TO_CHAR(s.sale_dt, 'YYYYMM') <= '${endMonth}'`
+    : `TO_CHAR(s.sale_dt, 'YYYYMM') >= '${yearPrefix}01' AND TO_CHAR(s.sale_dt, 'YYYYMM') <= '${yearPrefix}12'`;
+  // 전월 재고 수량은 "조회 구간의 전월"까지 포함 (예: 26.01 조회 시 25.12 필요)
+  const prevYymmCondition = startMonth != null && endMonth != null
+    ? (() => {
+        const prevStart = getMonthBeforeYYYYMM(startMonth, 1);
+        const prevEnd = getMonthBeforeYYYYMM(endMonth, 1);
+        return `a.yymm >= '${prevStart}' AND a.yymm <= '${prevEnd}'`;
+      })()
+    : `a.yymm >= '${yearPrefix}01' AND a.yymm <= '${yearPrefix}12'`;
+
   // 전년 시즌 구분용: 2024년이면 당시즌=24*, 차기=25*, 2025년이면 당시즌=25*, 차기=26*
   const yearShort = yearPrefix.slice(-2); // "24" or "25"
   const nextYearShort = String(parseInt(yearShort) + 1).padStart(2, "0");
@@ -101,7 +141,7 @@ function buildMonthlyStockQuery(
         SUM(a.stock_qty_expected) AS current_stock_qty
       FROM fnf.chn.dw_stock_m a
       LEFT JOIN fnf.sap_fnf.mst_prdt b ON a.prdt_cd = b.prdt_cd
-      WHERE a.yymm >= '${yearPrefix}01' AND a.yymm <= '${yearPrefix}12'
+      WHERE ${yymmCondition}
         AND a.brd_cd = '${brand}'
         AND b.prdt_hrrc1_nm = 'ACC'
       GROUP BY a.yymm, a.prdt_cd
@@ -124,7 +164,7 @@ function buildMonthlyStockQuery(
         SUM(a.stock_tag_amt_expected) AS stock_amt
       FROM fnf.chn.dw_stock_m a
       LEFT JOIN fnf.sap_fnf.mst_prdt b ON a.prdt_cd = b.prdt_cd
-      WHERE a.yymm >= '${yearPrefix}01' AND a.yymm <= '${yearPrefix}12'
+      WHERE ${yymmCondition}
         AND a.brd_cd = '${brand}'
         AND b.prdt_hrrc1_nm = 'ACC'
       GROUP BY a.yymm, ${dimConfig.stockKey}, a.prdt_cd
@@ -147,8 +187,7 @@ function buildMonthlyStockQuery(
       FROM fnf.chn.dw_sale s
       LEFT JOIN fnf.sap_fnf.mst_prdt p ON s.prdt_cd = p.prdt_cd
       LEFT JOIN fnf.chn.dw_shop_wh_detail d ON s.shop_id = d.oa_map_shop_id
-      WHERE TO_CHAR(s.sale_dt, 'YYYYMM') >= '${yearPrefix}01' 
-        AND TO_CHAR(s.sale_dt, 'YYYYMM') <= '${yearPrefix}12'
+      WHERE ${salesYymmCondition}
         AND s.brd_cd = '${brand}'
         AND p.prdt_hrrc1_nm = 'ACC'
         AND d.fr_or_cls IN ('FR', 'OR')
@@ -166,7 +205,7 @@ function buildMonthlyStockQuery(
       GROUP BY month, mid_category_kr
     ),
     
-    -- 전월 재고 수량 집계 (정체재고 판단용)
+    -- 전월 재고 수량 집계 (정체재고 판단용, 조회 구간의 전월 포함)
     prev_month_stock AS (
       SELECT
         a.yymm AS month,
@@ -174,7 +213,7 @@ function buildMonthlyStockQuery(
         SUM(a.stock_qty_expected) AS prev_stock_qty
       FROM fnf.chn.dw_stock_m a
       LEFT JOIN fnf.sap_fnf.mst_prdt b ON a.prdt_cd = b.prdt_cd
-      WHERE a.yymm >= '${yearPrefix}01' AND a.yymm <= '${yearPrefix}12'
+      WHERE ${prevYymmCondition}
         AND a.brd_cd = '${brand}'
         AND b.prdt_hrrc1_nm = 'ACC'
       GROUP BY a.yymm, ${dimConfig.stockKey}
@@ -212,7 +251,24 @@ function buildMonthlyStockQuery(
         AND st.mid_category_kr IN ('신발', '모자', '가방', '기타')
     ),
     
-    -- 시즌 그룹 분류 (변경: 당월수량미달 먼저, 그 다음 시즌 구분, 과시즌만 2단계 정체재고 판단)
+    -- 3월 기준 당시즌 연도(YY): 기준월 3~12월이면 해당연도, 1~2월이면 전년
+    with_season_base AS (
+      SELECT 
+        month,
+        dimension_key,
+        season,
+        mid_category_kr,
+        stock_amt,
+        sales_amt,
+        stock_amt_total_mid,
+        prev_stock_qty,
+        style_current_qty,
+        CASE WHEN CAST(SUBSTR(month, 5, 2) AS INT) >= 3 THEN SUBSTR(month, 3, 2)
+             ELSE SUBSTR(LPAD(CAST(CAST(SUBSTR(month, 1, 4) AS INT) - 1 AS VARCHAR), 4, '0'), 3, 2) END AS current_season_year
+      FROM combined
+    ),
+    
+    -- 시즌 그룹 분류 (3월 기준: 당시즌=YY*, 차기시즌=(YY+1)*, 과시즌=<YY*)
     with_season_group AS (
       SELECT 
         month,
@@ -225,19 +281,16 @@ function buildMonthlyStockQuery(
         prev_stock_qty,
         style_current_qty,
         CASE 
-          -- 0. 먼저 스타일 기준 당월수량 < currentMonthMinQty이면 당월수량미달
           WHEN style_current_qty < ${currentMonthMinQty} THEN '당월수량미달'
-          -- 1. 시즌 구분 (당시즌, 차기시즌은 정체재고로 바뀌지 않음)
-          WHEN season LIKE '${yearShort}%' THEN '당시즌'
-          WHEN season LIKE '${nextYearShort}%' THEN '차기시즌'
-          -- 2. 과시즌인 경우 2단계 판단
-          -- (1) 전월말 수량이 minQty 미만이면 정체 아님 (과시즌)
-          WHEN prev_stock_qty < ${minQty} THEN '과시즌'
-          -- (2) 전월말 수량 >= minQty이고 비율 < threshold이면 정체재고
-          WHEN stock_amt_total_mid > 0 AND (sales_amt / stock_amt_total_mid) < ${thresholdRatio} THEN '정체재고'
+          WHEN SUBSTR(season, 1, 2) = current_season_year THEN '당시즌'
+          WHEN SUBSTR(season, 1, 2) = LPAD(CAST(current_season_year AS INT) + 1, 2, '0') THEN '차기시즌'
+          WHEN TRY_CAST(SUBSTR(season, 1, 2) AS INT) < CAST(current_season_year AS INT) THEN
+            CASE WHEN prev_stock_qty < ${minQty} THEN '과시즌'
+                 WHEN stock_amt_total_mid > 0 AND (sales_amt / stock_amt_total_mid) < ${thresholdRatio} THEN '정체재고'
+                 ELSE '과시즌' END
           ELSE '과시즌'
         END AS season_group
-      FROM combined
+      FROM with_season_base
     )
     
     -- 월별, 시즌그룹별 집계
@@ -253,14 +306,13 @@ function buildMonthlyStockQuery(
   `;
 }
 
-// 결과를 MonthSeasonData 배열로 변환
+// 결과를 MonthSeasonData 배열로 변환 (단일 연도 01~12용, month는 나중에 prefix 붙임)
 function transformResults(rows: any[]): MonthSeasonData[] {
   const monthMap = new Map<string, MonthSeasonData>();
 
   // 12개월 초기화
   for (let m = 1; m <= 12; m++) {
     const monthStr = m.toString().padStart(2, "0");
-    // 연도는 나중에 prefix 붙임
     monthMap.set(monthStr, {
       month: monthStr,
       정체재고: { stock_amt: 0, sales_amt: 0 },
@@ -273,10 +325,9 @@ function transformResults(rows: any[]): MonthSeasonData[] {
     });
   }
 
-  // 결과 매핑
   rows.forEach((row) => {
     const monthFull = row.MONTH; // YYYYMM
-    const monthStr = monthFull.slice(-2); // MM
+    const monthStr = monthFull.length === 6 ? monthFull.slice(-2) : monthFull;
     const seasonGroup = row.SEASON_GROUP as SeasonGroup;
     const stockAmt = Number(row.STOCK_AMT) || 0;
     const salesAmt = Number(row.SALES_AMT) || 0;
@@ -290,10 +341,44 @@ function transformResults(rows: any[]): MonthSeasonData[] {
     }
   });
 
-  // 배열로 변환 (01~12 순서)
-  return Array.from(monthMap.values()).sort((a, b) => 
+  return Array.from(monthMap.values()).sort((a, b) =>
     parseInt(a.month) - parseInt(b.month)
   );
+}
+
+/** 지정한 YYYYMM 목록 순서로 MonthSeasonData 배열 생성 (행은 YYYYMM 키) */
+function transformResultsByMonths(rows: any[], expectedMonths: string[]): MonthSeasonData[] {
+  const monthMap = new Map<string, MonthSeasonData>();
+
+  expectedMonths.forEach((ym) => {
+    monthMap.set(ym, {
+      month: ym,
+      정체재고: { stock_amt: 0, sales_amt: 0 },
+      과시즌: { stock_amt: 0, sales_amt: 0 },
+      당시즌: { stock_amt: 0, sales_amt: 0 },
+      차기시즌: { stock_amt: 0, sales_amt: 0 },
+      당월수량미달: { stock_amt: 0, sales_amt: 0 },
+      total_stock_amt: 0,
+      total_sales_amt: 0,
+    });
+  });
+
+  rows.forEach((row) => {
+    const monthFull = String(row.MONTH);
+    if (monthFull.length < 6) return;
+    const data = monthMap.get(monthFull);
+    const seasonGroup = row.SEASON_GROUP as SeasonGroup;
+    const stockAmt = Number(row.STOCK_AMT) || 0;
+    const salesAmt = Number(row.SALES_AMT) || 0;
+    if (data && seasonGroup && data[seasonGroup]) {
+      data[seasonGroup].stock_amt += stockAmt;
+      data[seasonGroup].sales_amt += salesAmt;
+      data.total_stock_amt += stockAmt;
+      data.total_sales_amt += salesAmt;
+    }
+  });
+
+  return expectedMonths.map((ym) => monthMap.get(ym)!).filter(Boolean);
 }
 
 export default async function handler(
@@ -327,21 +412,63 @@ export default async function handler(
   })();
 
   const { currentYear, nextYear } = getYearConfig(referenceMonth);
+  const refNorm = referenceMonth.replace(".", "");
 
   try {
-    // 2024년 데이터 조회
-    const query2024 = buildMonthlyStockQuery(brand, "2024", thresholdRatio, "24", "25", dimTab, itemTab, minQty, currentMonthMinQty);
-    const result2024 = await runQuery(query2024);
-    const data2024 = transformResults(result2024);
+    // 기준월 포함 최근 12개월 (기준월-11 ~ 기준월) / 전년 동일 구간 12개월
+    const currentMonths = getTwelveMonthsEndingAt(referenceMonth);
+    const prevMonths: string[] = [];
+    for (let i = 23; i >= 12; i--) {
+      prevMonths.push(getMonthBeforeYYYYMM(referenceMonth, i));
+    }
 
-    // 2025년 데이터 조회
-    const query2025 = buildMonthlyStockQuery(brand, "2025", thresholdRatio, "25", "26", dimTab, itemTab, minQty, currentMonthMinQty);
-    const result2025 = await runQuery(query2025);
-    const data2025 = transformResults(result2025);
+    // 당년 12개월: 연도별로 쿼리 후 병합
+    const yearRangesCurrent = new Map<string, { start: string; end: string }>();
+    currentMonths.forEach((ym) => {
+      const y = ym.slice(0, 4);
+      if (!yearRangesCurrent.has(y)) {
+        yearRangesCurrent.set(y, { start: ym, end: ym });
+      } else {
+        const r = yearRangesCurrent.get(y)!;
+        if (ym < r.start) r.start = ym;
+        if (ym > r.end) r.end = ym;
+      }
+    });
+    const allRowsCurrent: any[] = [];
+    for (const [yearPrefix, range] of Array.from(yearRangesCurrent.entries())) {
+      const q = buildMonthlyStockQuery(
+        brand, yearPrefix, thresholdRatio, currentYear, nextYear,
+        dimTab, itemTab, minQty, currentMonthMinQty, range.start, range.end
+      );
+      const rows = await runQuery(q);
+      rows.forEach((r: any) => allRowsCurrent.push(r));
+    }
+    const data2025 = transformResultsByMonths(allRowsCurrent, currentMonths);
 
-    // 월 형식 변경: "01" -> "202401" / "202501"
-    data2024.forEach(d => d.month = "2024" + d.month);
-    data2025.forEach(d => d.month = "2025" + d.month);
+    // 전년 12개월: 연도별로 쿼리 후 병합
+    const yearRangesPrev = new Map<string, { start: string; end: string }>();
+    prevMonths.forEach((ym) => {
+      const y = ym.slice(0, 4);
+      if (!yearRangesPrev.has(y)) {
+        yearRangesPrev.set(y, { start: ym, end: ym });
+      } else {
+        const r = yearRangesPrev.get(y)!;
+        if (ym < r.start) r.start = ym;
+        if (ym > r.end) r.end = ym;
+      }
+    });
+    const allRowsPrev: any[] = [];
+    for (const [yearPrefix, range] of Array.from(yearRangesPrev.entries())) {
+      const prevY = yearPrefix.slice(-2);
+      const prevNext = String(parseInt(prevY, 10) + 1).padStart(2, "0");
+      const q = buildMonthlyStockQuery(
+        brand, yearPrefix, thresholdRatio, prevY, prevNext,
+        dimTab, itemTab, minQty, currentMonthMinQty, range.start, range.end
+      );
+      const rows = await runQuery(q);
+      rows.forEach((r: any) => allRowsPrev.push(r));
+    }
+    const data2024 = transformResultsByMonths(allRowsPrev, prevMonths);
 
     const response: InventorySeasonChartResponse = {
       year2024: data2024,

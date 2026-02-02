@@ -76,7 +76,7 @@ export default async function handler(
   }
 
   const startMonth = '202401';
-  const endMonth = '202512';
+  const endMonth = '202601';
 
   try {
     console.log(`[sales-data] Querying Snowflake for brand=${brand} (${brandCode})`);

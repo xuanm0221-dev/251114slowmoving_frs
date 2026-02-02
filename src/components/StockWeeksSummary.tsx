@@ -161,9 +161,12 @@ export default function StockWeeksSummary({
     return { text: `△${diffFormatted}${percentText}`, color: "text-blue-500" };
   };
 
-  // 전년 동월 계산
+  // 전년 동월 계산 (예: 2026.01 → 2025.01)
   const getPreviousYearMonth = (month: string): string => {
-    return month.replace("2025", "2024");
+    const [y, m] = month.split(".");
+    const year = parseInt(y, 10);
+    if (Number.isNaN(year) || !m) return month;
+    return `${year - 1}.${m}`;
   };
 
   // 천단위 콤마 포맷
@@ -192,9 +195,9 @@ export default function StockWeeksSummary({
       const monthsSinceBase = (year - baseYear) * 12 + (monthNum - baseMonth);
       const remarkNum = Math.floor(monthsSinceBase / 3) + 1;
       
-      // remark 기간 계산
+      // remark 기간 계산 (base 2023.12 + N개월 → 해당 연/월)
       const startMonthsSinceBase = (remarkNum - 1) * 3;
-      const startYear = baseYear + Math.floor((baseMonth + startMonthsSinceBase) / 12);
+      const startYear = baseYear + Math.floor(startMonthsSinceBase / 12);
       const startMonth = ((baseMonth + startMonthsSinceBase - 1) % 12) + 1;
       
       const endMonthsSinceBase = remarkNum * 3 - 1;

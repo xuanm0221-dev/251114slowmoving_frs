@@ -17,12 +17,26 @@ interface ItemDetailResponse {
     season: string;
     dimensionKey: string;
   };
-  currentYear: ItemMonthlyData[];
-  previousYear: ItemMonthlyData[];
+  months: ItemMonthlyData[];
+  previousYearSameMonth: ItemMonthlyData | null;
   meta: {
     brand: string;
     dimensionTab: string;
   };
+}
+
+/** 기준월(YYYYMM 또는 YYYY.MM)에서 N개월 이전 월을 YYYYMM으로 반환 */
+function getMonthBeforeYYYYMM(referenceMonth: string, monthsBefore: number): string {
+  const normalized = referenceMonth.replace(".", "");
+  const y = parseInt(normalized.slice(0, 4), 10);
+  const m = parseInt(normalized.slice(4, 6), 10);
+  let targetYear = y;
+  let targetMonth = m - monthsBefore;
+  while (targetMonth <= 0) {
+    targetMonth += 12;
+    targetYear -= 1;
+  }
+  return `${targetYear}${String(targetMonth).padStart(2, "0")}`;
 }
 
 export default async function handler(
@@ -33,11 +47,20 @@ export default async function handler(
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  const { brand, prdt_cd, color_cd, size_cd, dimensionTab } = req.query;
+  const { brand, prdt_cd, color_cd, size_cd, dimensionTab, referenceMonth: refMonth } = req.query;
 
-  if (!brand || !prdt_cd || !dimensionTab) {
+  if (!brand || !prdt_cd || !dimensionTab || !refMonth) {
     return res.status(400).json({ error: "Missing required parameters" });
   }
+
+  const endMonth = (refMonth as string).replace(".", "");
+  const startMonth = getMonthBeforeYYYYMM(refMonth as string, 12);
+  const startDate = `${startMonth.slice(0, 4)}-${startMonth.slice(4, 6)}-01`;
+  const endYear = parseInt(endMonth.slice(0, 4), 10);
+  const endMonthNum = parseInt(endMonth.slice(4, 6), 10);
+  const endDateNext = endMonthNum === 12
+    ? `${endYear + 1}-01-01`
+    : `${endYear}-${String(endMonthNum + 1).padStart(2, "0")}-01`;
 
   try {
     // dimensionTab에 따라 동적으로 쿼리 구성 (stagnant-stock.ts와 동일한 방식)
@@ -96,8 +119,8 @@ export default async function handler(
         LEFT JOIN fnf.sap_fnf.mst_prdt b ON a.prdt_cd = b.prdt_cd
         WHERE a.brd_cd = '${brand}'
           AND ${stockWhereCondition}
-          AND a.yymm >= '202401'
-          AND a.yymm <= '202511'
+          AND a.yymm >= '${startMonth}'
+          AND a.yymm <= '${endMonth}'
         GROUP BY ${stockDimKey}, a.yymm
       ),
       sales_data AS (
@@ -108,8 +131,8 @@ export default async function handler(
         FROM fnf.chn.dw_sale s
         WHERE s.brd_cd = '${brand}'
           AND ${salesWhereCondition}
-          AND s.sale_dt >= '2024-01-01'
-          AND s.sale_dt < '2025-12-01'
+          AND s.sale_dt >= '${startDate}'
+          AND s.sale_dt < '${endDateNext}'
         GROUP BY ${salesDimKey}, TO_CHAR(s.sale_dt, 'YYYYMM')
       )
       SELECT 
@@ -152,9 +175,10 @@ export default async function handler(
       dimensionKey,
     };
 
-    // 2024년, 2025년 데이터 분리
-    const currentYear: ItemMonthlyData[] = [];
-    const previousYear: ItemMonthlyData[] = [];
+    // 12개월(기준월-11 ~ 기준월) + 전년 동월 1개월 분리
+    const months: ItemMonthlyData[] = [];
+    let previousYearSameMonth: ItemMonthlyData | null = null;
+    const chartStartMonth = getMonthBeforeYYYYMM(refMonth as string, 11);
 
     rows.forEach((row) => {
       const month = row.YYMM;
@@ -164,18 +188,17 @@ export default async function handler(
         stock_amt: row.STOCK_AMT,
         sales_amt: row.SALES_AMT,
       };
-
-      if (month.startsWith("2025")) {
-        currentYear.push(data);
-      } else if (month.startsWith("2024")) {
-        previousYear.push(data);
+      if (month === startMonth) {
+        previousYearSameMonth = data;
+      } else if (month >= chartStartMonth && month <= endMonth) {
+        months.push(data);
       }
     });
 
     res.status(200).json({
       item,
-      currentYear,
-      previousYear,
+      months,
+      previousYearSameMonth,
       meta: {
         brand: brand as string,
         dimensionTab: dimensionTab as string,

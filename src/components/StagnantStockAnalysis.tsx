@@ -1500,6 +1500,7 @@ export default function StagnantStockAnalysis({
           item={selectedItem}
           brand={brandCode}
           dimensionTab={dimensionTab}
+          referenceMonth={referenceMonth}
         />
       )}
     </div>

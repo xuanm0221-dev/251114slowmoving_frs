@@ -33,13 +33,14 @@ const DIMENSION_KEY_MAP: Record<DimensionTab, { salesKey: string; stockKey: stri
   },
 };
 
-// 기준월 기준으로 당해/차기 연도 계산
+// 3월 기준 당시즌/차기시즌 연도(2자리): 기준월 3~12월이면 해당연도, 1~2월이면 전년 (차트와 동일)
 function getYearConfig(targetMonth: string): { currentYear: string; nextYear: string } {
-  const year = parseInt(targetMonth.slice(0, 4), 10); // 기준월의 연도 사용
-  return {
-    currentYear: String(year).slice(-2), // 기준월 연도 기준
-    nextYear: String(year + 1).slice(-2), // 기준월 연도 + 1
-  };
+  const year = parseInt(targetMonth.slice(0, 4), 10);
+  const month = parseInt(targetMonth.slice(4, 6), 10);
+  const currentSeasonYear = month >= 3 ? year : year - 1;
+  const currentYear = String(currentSeasonYear).slice(-2).padStart(2, "0");
+  const nextYear = String(currentSeasonYear + 1).slice(-2).padStart(2, "0");
+  return { currentYear, nextYear };
 }
 
 // 전월 계산 함수 (YYYYMM 형식)
