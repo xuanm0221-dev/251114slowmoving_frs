@@ -2,16 +2,16 @@
   "brands": {
     "MLB": {
       "2025.12": {
-        "Shoes": 163572560,
-        "Headwear": 2463230,
-        "Bag": 8872710,
-        "Acc_etc": 0
+        "Shoes": 343900733,
+        "Headwear": 83689563,
+        "Bag": 88469560,
+        "Acc_etc": 4798481
       },
       "2026.01": {
-        "Shoes": 0,
-        "Headwear": 0,
-        "Bag": 0,
-        "Acc_etc": 0
+        "Shoes": 407848480,
+        "Headwear": 170781401,
+        "Bag": 56508505,
+        "Acc_etc": 4960478
       },
       "2026.02": {
         "Shoes": 221920480,
@@ -140,7 +140,7 @@
   ],
   "metadata": {
     "MLB": {
-      "lastUpdated": "2026-02-10T23:38:32.083Z"
+      "lastUpdated": "2026-02-19T23:55:08.694Z"
     },
     "DISCOVERY": {
       "lastUpdated": "2026-02-10T23:45:29.931Z"
