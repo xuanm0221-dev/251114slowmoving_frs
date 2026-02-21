@@ -45,7 +45,7 @@ function SaveButton({
   onSave: () => void;
   onRecalc: (type: "current" | "full") => void;
   onToggleDropdown: () => void;
-  dropdownRef: React.RefObject<HTMLDivElement | null>;
+  dropdownRef: React.RefObject<HTMLDivElement>;
 }) {
   if (saved) {
     return (
@@ -291,7 +291,7 @@ export default function Navigation() {
                   onToggleDropdown={() =>
                     setOpenDropdown(openDropdown === section.key ? null : section.key)
                   }
-                  dropdownRef={{ current: dropdownRefs.current[section.key] ?? null } as React.RefObject<HTMLDivElement | null>}
+                  dropdownRef={{ current: dropdownRefs.current[section.key] ?? null } as React.RefObject<HTMLDivElement>}
                 />
               ))}
             </div>
