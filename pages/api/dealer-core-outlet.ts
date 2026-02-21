@@ -159,7 +159,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // JSON에 데이터가 있으면 JSON에서 읽기
     if (hasJsonData) {
       console.log(`[dealer-core-outlet] 기준월(${baseMonthFormatted}) JSON 파일에서 데이터를 읽습니다. (brand: ${brandName})`);
-      let response = jsonData.brands[brandName][baseMonth];
+      let response = jsonData!.brands[brandName][baseMonth];
       
       // 카테고리 필터링 (products 배열이 너무 클 수 있으므로)
       if (selectedCategory !== 'all' && response.products) {
