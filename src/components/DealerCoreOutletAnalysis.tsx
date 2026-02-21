@@ -47,6 +47,7 @@ interface ApiResponse {
     baseMonth: string;
     priorMonth: string;
     daysInMonth: number;
+    dataSource?: string;
   };
 }
 
