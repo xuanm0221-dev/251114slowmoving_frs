@@ -102,7 +102,8 @@ const getMonthsForChart = (
   if (yearTab === "24년") {
     candidateMonths = Array.from({ length: 12 }, (_, i) => `2024.${String(i + 1).padStart(2, "0")}`);
   } else if (yearTab === "25년") {
-    candidateMonths = Array.from({ length: 12 }, (_, i) => `2025.${String(i + 1).padStart(2, "0")}`);
+    // 25년: 기준월 이전 11개월 + 기준월 + 기준월 이후 6개월
+    candidateMonths = generateMonthsAroundReference(referenceMonth, 11, 6);
   } else {
     // 26년: 기준월 이전 11개월 + 기준월 + 기준월 이후 6개월
     candidateMonths = generateMonthsAroundReference(referenceMonth, 11, 6);

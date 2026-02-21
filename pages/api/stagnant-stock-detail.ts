@@ -57,7 +57,6 @@ function buildMonthlyDetailQuery(
         TO_CHAR(sale_dt, 'YYYYMM') AS sale_ym,
         SUM(tag_amt) AS sales_amt
       FROM fnf.chn.dw_sale s
-      LEFT JOIN fnf.sap_fnf.mst_prdt p ON s.prdt_cd = p.prdt_cd
       WHERE s.prdt_cd = '${prdt_cd}'
         AND s.brd_cd = '${brand}'
         AND TO_CHAR(sale_dt, 'YYYYMM') >= '${startMonth}'
@@ -69,7 +68,7 @@ function buildMonthlyDetailQuery(
     monthly_stock AS (
       SELECT 
         yymm,
-        SUM(stock_tag_amt_expected) AS stock_amt
+        SUM(COALESCE(stock_tag_amt_insp, 0) + COALESCE(stock_tag_amt_frozen, 0) + COALESCE(stock_tag_amt_expected, 0)) AS stock_amt
       FROM fnf.chn.dw_stock_m
       WHERE prdt_cd = '${prdt_cd}'
         AND brd_cd = '${brand}'
@@ -117,7 +116,7 @@ function buildYoyCompareQuery(
         COALESCE(sl.sales_amt, 0) AS sales_amt
       FROM (
         SELECT 
-          SUM(stock_tag_amt_expected) AS stock_amt,
+          SUM(COALESCE(stock_tag_amt_insp, 0) + COALESCE(stock_tag_amt_frozen, 0) + COALESCE(stock_tag_amt_expected, 0)) AS stock_amt,
           SUM(stock_qty_expected) AS stock_qty
         FROM fnf.chn.dw_stock_m
         WHERE prdt_cd = '${prdt_cd}'
@@ -141,7 +140,7 @@ function buildYoyCompareQuery(
         COALESCE(sl.sales_amt, 0) AS sales_amt
       FROM (
         SELECT 
-          SUM(stock_tag_amt_expected) AS stock_amt,
+          SUM(COALESCE(stock_tag_amt_insp, 0) + COALESCE(stock_tag_amt_frozen, 0) + COALESCE(stock_tag_amt_expected, 0)) AS stock_amt,
           SUM(stock_qty_expected) AS stock_qty
         FROM fnf.chn.dw_stock_m
         WHERE prdt_cd = '${prdt_cd}'
@@ -176,19 +175,25 @@ function buildYoyCompareQuery(
 // 품번 기본 정보 쿼리
 function buildProductInfoQuery(brand: string, prdt_cd: string): string {
   return `
+    WITH acc_item_map AS (
+      SELECT DISTINCT ITEM, PRDT_KIND_NM_ENG
+      FROM FNF.PRCS.DB_PRDT
+      WHERE PARENT_PRDT_KIND_NM_ENG = 'ACC'
+    )
     SELECT 
-      prdt_cd,
-      prdt_nm,
-      SUBSTR(prdt_cd, 2, 3) AS season,
+      m.prdt_cd,
+      m.prdt_nm,
+      SUBSTR(m.prdt_cd, 2, 3) AS season,
       CASE
-        WHEN prdt_hrrc2_nm = 'Shoes' THEN '신발'
-        WHEN prdt_hrrc2_nm = 'Headwear' THEN '모자'
-        WHEN prdt_hrrc2_nm = 'Bag' THEN '가방'
-        WHEN prdt_hrrc2_nm = 'Acc_etc' THEN '기타'
-        ELSE prdt_hrrc2_nm
+        WHEN db.PRDT_KIND_NM_ENG = 'Shoes' THEN '신발'
+        WHEN db.PRDT_KIND_NM_ENG = 'Headwear' THEN '모자'
+        WHEN db.PRDT_KIND_NM_ENG = 'Bag' THEN '가방'
+        WHEN db.PRDT_KIND_NM_ENG = 'Acc_etc' THEN '기타'
+        ELSE db.PRDT_KIND_NM_ENG
       END AS mid_category_kr
-    FROM fnf.sap_fnf.mst_prdt
-    WHERE prdt_cd = '${prdt_cd}'
+    FROM fnf.sap_fnf.mst_prdt m
+    LEFT JOIN acc_item_map db ON SUBSTR(m.prdt_cd, 7, 2) = db.ITEM
+    WHERE m.prdt_cd = '${prdt_cd}'
     LIMIT 1
   `;
 }

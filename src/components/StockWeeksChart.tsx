@@ -88,14 +88,42 @@ export default function StockWeeksChart({
     return generateMonthsAroundReference(referenceMonth, 11, 6);
   }, [referenceMonth]);
 
-  // 단일 아이템 차트 데이터: props로 받은 데이터 그대로 사용
+  // 단일 아이템 차트 데이터: 대리상은 기준월까지만 표시
   const singleItemChartData = useMemo(() => {
-    return chartData;
-  }, [chartData]);
+    if (!chartData) return [];
+    
+    // 기준월을 YYYYMM 형식으로 변환
+    const [refYear, refMonth] = referenceMonth.split(".").map(Number);
+    const refYyyymm = `${refYear}${String(refMonth).padStart(2, "0")}`;
+    
+    return chartData.map((point) => {
+      // 월 레이블에서 실제 월 추출 (예: "25.11" 또는 "26.01(F)")
+      const monthLabel = point.month;
+      const monthStr = monthLabel.replace("(F)", "").trim();
+      const [yearShort, month] = monthStr.split(".");
+      const year = yearShort.length === 2 ? Number(`20${yearShort}`) : Number(yearShort);
+      const yyyymm = `${year}${String(month).padStart(2, "0")}`;
+      
+      // 기준월 이후면 대리상 데이터를 null로 설정
+      if (parseInt(yyyymm) > parseInt(refYyyymm)) {
+        return {
+          ...point,
+          대리상: null,
+        };
+      }
+      
+      return point;
+    });
+  }, [chartData, referenceMonth]);
 
   // 모든 아이템 차트 데이터 생성 (각 아이템별로 computeStockWeeksForChart 사용)
+  // 대리상은 기준월까지만 표시
   const allItemsChartData = useMemo(() => {
     if (!showAllItems || !allInventoryData || !allSalesData) return [];
+
+    // 기준월을 YYYYMM 형식으로 변환
+    const [refYear, refMonth] = referenceMonth.split(".").map(Number);
+    const refYyyymm = `${refYear}${String(refMonth).padStart(2, "0")}`;
 
     // 각 아이템별로 주수 데이터 계산
     const itemChartDataMap: Record<ItemTab, StockWeeksChartPoint[]> = {} as Record<ItemTab, StockWeeksChartPoint[]>;
@@ -127,6 +155,10 @@ export default function StockWeeksChart({
         ? `${yearShort}.${monthStr}(F)`
         : `${yearShort}.${monthStr}`;
       
+      // 기준월 이후인지 확인
+      const monthYyyymm = `${yearStr}${monthStr}`;
+      const isAfterReferenceMonth = parseInt(monthYyyymm) > parseInt(refYyyymm);
+      
       const dataPoint: Record<string, string | number | null> = {
         month: monthLabel,
       };
@@ -135,7 +167,10 @@ export default function StockWeeksChart({
         const chartData = itemChartDataMap[itemTab];
         if (chartData && chartData[index]) {
           dataPoint[`${ITEM_LABELS[itemTab]}_합계`] = chartData[index].합계;
-          dataPoint[`${ITEM_LABELS[itemTab]}_대리상`] = chartData[index].대리상;
+          // 대리상은 기준월 이후면 null로 설정
+          dataPoint[`${ITEM_LABELS[itemTab]}_대리상`] = isAfterReferenceMonth 
+            ? null 
+            : chartData[index].대리상;
         } else {
           dataPoint[`${ITEM_LABELS[itemTab]}_합계`] = null;
           dataPoint[`${ITEM_LABELS[itemTab]}_대리상`] = null;
@@ -144,7 +179,7 @@ export default function StockWeeksChart({
 
       return dataPoint;
     });
-  }, [showAllItems, allInventoryData, allSalesData, daysInMonth, productTypeTab, stockWeekWindow]);
+  }, [showAllItems, allInventoryData, allSalesData, daysInMonth, productTypeTab, stockWeekWindow, referenceMonth, chartMonths]);
 
   const colors = ITEM_COLORS[selectedTab];
   const itemLabel = ITEM_LABELS[selectedTab];

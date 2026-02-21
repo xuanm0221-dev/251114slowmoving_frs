@@ -99,24 +99,30 @@ export default async function handler(
 
     // 품번 기본 정보 + 월별 데이터 조회
     const query = `
-      WITH stock_data AS (
+      WITH acc_item_map AS (
+        SELECT DISTINCT ITEM, PRDT_KIND_NM_ENG
+        FROM FNF.PRCS.DB_PRDT
+        WHERE PARENT_PRDT_KIND_NM_ENG = 'ACC'
+      ),
+      stock_data AS (
         SELECT 
           ${stockDimKey} AS dimension_key,
           a.yymm,
           MAX(a.prdt_cd) AS prdt_cd,
           MAX(b.prdt_nm) AS prdt_nm,
           MAX(CASE
-            WHEN b.prdt_hrrc2_nm = 'Shoes' THEN '신발'
-            WHEN b.prdt_hrrc2_nm = 'Headwear' THEN '모자'
-            WHEN b.prdt_hrrc2_nm = 'Bag' THEN '가방'
-            WHEN b.prdt_hrrc2_nm = 'Acc_etc' THEN '기타'
-            ELSE b.prdt_hrrc2_nm
+            WHEN db.PRDT_KIND_NM_ENG = 'Shoes' THEN '신발'
+            WHEN db.PRDT_KIND_NM_ENG = 'Headwear' THEN '모자'
+            WHEN db.PRDT_KIND_NM_ENG = 'Bag' THEN '가방'
+            WHEN db.PRDT_KIND_NM_ENG = 'Acc_etc' THEN '기타'
+            ELSE db.PRDT_KIND_NM_ENG
           END) AS mid_category_kr,
           MAX(SUBSTR(a.prdt_cd, 2, 3)) AS season,
-          SUM(a.stock_tag_amt_expected) AS stock_amt,
+          SUM(COALESCE(a.stock_tag_amt_insp, 0) + COALESCE(a.stock_tag_amt_frozen, 0) + COALESCE(a.stock_tag_amt_expected, 0)) AS stock_amt,
           SUM(a.stock_qty_expected) AS stock_qty
         FROM fnf.chn.dw_stock_m a
         LEFT JOIN fnf.sap_fnf.mst_prdt b ON a.prdt_cd = b.prdt_cd
+        LEFT JOIN acc_item_map db ON SUBSTR(a.prdt_cd, 7, 2) = db.ITEM
         WHERE a.brd_cd = '${brand}'
           AND ${stockWhereCondition}
           AND a.yymm >= '${startMonth}'

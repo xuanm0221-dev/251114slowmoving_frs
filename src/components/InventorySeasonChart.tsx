@@ -18,6 +18,9 @@ import {
 import type { Brand } from "@/types/sales";
 import { BRAND_CODE_MAP, DIMENSION_TABS } from "@/types/stagnantStock";
 import type { DimensionTab } from "@/types/stagnantStock";
+
+// 차트에서 사용할 단위 탭 목록 (컬러&사이즈만)
+const CHART_DIMENSION_TABS: DimensionTab[] = ["컬러&사이즈"];
 import { useReferenceMonth } from "@/contexts/ReferenceMonthContext";
 
 // 아이템 필터 타입
@@ -145,18 +148,23 @@ const YoYTooltip = ({ active, payload, label, data2024, data2025 }: YoYTooltipPr
 
   if (!curr) return null;
 
-  const monthNum = parseInt(curr.month.slice(-2));
-  const showPrevData = monthNum >= 6; // 6월 이상만 전년 데이터 표시 (24년 1~5월 제외)
+  // 전년 데이터가 실제로 존재하는지 확인 (차트 데이터 생성 로직과 동일)
+  const showPrevData = !!prev && (prev.total_stock_amt > 0 || prev.total_sales_amt > 0);
 
   const daysInMonth = getDaysInMonth(curr.month);
   const yoy = showPrevData && prev?.total_stock_amt > 0 
     ? ((curr.total_stock_amt / prev.total_stock_amt) * 100).toFixed(1) 
     : "-";
 
+  // X축 레이블에서 연도 추출 (chartData.month 형식: "2025-12", "2026-01")
+  const [yearStr, monthStr] = chartData.month.split("-");
+  const yearShort = yearStr.slice(-2); // "2025" → "25", "2026" → "26"
+  const displayMonthNum = parseInt(monthStr);
+
   return (
     <div className="bg-white border border-gray-300 rounded-lg p-3 text-xs shadow-lg min-w-[280px]">
       <div className="font-bold text-gray-800 mb-2 border-b pb-2">
-        25년 {monthNum}월
+        {yearShort}년 {displayMonthNum}월
       </div>
       <div className="space-y-1 mb-3">
         <div className="flex justify-between">
@@ -300,10 +308,15 @@ const SalesTooltip = ({ active, payload, label, data2024, data2025 }: SalesToolt
     return `${(stock / weekSales).toFixed(1)}주`;
   };
 
+  // X축 레이블에서 연도 추출 (chartData.month 형식: "2025-12", "2026-01")
+  const [yearStr, monthStr] = chartData.month.split("-");
+  const yearShort = yearStr.slice(-2); // "2025" → "25", "2026" → "26"
+  const displayMonthNum = parseInt(monthStr);
+
   return (
     <div className="bg-white border border-gray-300 rounded-lg p-3 text-xs shadow-lg">
       <div className="font-bold text-gray-800 mb-2 pb-2 border-b">
-        25년 {parseInt(curr.month.slice(-2))}월
+        {yearShort}년 {displayMonthNum}월
       </div>
       
       <table className="w-full">
@@ -341,7 +354,7 @@ const SalesTooltip = ({ active, payload, label, data2024, data2025 }: SalesToolt
   );
 };
 
-export default function InventorySeasonChart({ brand, dimensionTab = "스타일", onDimensionTabChange, thresholdPct = 0.01, minQty = 10, currentMonthMinQty = 10, itemTab = "ACC합계", onItemTabChange }: InventorySeasonChartProps) {
+export default function InventorySeasonChart({ brand, dimensionTab = "컬러&사이즈", onDimensionTabChange, thresholdPct = 0.01, minQty = 10, currentMonthMinQty = 10, itemTab = "ACC합계", onItemTabChange }: InventorySeasonChartProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<InventorySeasonChartResponse | null>(null);
@@ -737,24 +750,7 @@ export default function InventorySeasonChart({ brand, dimensionTab = "스타일"
             (상품단위)정상,정체 재고금액 추이
           </h2>
           
-          {/* 분석 단위 탭 - iOS 세그먼트 컨트롤 스타일 */}
-          {onDimensionTabChange && (
-            <div className="flex p-1 bg-gray-100 rounded-lg">
-              {DIMENSION_TABS.map((tab) => (
-                <button
-                  key={tab}
-                  onClick={() => onDimensionTabChange(tab)}
-                  className={`px-4 py-1.5 text-sm font-medium rounded-md transition-all duration-200 ${
-                    dimensionTab === tab
-                      ? "bg-white text-gray-900 shadow-sm"
-                      : "text-gray-600 hover:text-gray-900"
-                  }`}
-                >
-                  {tab}
-                </button>
-              ))}
-            </div>
-          )}
+          {/* 분석 단위 탭 제거: 컬러&사이즈만 사용하므로 탭 표시 불필요 */}
           
           {/* 아이템 필터 탭 */}
           {onItemTabChange && (

@@ -555,6 +555,7 @@ export default function DealerCoreOutletAnalysis({
   console.log('[DealerCoreOutlet] Component rendered/mounted with brand:', brand);
   
   const [loading, setLoading] = useState(false);
+  const [loadingMessage, setLoadingMessage] = useState<string>("데이터 로딩 중...");
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<ApiResponse | null>(null);
   // 전역 기준월 사용
@@ -588,6 +589,7 @@ export default function DealerCoreOutletAnalysis({
     console.log('[DealerCoreOutlet] Fetching data:', { brand: brandCode, baseMonth: selectedMonth });
     setLoading(true);
     setError(null);
+    setLoadingMessage("API 조회중..."); // 기본값: Snowflake 조회 중
     
     try {
       const params = new URLSearchParams({
@@ -610,6 +612,14 @@ export default function DealerCoreOutletAnalysis({
       
       const result: ApiResponse = await response.json();
       console.log('[DealerCoreOutlet] Data loaded successfully:', result);
+      
+      // 조회 소스에 따라 메시지 업데이트 (다음 조회를 위해)
+      if (result.meta?.dataSource === 'json') {
+        setLoadingMessage("JSON 파일 읽는 중...");
+      } else {
+        setLoadingMessage("API 조회중...");
+      }
+      
       setData(result);
     } catch (err) {
       console.error('[DealerCoreOutlet] Fetch error:', err);
@@ -823,7 +833,7 @@ export default function DealerCoreOutletAnalysis({
         {loading && (
           <div className="flex justify-center items-center py-12">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-500"></div>
-            <span className="ml-3 text-gray-600">데이터 로딩 중...</span>
+            <span className="ml-3 text-gray-600">{loadingMessage}</span>
           </div>
         )}
 

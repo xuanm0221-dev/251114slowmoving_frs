@@ -114,7 +114,15 @@ export default async function handler(
     });
 
     // 클라이언트 데이터: 기준월(endMonth) 이상이면서, 스냅샷 보호 구간이 아니면 반영 (기준월 수기 입력 허용)
+    // 중요: 기준월 이전 데이터는 절대 덮어쓰지 않음 (이중 보호)
     Object.keys(data).forEach((month) => {
+      // 기준월 이전 데이터는 절대 덮어쓰지 않음
+      if (month < endMonth) {
+        console.warn(`[입고예정 저장] 기준월(${endMonth}) 이전 데이터(${month})는 보호되어 덮어쓰지 않습니다.`);
+        return;
+      }
+      
+      // 기준월 이상이면서, 스냅샷 보호 구간이 아니면 반영
       if (month >= endMonth && (month > protectedMonth || protectedMonth === endMonth)) {
         mergedData[month] = data[month];
       }

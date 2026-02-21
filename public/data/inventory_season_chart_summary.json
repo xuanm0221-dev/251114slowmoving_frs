@@ -1,0 +1,3766 @@
+{
+  "brands": {
+    "M": {
+      "202312": {
+        "month": "202312",
+        "정체재고": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "과시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "차기시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당월수량미달": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "total_stock_amt": 0,
+        "total_sales_amt": 0
+      },
+      "202401": {
+        "month": "202401",
+        "정체재고": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "과시즌": {
+          "stock_amt": 897431749,
+          "sales_amt": 134618154
+        },
+        "당시즌": {
+          "stock_amt": 1246133838,
+          "sales_amt": 157962583
+        },
+        "차기시즌": {
+          "stock_amt": 1217661340,
+          "sales_amt": 78765498
+        },
+        "당월수량미달": {
+          "stock_amt": 267635,
+          "sales_amt": 75601
+        },
+        "total_stock_amt": 3361494562,
+        "total_sales_amt": 371421836
+      },
+      "202402": {
+        "month": "202402",
+        "정체재고": {
+          "stock_amt": 29637608,
+          "sales_amt": 10519478
+        },
+        "과시즌": {
+          "stock_amt": 119367561,
+          "sales_amt": 102479385
+        },
+        "당시즌": {
+          "stock_amt": 270162361,
+          "sales_amt": 148244697
+        },
+        "차기시즌": {
+          "stock_amt": 447637087,
+          "sales_amt": 136741360
+        },
+        "당월수량미달": {
+          "stock_amt": 12552546,
+          "sales_amt": 3674485
+        },
+        "total_stock_amt": 879357163,
+        "total_sales_amt": 401659405
+      },
+      "202403": {
+        "month": "202403",
+        "정체재고": {
+          "stock_amt": 138901854,
+          "sales_amt": 23644826
+        },
+        "과시즌": {
+          "stock_amt": 591526179,
+          "sales_amt": 203501050
+        },
+        "당시즌": {
+          "stock_amt": 638501580,
+          "sales_amt": 121508107
+        },
+        "차기시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당월수량미달": {
+          "stock_amt": 453658,
+          "sales_amt": 1348201
+        },
+        "total_stock_amt": 1369383271,
+        "total_sales_amt": 350002184
+      },
+      "202404": {
+        "month": "202404",
+        "정체재고": {
+          "stock_amt": 39640953,
+          "sales_amt": 9258227
+        },
+        "과시즌": {
+          "stock_amt": 282589674,
+          "sales_amt": 186236646
+        },
+        "당시즌": {
+          "stock_amt": 207175081,
+          "sales_amt": 119225838
+        },
+        "차기시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당월수량미달": {
+          "stock_amt": 598744,
+          "sales_amt": 3906119
+        },
+        "total_stock_amt": 530004452,
+        "total_sales_amt": 318626830
+      },
+      "202405": {
+        "month": "202405",
+        "정체재고": {
+          "stock_amt": 35373933,
+          "sales_amt": 6471490
+        },
+        "과시즌": {
+          "stock_amt": 218069212,
+          "sales_amt": 191368747
+        },
+        "당시즌": {
+          "stock_amt": 237104213,
+          "sales_amt": 129746058
+        },
+        "차기시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당월수량미달": {
+          "stock_amt": 566687,
+          "sales_amt": 4833440
+        },
+        "total_stock_amt": 491114045,
+        "total_sales_amt": 332419735
+      },
+      "202406": {
+        "month": "202406",
+        "정체재고": {
+          "stock_amt": 717059960,
+          "sales_amt": 40950844
+        },
+        "과시즌": {
+          "stock_amt": 1137271029,
+          "sales_amt": 143409707
+        },
+        "당시즌": {
+          "stock_amt": 1303865064,
+          "sales_amt": 122059718
+        },
+        "차기시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당월수량미달": {
+          "stock_amt": 1322199,
+          "sales_amt": 118381
+        },
+        "total_stock_amt": 3159518252,
+        "total_sales_amt": 306538650
+      },
+      "202407": {
+        "month": "202407",
+        "정체재고": {
+          "stock_amt": 1094974646,
+          "sales_amt": 54553875
+        },
+        "과시즌": {
+          "stock_amt": 689443521,
+          "sales_amt": 83454678
+        },
+        "당시즌": {
+          "stock_amt": 1718291873,
+          "sales_amt": 131237514
+        },
+        "차기시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당월수량미달": {
+          "stock_amt": 2255884,
+          "sales_amt": 93408
+        },
+        "total_stock_amt": 3504965924,
+        "total_sales_amt": 269339475
+      },
+      "202408": {
+        "month": "202408",
+        "정체재고": {
+          "stock_amt": 952922902,
+          "sales_amt": 59894979
+        },
+        "과시즌": {
+          "stock_amt": 716332387,
+          "sales_amt": 100356139
+        },
+        "당시즌": {
+          "stock_amt": 1730149327,
+          "sales_amt": 171448713
+        },
+        "차기시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당월수량미달": {
+          "stock_amt": 319349,
+          "sales_amt": 45203
+        },
+        "total_stock_amt": 3399723965,
+        "total_sales_amt": 331745034
+      },
+      "202409": {
+        "month": "202409",
+        "정체재고": {
+          "stock_amt": 926154954,
+          "sales_amt": 52648470
+        },
+        "과시즌": {
+          "stock_amt": 626611021,
+          "sales_amt": 87216084
+        },
+        "당시즌": {
+          "stock_amt": 1696624983,
+          "sales_amt": 164181832
+        },
+        "차기시즌": {
+          "stock_amt": 63328071,
+          "sales_amt": 254659
+        },
+        "당월수량미달": {
+          "stock_amt": 350667,
+          "sales_amt": 19387
+        },
+        "total_stock_amt": 3313069696,
+        "total_sales_amt": 304320432
+      },
+      "202410": {
+        "month": "202410",
+        "정체재고": {
+          "stock_amt": 695531146,
+          "sales_amt": 60312595
+        },
+        "과시즌": {
+          "stock_amt": 752238416,
+          "sales_amt": 130315919
+        },
+        "당시즌": {
+          "stock_amt": 1570970032,
+          "sales_amt": 214924012
+        },
+        "차기시즌": {
+          "stock_amt": 70068431,
+          "sales_amt": 2624176
+        },
+        "당월수량미달": {
+          "stock_amt": 348370,
+          "sales_amt": 27998
+        },
+        "total_stock_amt": 3089156395,
+        "total_sales_amt": 408204700
+      },
+      "202411": {
+        "month": "202411",
+        "정체재고": {
+          "stock_amt": 647636413,
+          "sales_amt": 50794141
+        },
+        "과시즌": {
+          "stock_amt": 665792227,
+          "sales_amt": 116568360
+        },
+        "당시즌": {
+          "stock_amt": 1455193494,
+          "sales_amt": 202650432
+        },
+        "차기시즌": {
+          "stock_amt": 175818222,
+          "sales_amt": 4632704
+        },
+        "당월수량미달": {
+          "stock_amt": 343881,
+          "sales_amt": 13139
+        },
+        "total_stock_amt": 2944784237,
+        "total_sales_amt": 374658776
+      },
+      "202412": {
+        "month": "202412",
+        "정체재고": {
+          "stock_amt": 666741146,
+          "sales_amt": 45727633
+        },
+        "과시즌": {
+          "stock_amt": 584799340,
+          "sales_amt": 85858830
+        },
+        "당시즌": {
+          "stock_amt": 1282078716,
+          "sales_amt": 177398070
+        },
+        "차기시즌": {
+          "stock_amt": 486171435,
+          "sales_amt": 20724573
+        },
+        "당월수량미달": {
+          "stock_amt": 379138,
+          "sales_amt": 34208
+        },
+        "total_stock_amt": 3020169775,
+        "total_sales_amt": 329743314
+      },
+      "202501": {
+        "month": "202501",
+        "정체재고": {
+          "stock_amt": 546258504,
+          "sales_amt": 47452901
+        },
+        "과시즌": {
+          "stock_amt": 584052486,
+          "sales_amt": 118783465
+        },
+        "당시즌": {
+          "stock_amt": 1140445352,
+          "sales_amt": 205366359
+        },
+        "차기시즌": {
+          "stock_amt": 626769587,
+          "sales_amt": 108701347
+        },
+        "당월수량미달": {
+          "stock_amt": 395082,
+          "sales_amt": 31511
+        },
+        "total_stock_amt": 2897921011,
+        "total_sales_amt": 480335583
+      },
+      "202502": {
+        "month": "202502",
+        "정체재고": {
+          "stock_amt": 634800828,
+          "sales_amt": 35459960
+        },
+        "과시즌": {
+          "stock_amt": 454980442,
+          "sales_amt": 69838937
+        },
+        "당시즌": {
+          "stock_amt": 1090292157,
+          "sales_amt": 114287242
+        },
+        "차기시즌": {
+          "stock_amt": 659927383,
+          "sales_amt": 78996820
+        },
+        "당월수량미달": {
+          "stock_amt": 446879,
+          "sales_amt": 21218
+        },
+        "total_stock_amt": 2840447689,
+        "total_sales_amt": 298604177
+      },
+      "202503": {
+        "month": "202503",
+        "정체재고": {
+          "stock_amt": 1050867768,
+          "sales_amt": 77829266
+        },
+        "과시즌": {
+          "stock_amt": 1011918465,
+          "sales_amt": 172816394
+        },
+        "당시즌": {
+          "stock_amt": 593290987,
+          "sales_amt": 100499691
+        },
+        "차기시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당월수량미달": {
+          "stock_amt": 492695,
+          "sales_amt": 12363
+        },
+        "total_stock_amt": 2656569915,
+        "total_sales_amt": 351157714
+      },
+      "202504": {
+        "month": "202504",
+        "정체재고": {
+          "stock_amt": 1101419872,
+          "sales_amt": 74147394
+        },
+        "과시즌": {
+          "stock_amt": 957971318,
+          "sales_amt": 157196870
+        },
+        "당시즌": {
+          "stock_amt": 597762400,
+          "sales_amt": 89708865
+        },
+        "차기시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당월수량미달": {
+          "stock_amt": 4879403,
+          "sales_amt": 24090
+        },
+        "total_stock_amt": 2662032993,
+        "total_sales_amt": 321077219
+      },
+      "202505": {
+        "month": "202505",
+        "정체재고": {
+          "stock_amt": 910767395,
+          "sales_amt": 70660886
+        },
+        "과시즌": {
+          "stock_amt": 993259865,
+          "sales_amt": 196267776
+        },
+        "당시즌": {
+          "stock_amt": 561312831,
+          "sales_amt": 105547672
+        },
+        "차기시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당월수량미달": {
+          "stock_amt": 4904881,
+          "sales_amt": 31622
+        },
+        "total_stock_amt": 2470244972,
+        "total_sales_amt": 372507956
+      },
+      "202506": {
+        "month": "202506",
+        "정체재고": {
+          "stock_amt": 1045396567,
+          "sales_amt": 64125868
+        },
+        "과시즌": {
+          "stock_amt": 890540174,
+          "sales_amt": 138061674
+        },
+        "당시즌": {
+          "stock_amt": 970304483,
+          "sales_amt": 87456021
+        },
+        "차기시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당월수량미달": {
+          "stock_amt": 4896046,
+          "sales_amt": 24583
+        },
+        "total_stock_amt": 2911137270,
+        "total_sales_amt": 289668146
+      },
+      "202507": {
+        "month": "202507",
+        "정체재고": {
+          "stock_amt": 1041019555,
+          "sales_amt": 65948458
+        },
+        "과시즌": {
+          "stock_amt": 896131922,
+          "sales_amt": 124523571
+        },
+        "당시즌": {
+          "stock_amt": 1345773274,
+          "sales_amt": 101943698
+        },
+        "차기시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당월수량미달": {
+          "stock_amt": 6798612,
+          "sales_amt": 9119
+        },
+        "total_stock_amt": 3289723363,
+        "total_sales_amt": 292424846
+      },
+      "202508": {
+        "month": "202508",
+        "정체재고": {
+          "stock_amt": 1032838018,
+          "sales_amt": 71777192
+        },
+        "과시즌": {
+          "stock_amt": 933033599,
+          "sales_amt": 125941150
+        },
+        "당시즌": {
+          "stock_amt": 1879090163,
+          "sales_amt": 137688485
+        },
+        "차기시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당월수량미달": {
+          "stock_amt": 5048220,
+          "sales_amt": 15753
+        },
+        "total_stock_amt": 3850010000,
+        "total_sales_amt": 335422580
+      },
+      "202509": {
+        "month": "202509",
+        "정체재고": {
+          "stock_amt": 981756491,
+          "sales_amt": 63394825
+        },
+        "과시즌": {
+          "stock_amt": 878528878,
+          "sales_amt": 106689026
+        },
+        "당시즌": {
+          "stock_amt": 2036424475,
+          "sales_amt": 135053156
+        },
+        "차기시즌": {
+          "stock_amt": 201979205,
+          "sales_amt": 1400770
+        },
+        "당월수량미달": {
+          "stock_amt": 4885835,
+          "sales_amt": 6815
+        },
+        "total_stock_amt": 4103574884,
+        "total_sales_amt": 306544592
+      },
+      "202510": {
+        "month": "202510",
+        "정체재고": {
+          "stock_amt": 816835052,
+          "sales_amt": 77499636
+        },
+        "과시즌": {
+          "stock_amt": 1075423321,
+          "sales_amt": 169332895
+        },
+        "당시즌": {
+          "stock_amt": 2000508588,
+          "sales_amt": 191387770
+        },
+        "차기시즌": {
+          "stock_amt": 375152869,
+          "sales_amt": 13272549
+        },
+        "당월수량미달": {
+          "stock_amt": 4900052,
+          "sales_amt": 12136
+        },
+        "total_stock_amt": 4272819882,
+        "total_sales_amt": 451504986
+      },
+      "202511": {
+        "month": "202511",
+        "정체재고": {
+          "stock_amt": 854804339,
+          "sales_amt": 67695909
+        },
+        "과시즌": {
+          "stock_amt": 1101426294,
+          "sales_amt": 124264642
+        },
+        "당시즌": {
+          "stock_amt": 1948107302,
+          "sales_amt": 165173775
+        },
+        "차기시즌": {
+          "stock_amt": 428786724,
+          "sales_amt": 19600644
+        },
+        "당월수량미달": {
+          "stock_amt": 514113,
+          "sales_amt": 8773
+        },
+        "total_stock_amt": 4333638772,
+        "total_sales_amt": 376743743
+      },
+      "202512": {
+        "month": "202512",
+        "정체재고": {
+          "stock_amt": 788569274,
+          "sales_amt": 63000591
+        },
+        "과시즌": {
+          "stock_amt": 981253601,
+          "sales_amt": 103271979
+        },
+        "당시즌": {
+          "stock_amt": 1825248378,
+          "sales_amt": 158921673
+        },
+        "차기시즌": {
+          "stock_amt": 808580155,
+          "sales_amt": 23379680
+        },
+        "당월수량미달": {
+          "stock_amt": 518970,
+          "sales_amt": 12468
+        },
+        "total_stock_amt": 4404170378,
+        "total_sales_amt": 348586391
+      },
+      "202601": {
+        "month": "202601",
+        "정체재고": {
+          "stock_amt": 661351526,
+          "sales_amt": 49142713
+        },
+        "과시즌": {
+          "stock_amt": 932959992,
+          "sales_amt": 119705406
+        },
+        "당시즌": {
+          "stock_amt": 1700593111,
+          "sales_amt": 171299939
+        },
+        "차기시즌": {
+          "stock_amt": 1208218912,
+          "sales_amt": 74635279
+        },
+        "당월수량미달": {
+          "stock_amt": 540268,
+          "sales_amt": 9216
+        },
+        "total_stock_amt": 4503663809,
+        "total_sales_amt": 414792553
+      }
+    },
+    "I": {
+      "202312": {
+        "month": "202312",
+        "정체재고": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "과시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "차기시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당월수량미달": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "total_stock_amt": 0,
+        "total_sales_amt": 0
+      },
+      "202401": {
+        "month": "202401",
+        "정체재고": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "과시즌": {
+          "stock_amt": 41868407,
+          "sales_amt": 3062680
+        },
+        "당시즌": {
+          "stock_amt": 73827351,
+          "sales_amt": 10987364
+        },
+        "차기시즌": {
+          "stock_amt": 97238846,
+          "sales_amt": 5620101
+        },
+        "당월수량미달": {
+          "stock_amt": 121047,
+          "sales_amt": 17389
+        },
+        "total_stock_amt": 213055651,
+        "total_sales_amt": 19687534
+      },
+      "202402": {
+        "month": "202402",
+        "정체재고": {
+          "stock_amt": 2999045,
+          "sales_amt": 242445
+        },
+        "과시즌": {
+          "stock_amt": 2420620,
+          "sales_amt": 1254351
+        },
+        "당시즌": {
+          "stock_amt": 2642935,
+          "sales_amt": 5827056
+        },
+        "차기시즌": {
+          "stock_amt": 34867996,
+          "sales_amt": 8327298
+        },
+        "당월수량미달": {
+          "stock_amt": 264417,
+          "sales_amt": 1168800
+        },
+        "total_stock_amt": 43195013,
+        "total_sales_amt": 16819950
+      },
+      "202403": {
+        "month": "202403",
+        "정체재고": {
+          "stock_amt": 8129004,
+          "sales_amt": 244641
+        },
+        "과시즌": {
+          "stock_amt": 12175629,
+          "sales_amt": 5483849
+        },
+        "당시즌": {
+          "stock_amt": 43845032,
+          "sales_amt": 6940084
+        },
+        "차기시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당월수량미달": {
+          "stock_amt": 167388,
+          "sales_amt": 485267
+        },
+        "total_stock_amt": 64317053,
+        "total_sales_amt": 13153841
+      },
+      "202404": {
+        "month": "202404",
+        "정체재고": {
+          "stock_amt": 4125589,
+          "sales_amt": 71783
+        },
+        "과시즌": {
+          "stock_amt": 4592974,
+          "sales_amt": 3353181
+        },
+        "당시즌": {
+          "stock_amt": 11553958,
+          "sales_amt": 6586079
+        },
+        "차기시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당월수량미달": {
+          "stock_amt": 252202,
+          "sales_amt": 674184
+        },
+        "total_stock_amt": 20524723,
+        "total_sales_amt": 10685227
+      },
+      "202405": {
+        "month": "202405",
+        "정체재고": {
+          "stock_amt": 2870785,
+          "sales_amt": 28260
+        },
+        "과시즌": {
+          "stock_amt": 4722159,
+          "sales_amt": 3112644
+        },
+        "당시즌": {
+          "stock_amt": 7342836,
+          "sales_amt": 7857023
+        },
+        "차기시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당월수량미달": {
+          "stock_amt": 292574,
+          "sales_amt": 854345
+        },
+        "total_stock_amt": 15228354,
+        "total_sales_amt": 11852272
+      },
+      "202406": {
+        "month": "202406",
+        "정체재고": {
+          "stock_amt": 24029681,
+          "sales_amt": 482968
+        },
+        "과시즌": {
+          "stock_amt": 78672019,
+          "sales_amt": 4377693
+        },
+        "당시즌": {
+          "stock_amt": 81793378,
+          "sales_amt": 6376618
+        },
+        "차기시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당월수량미달": {
+          "stock_amt": 123469,
+          "sales_amt": 11943
+        },
+        "total_stock_amt": 184618547,
+        "total_sales_amt": 11249222
+      },
+      "202407": {
+        "month": "202407",
+        "정체재고": {
+          "stock_amt": 81280614,
+          "sales_amt": 2407905
+        },
+        "과시즌": {
+          "stock_amt": 14903812,
+          "sales_amt": 1165449
+        },
+        "당시즌": {
+          "stock_amt": 99415611,
+          "sales_amt": 6177548
+        },
+        "차기시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당월수량미달": {
+          "stock_amt": 130674,
+          "sales_amt": 15603
+        },
+        "total_stock_amt": 195730711,
+        "total_sales_amt": 9766505
+      },
+      "202408": {
+        "month": "202408",
+        "정체재고": {
+          "stock_amt": 63106376,
+          "sales_amt": 3421150
+        },
+        "과시즌": {
+          "stock_amt": 27829639,
+          "sales_amt": 2903936
+        },
+        "당시즌": {
+          "stock_amt": 102936555,
+          "sales_amt": 10180978
+        },
+        "차기시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당월수량미달": {
+          "stock_amt": 127445,
+          "sales_amt": 25261
+        },
+        "total_stock_amt": 194000015,
+        "total_sales_amt": 16531325
+      },
+      "202409": {
+        "month": "202409",
+        "정체재고": {
+          "stock_amt": 65027812,
+          "sales_amt": 2587632
+        },
+        "과시즌": {
+          "stock_amt": 20868918,
+          "sales_amt": 1942393
+        },
+        "당시즌": {
+          "stock_amt": 100901408,
+          "sales_amt": 8691036
+        },
+        "차기시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당월수량미달": {
+          "stock_amt": 135226,
+          "sales_amt": 9704
+        },
+        "total_stock_amt": 186933364,
+        "total_sales_amt": 13230765
+      },
+      "202410": {
+        "month": "202410",
+        "정체재고": {
+          "stock_amt": 50557981,
+          "sales_amt": 2393440
+        },
+        "과시즌": {
+          "stock_amt": 28272181,
+          "sales_amt": 2973628
+        },
+        "당시즌": {
+          "stock_amt": 89447309,
+          "sales_amt": 9936785
+        },
+        "차기시즌": {
+          "stock_amt": 3663791,
+          "sales_amt": 11855
+        },
+        "당월수량미달": {
+          "stock_amt": 2164198,
+          "sales_amt": 8163
+        },
+        "total_stock_amt": 174105460,
+        "total_sales_amt": 15323871
+      },
+      "202411": {
+        "month": "202411",
+        "정체재고": {
+          "stock_amt": 53342697,
+          "sales_amt": 1819799
+        },
+        "과시즌": {
+          "stock_amt": 21317482,
+          "sales_amt": 2014055
+        },
+        "당시즌": {
+          "stock_amt": 82981764,
+          "sales_amt": 7512997
+        },
+        "차기시즌": {
+          "stock_amt": 14246188,
+          "sales_amt": 310762
+        },
+        "당월수량미달": {
+          "stock_amt": 135226,
+          "sales_amt": 5497
+        },
+        "total_stock_amt": 172023357,
+        "total_sales_amt": 11663110
+      },
+      "202412": {
+        "month": "202412",
+        "정체재고": {
+          "stock_amt": 50240767,
+          "sales_amt": 1854342
+        },
+        "과시즌": {
+          "stock_amt": 20342315,
+          "sales_amt": 1913064
+        },
+        "당시즌": {
+          "stock_amt": 75421087,
+          "sales_amt": 7758742
+        },
+        "차기시즌": {
+          "stock_amt": 28764131,
+          "sales_amt": 1084936
+        },
+        "당월수량미달": {
+          "stock_amt": 151914,
+          "sales_amt": 6038
+        },
+        "total_stock_amt": 174920214,
+        "total_sales_amt": 12617122
+      },
+      "202501": {
+        "month": "202501",
+        "정체재고": {
+          "stock_amt": 39447084,
+          "sales_amt": 2033184
+        },
+        "과시즌": {
+          "stock_amt": 25446370,
+          "sales_amt": 3610588
+        },
+        "당시즌": {
+          "stock_amt": 66798033,
+          "sales_amt": 9839768
+        },
+        "차기시즌": {
+          "stock_amt": 36281937,
+          "sales_amt": 6799027
+        },
+        "당월수량미달": {
+          "stock_amt": 151727,
+          "sales_amt": 5388
+        },
+        "total_stock_amt": 168125151,
+        "total_sales_amt": 22287955
+      },
+      "202502": {
+        "month": "202502",
+        "정체재고": {
+          "stock_amt": 50116119,
+          "sales_amt": 1495358
+        },
+        "과시즌": {
+          "stock_amt": 11856938,
+          "sales_amt": 1014655
+        },
+        "당시즌": {
+          "stock_amt": 65287096,
+          "sales_amt": 3666116
+        },
+        "차기시즌": {
+          "stock_amt": 38751493,
+          "sales_amt": 3472941
+        },
+        "당월수량미달": {
+          "stock_amt": 158518,
+          "sales_amt": 7866
+        },
+        "total_stock_amt": 166170164,
+        "total_sales_amt": 9656936
+      },
+      "202503": {
+        "month": "202503",
+        "정체재고": {
+          "stock_amt": 63985143,
+          "sales_amt": 2676299
+        },
+        "과시즌": {
+          "stock_amt": 54542771,
+          "sales_amt": 9240218
+        },
+        "당시즌": {
+          "stock_amt": 37674025,
+          "sales_amt": 4849034
+        },
+        "차기시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당월수량미달": {
+          "stock_amt": 171285,
+          "sales_amt": 11101
+        },
+        "total_stock_amt": 156373224,
+        "total_sales_amt": 16776652
+      },
+      "202504": {
+        "month": "202504",
+        "정체재고": {
+          "stock_amt": 80832251,
+          "sales_amt": 2921465
+        },
+        "과시즌": {
+          "stock_amt": 37523360,
+          "sales_amt": 3548973
+        },
+        "당시즌": {
+          "stock_amt": 33968339,
+          "sales_amt": 4993377
+        },
+        "차기시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당월수량미달": {
+          "stock_amt": 168412,
+          "sales_amt": 8635
+        },
+        "total_stock_amt": 152492362,
+        "total_sales_amt": 11472450
+      },
+      "202505": {
+        "month": "202505",
+        "정체재고": {
+          "stock_amt": 71258123,
+          "sales_amt": 2879214
+        },
+        "과시즌": {
+          "stock_amt": 37169454,
+          "sales_amt": 4561357
+        },
+        "당시즌": {
+          "stock_amt": 36646827,
+          "sales_amt": 5668245
+        },
+        "차기시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당월수량미달": {
+          "stock_amt": 166593,
+          "sales_amt": 14754
+        },
+        "total_stock_amt": 145240997,
+        "total_sales_amt": 13123570
+      },
+      "202506": {
+        "month": "202506",
+        "정체재고": {
+          "stock_amt": 83108816,
+          "sales_amt": 2616567
+        },
+        "과시즌": {
+          "stock_amt": 29200332,
+          "sales_amt": 2897630
+        },
+        "당시즌": {
+          "stock_amt": 47933891,
+          "sales_amt": 4361488
+        },
+        "차기시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당월수량미달": {
+          "stock_amt": 155500,
+          "sales_amt": 2535
+        },
+        "total_stock_amt": 160398539,
+        "total_sales_amt": 9878220
+      },
+      "202507": {
+        "month": "202507",
+        "정체재고": {
+          "stock_amt": 76578389,
+          "sales_amt": 2447430
+        },
+        "과시즌": {
+          "stock_amt": 27730156,
+          "sales_amt": 4554172
+        },
+        "당시즌": {
+          "stock_amt": 63338344,
+          "sales_amt": 4181587
+        },
+        "차기시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당월수량미달": {
+          "stock_amt": 147864,
+          "sales_amt": 5881
+        },
+        "total_stock_amt": 167794753,
+        "total_sales_amt": 11189070
+      },
+      "202508": {
+        "month": "202508",
+        "정체재고": {
+          "stock_amt": 65570097,
+          "sales_amt": 2554111
+        },
+        "과시즌": {
+          "stock_amt": 32436767,
+          "sales_amt": 4918549
+        },
+        "당시즌": {
+          "stock_amt": 68819085,
+          "sales_amt": 7742450
+        },
+        "차기시즌": {
+          "stock_amt": 472012,
+          "sales_amt": 7188
+        },
+        "당월수량미달": {
+          "stock_amt": 151578,
+          "sales_amt": 5719
+        },
+        "total_stock_amt": 167449539,
+        "total_sales_amt": 15228017
+      },
+      "202509": {
+        "month": "202509",
+        "정체재고": {
+          "stock_amt": 64641795,
+          "sales_amt": 2448645
+        },
+        "과시즌": {
+          "stock_amt": 29675316,
+          "sales_amt": 3473482
+        },
+        "당시즌": {
+          "stock_amt": 64279896,
+          "sales_amt": 5445797
+        },
+        "차기시즌": {
+          "stock_amt": 1363123,
+          "sales_amt": 72059
+        },
+        "당월수량미달": {
+          "stock_amt": 165622,
+          "sales_amt": 14218
+        },
+        "total_stock_amt": 160125752,
+        "total_sales_amt": 11454201
+      },
+      "202510": {
+        "month": "202510",
+        "정체재고": {
+          "stock_amt": 54305307,
+          "sales_amt": 2562539
+        },
+        "과시즌": {
+          "stock_amt": 31332912,
+          "sales_amt": 5634386
+        },
+        "당시즌": {
+          "stock_amt": 57406172,
+          "sales_amt": 8164817
+        },
+        "차기시즌": {
+          "stock_amt": 2591513,
+          "sales_amt": 193077
+        },
+        "당월수량미달": {
+          "stock_amt": 161983,
+          "sales_amt": 6393
+        },
+        "total_stock_amt": 145797887,
+        "total_sales_amt": 16561212
+      },
+      "202511": {
+        "month": "202511",
+        "정체재고": {
+          "stock_amt": 59467440,
+          "sales_amt": 2036232
+        },
+        "과시즌": {
+          "stock_amt": 23768957,
+          "sales_amt": 3113054
+        },
+        "당시즌": {
+          "stock_amt": 54871461,
+          "sales_amt": 6449064
+        },
+        "차기시즌": {
+          "stock_amt": 11457004,
+          "sales_amt": 322369
+        },
+        "당월수량미달": {
+          "stock_amt": 169009,
+          "sales_amt": 12952
+        },
+        "total_stock_amt": 149733871,
+        "total_sales_amt": 11933671
+      },
+      "202512": {
+        "month": "202512",
+        "정체재고": {
+          "stock_amt": 58763824,
+          "sales_amt": 1945535
+        },
+        "과시즌": {
+          "stock_amt": 19662138,
+          "sales_amt": 2784813
+        },
+        "당시즌": {
+          "stock_amt": 53305342,
+          "sales_amt": 5350585
+        },
+        "차기시즌": {
+          "stock_amt": 25763704,
+          "sales_amt": 1758041
+        },
+        "당월수량미달": {
+          "stock_amt": 162710,
+          "sales_amt": 5931
+        },
+        "total_stock_amt": 157657718,
+        "total_sales_amt": 11844905
+      },
+      "202601": {
+        "month": "202601",
+        "정체재고": {
+          "stock_amt": 55192163,
+          "sales_amt": 2026274
+        },
+        "과시즌": {
+          "stock_amt": 24614065,
+          "sales_amt": 2946683
+        },
+        "당시즌": {
+          "stock_amt": 54442683,
+          "sales_amt": 5926511
+        },
+        "차기시즌": {
+          "stock_amt": 36691269,
+          "sales_amt": 3666146
+        },
+        "당월수량미달": {
+          "stock_amt": 179015,
+          "sales_amt": -1
+        },
+        "total_stock_amt": 171119195,
+        "total_sales_amt": 14565613
+      }
+    },
+    "X": {
+      "202312": {
+        "month": "202312",
+        "정체재고": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "과시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "차기시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당월수량미달": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "total_stock_amt": 0,
+        "total_sales_amt": 0
+      },
+      "202401": {
+        "month": "202401",
+        "정체재고": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "과시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "차기시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당월수량미달": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "total_stock_amt": 0,
+        "total_sales_amt": 0
+      },
+      "202402": {
+        "month": "202402",
+        "정체재고": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "과시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "차기시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당월수량미달": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "total_stock_amt": 0,
+        "total_sales_amt": 0
+      },
+      "202403": {
+        "month": "202403",
+        "정체재고": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "과시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "차기시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당월수량미달": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "total_stock_amt": 0,
+        "total_sales_amt": 0
+      },
+      "202404": {
+        "month": "202404",
+        "정체재고": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "과시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "차기시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당월수량미달": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "total_stock_amt": 0,
+        "total_sales_amt": 0
+      },
+      "202405": {
+        "month": "202405",
+        "정체재고": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "과시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "차기시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당월수량미달": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "total_stock_amt": 0,
+        "total_sales_amt": 0
+      },
+      "202406": {
+        "month": "202406",
+        "정체재고": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "과시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "차기시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당월수량미달": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "total_stock_amt": 0,
+        "total_sales_amt": 0
+      },
+      "202407": {
+        "month": "202407",
+        "정체재고": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "과시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "차기시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당월수량미달": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "total_stock_amt": 0,
+        "total_sales_amt": 0
+      },
+      "202408": {
+        "month": "202408",
+        "정체재고": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "과시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "차기시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당월수량미달": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "total_stock_amt": 0,
+        "total_sales_amt": 0
+      },
+      "202409": {
+        "month": "202409",
+        "정체재고": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "과시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당시즌": {
+          "stock_amt": 2391308,
+          "sales_amt": 990
+        },
+        "차기시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당월수량미달": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "total_stock_amt": 2391308,
+        "total_sales_amt": 990
+      },
+      "202410": {
+        "month": "202410",
+        "정체재고": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "과시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당시즌": {
+          "stock_amt": 2376022,
+          "sales_amt": 28268
+        },
+        "차기시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당월수량미달": {
+          "stock_amt": 39779,
+          "sales_amt": 109
+        },
+        "total_stock_amt": 2415801,
+        "total_sales_amt": 28377
+      },
+      "202411": {
+        "month": "202411",
+        "정체재고": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "과시즌": {
+          "stock_amt": 12480,
+          "sales_amt": 0
+        },
+        "당시즌": {
+          "stock_amt": 3691183,
+          "sales_amt": 49234
+        },
+        "차기시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당월수량미달": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "total_stock_amt": 3703663,
+        "total_sales_amt": 49234
+      },
+      "202412": {
+        "month": "202412",
+        "정체재고": {
+          "stock_amt": 12480,
+          "sales_amt": 0
+        },
+        "과시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당시즌": {
+          "stock_amt": 3346781,
+          "sales_amt": 131534
+        },
+        "차기시즌": {
+          "stock_amt": 2467500,
+          "sales_amt": 0
+        },
+        "당월수량미달": {
+          "stock_amt": 972600,
+          "sales_amt": 0
+        },
+        "total_stock_amt": 6799361,
+        "total_sales_amt": 131534
+      },
+      "202501": {
+        "month": "202501",
+        "정체재고": {
+          "stock_amt": 15600,
+          "sales_amt": 0
+        },
+        "과시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당시즌": {
+          "stock_amt": 5568673,
+          "sales_amt": 135901
+        },
+        "차기시즌": {
+          "stock_amt": 5697470,
+          "sales_amt": 8650
+        },
+        "당월수량미달": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "total_stock_amt": 11281743,
+        "total_sales_amt": 144551
+      },
+      "202502": {
+        "month": "202502",
+        "정체재고": {
+          "stock_amt": 15600,
+          "sales_amt": 0
+        },
+        "과시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당시즌": {
+          "stock_amt": 5693884,
+          "sales_amt": 169351
+        },
+        "차기시즌": {
+          "stock_amt": 6268903,
+          "sales_amt": 47417
+        },
+        "당월수량미달": {
+          "stock_amt": 9150,
+          "sales_amt": 3250
+        },
+        "total_stock_amt": 11987537,
+        "total_sales_amt": 220018
+      },
+      "202503": {
+        "month": "202503",
+        "정체재고": {
+          "stock_amt": 3679403,
+          "sales_amt": -2810
+        },
+        "과시즌": {
+          "stock_amt": 3076167,
+          "sales_amt": 97064
+        },
+        "당시즌": {
+          "stock_amt": 7695362,
+          "sales_amt": 52163
+        },
+        "차기시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당월수량미달": {
+          "stock_amt": 7120,
+          "sales_amt": 0
+        },
+        "total_stock_amt": 14458052,
+        "total_sales_amt": 146417
+      },
+      "202504": {
+        "month": "202504",
+        "정체재고": {
+          "stock_amt": 3468288,
+          "sales_amt": 260
+        },
+        "과시즌": {
+          "stock_amt": 3190908,
+          "sales_amt": 209196
+        },
+        "당시즌": {
+          "stock_amt": 7382029,
+          "sales_amt": 122888
+        },
+        "차기시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당월수량미달": {
+          "stock_amt": 11040,
+          "sales_amt": 560
+        },
+        "total_stock_amt": 14052265,
+        "total_sales_amt": 332904
+      },
+      "202505": {
+        "month": "202505",
+        "정체재고": {
+          "stock_amt": 3694408,
+          "sales_amt": 510
+        },
+        "과시즌": {
+          "stock_amt": 4078845,
+          "sales_amt": 225030
+        },
+        "당시즌": {
+          "stock_amt": 8005357,
+          "sales_amt": 148696
+        },
+        "차기시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당월수량미달": {
+          "stock_amt": 11530,
+          "sales_amt": 0
+        },
+        "total_stock_amt": 15790140,
+        "total_sales_amt": 374236
+      },
+      "202506": {
+        "month": "202506",
+        "정체재고": {
+          "stock_amt": 3691118,
+          "sales_amt": 7421
+        },
+        "과시즌": {
+          "stock_amt": 3938470,
+          "sales_amt": 210430
+        },
+        "당시즌": {
+          "stock_amt": 10270485,
+          "sales_amt": 156373
+        },
+        "차기시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당월수량미달": {
+          "stock_amt": 11530,
+          "sales_amt": 890
+        },
+        "total_stock_amt": 17911603,
+        "total_sales_amt": 375114
+      },
+      "202507": {
+        "month": "202507",
+        "정체재고": {
+          "stock_amt": 4227516,
+          "sales_amt": 10072
+        },
+        "과시즌": {
+          "stock_amt": 3236237,
+          "sales_amt": 170945
+        },
+        "당시즌": {
+          "stock_amt": 12708389,
+          "sales_amt": 185254
+        },
+        "차기시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당월수량미달": {
+          "stock_amt": 10640,
+          "sales_amt": 890
+        },
+        "total_stock_amt": 20182782,
+        "total_sales_amt": 367161
+      },
+      "202508": {
+        "month": "202508",
+        "정체재고": {
+          "stock_amt": 5469612,
+          "sales_amt": 55852
+        },
+        "과시즌": {
+          "stock_amt": 1789253,
+          "sales_amt": 96421
+        },
+        "당시즌": {
+          "stock_amt": 19869598,
+          "sales_amt": 704358
+        },
+        "차기시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당월수량미달": {
+          "stock_amt": 9750,
+          "sales_amt": 890
+        },
+        "total_stock_amt": 27138213,
+        "total_sales_amt": 857521
+      },
+      "202509": {
+        "month": "202509",
+        "정체재고": {
+          "stock_amt": 6251255,
+          "sales_amt": 36736
+        },
+        "과시즌": {
+          "stock_amt": 989040,
+          "sales_amt": 36325
+        },
+        "당시즌": {
+          "stock_amt": 24049759,
+          "sales_amt": 487576
+        },
+        "차기시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당월수량미달": {
+          "stock_amt": 13810,
+          "sales_amt": 1740
+        },
+        "total_stock_amt": 31303864,
+        "total_sales_amt": 562377
+      },
+      "202510": {
+        "month": "202510",
+        "정체재고": {
+          "stock_amt": 6381056,
+          "sales_amt": 40325
+        },
+        "과시즌": {
+          "stock_amt": 760230,
+          "sales_amt": 25082
+        },
+        "당시즌": {
+          "stock_amt": 28588764,
+          "sales_amt": 394454
+        },
+        "차기시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당월수량미달": {
+          "stock_amt": 13810,
+          "sales_amt": 290
+        },
+        "total_stock_amt": 35743860,
+        "total_sales_amt": 460151
+      },
+      "202511": {
+        "month": "202511",
+        "정체재고": {
+          "stock_amt": 6390659,
+          "sales_amt": 26118
+        },
+        "과시즌": {
+          "stock_amt": 630598,
+          "sales_amt": 17979
+        },
+        "당시즌": {
+          "stock_amt": 30244003,
+          "sales_amt": 290200
+        },
+        "차기시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당월수량미달": {
+          "stock_amt": 13520,
+          "sales_amt": 290
+        },
+        "total_stock_amt": 37278780,
+        "total_sales_amt": 334587
+      },
+      "202512": {
+        "month": "202512",
+        "정체재고": {
+          "stock_amt": 6477544,
+          "sales_amt": 43246
+        },
+        "과시즌": {
+          "stock_amt": 758181,
+          "sales_amt": 46761
+        },
+        "당시즌": {
+          "stock_amt": 30872979,
+          "sales_amt": 373087
+        },
+        "차기시즌": {
+          "stock_amt": 885000,
+          "sales_amt": 0
+        },
+        "당월수량미달": {
+          "stock_amt": 13230,
+          "sales_amt": 290
+        },
+        "total_stock_amt": 39006934,
+        "total_sales_amt": 463384
+      },
+      "202601": {
+        "month": "202601",
+        "정체재고": {
+          "stock_amt": 6574127,
+          "sales_amt": 33675
+        },
+        "과시즌": {
+          "stock_amt": 710816,
+          "sales_amt": 36029
+        },
+        "당시즌": {
+          "stock_amt": 30881200,
+          "sales_amt": 420382
+        },
+        "차기시즌": {
+          "stock_amt": 2193280,
+          "sales_amt": 12710
+        },
+        "당월수량미달": {
+          "stock_amt": 12360,
+          "sales_amt": 0
+        },
+        "total_stock_amt": 40371783,
+        "total_sales_amt": 502796
+      }
+    },
+    "MLB": {
+      "202312": {
+        "month": "202312",
+        "정체재고": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "과시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "차기시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당월수량미달": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "total_stock_amt": 0,
+        "total_sales_amt": 0
+      },
+      "202401": {
+        "month": "202401",
+        "정체재고": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "과시즌": {
+          "stock_amt": 897431749,
+          "sales_amt": 134618154
+        },
+        "당시즌": {
+          "stock_amt": 1246133838,
+          "sales_amt": 157962583
+        },
+        "차기시즌": {
+          "stock_amt": 1217661340,
+          "sales_amt": 78765498
+        },
+        "당월수량미달": {
+          "stock_amt": 267635,
+          "sales_amt": 75601
+        },
+        "total_stock_amt": 3361494562,
+        "total_sales_amt": 371421836
+      },
+      "202402": {
+        "month": "202402",
+        "정체재고": {
+          "stock_amt": 29637608,
+          "sales_amt": 10519478
+        },
+        "과시즌": {
+          "stock_amt": 119367561,
+          "sales_amt": 102479385
+        },
+        "당시즌": {
+          "stock_amt": 270162361,
+          "sales_amt": 148244697
+        },
+        "차기시즌": {
+          "stock_amt": 447637087,
+          "sales_amt": 136741360
+        },
+        "당월수량미달": {
+          "stock_amt": 12552546,
+          "sales_amt": 3674485
+        },
+        "total_stock_amt": 879357163,
+        "total_sales_amt": 401659405
+      },
+      "202403": {
+        "month": "202403",
+        "정체재고": {
+          "stock_amt": 138901854,
+          "sales_amt": 23644826
+        },
+        "과시즌": {
+          "stock_amt": 591526179,
+          "sales_amt": 203501050
+        },
+        "당시즌": {
+          "stock_amt": 638501580,
+          "sales_amt": 121508107
+        },
+        "차기시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당월수량미달": {
+          "stock_amt": 453658,
+          "sales_amt": 1348201
+        },
+        "total_stock_amt": 1369383271,
+        "total_sales_amt": 350002184
+      },
+      "202404": {
+        "month": "202404",
+        "정체재고": {
+          "stock_amt": 39640953,
+          "sales_amt": 9258227
+        },
+        "과시즌": {
+          "stock_amt": 282589674,
+          "sales_amt": 186236646
+        },
+        "당시즌": {
+          "stock_amt": 207175081,
+          "sales_amt": 119225838
+        },
+        "차기시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당월수량미달": {
+          "stock_amt": 598744,
+          "sales_amt": 3906119
+        },
+        "total_stock_amt": 530004452,
+        "total_sales_amt": 318626830
+      },
+      "202405": {
+        "month": "202405",
+        "정체재고": {
+          "stock_amt": 35373933,
+          "sales_amt": 6471490
+        },
+        "과시즌": {
+          "stock_amt": 218069212,
+          "sales_amt": 191368747
+        },
+        "당시즌": {
+          "stock_amt": 237104213,
+          "sales_amt": 129746058
+        },
+        "차기시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당월수량미달": {
+          "stock_amt": 566687,
+          "sales_amt": 4833440
+        },
+        "total_stock_amt": 491114045,
+        "total_sales_amt": 332419735
+      },
+      "202406": {
+        "month": "202406",
+        "정체재고": {
+          "stock_amt": 717059960,
+          "sales_amt": 40950844
+        },
+        "과시즌": {
+          "stock_amt": 1137271029,
+          "sales_amt": 143409707
+        },
+        "당시즌": {
+          "stock_amt": 1303865064,
+          "sales_amt": 122059718
+        },
+        "차기시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당월수량미달": {
+          "stock_amt": 1322199,
+          "sales_amt": 118381
+        },
+        "total_stock_amt": 3159518252,
+        "total_sales_amt": 306538650
+      },
+      "202407": {
+        "month": "202407",
+        "정체재고": {
+          "stock_amt": 1094974646,
+          "sales_amt": 54553875
+        },
+        "과시즌": {
+          "stock_amt": 689443521,
+          "sales_amt": 83454678
+        },
+        "당시즌": {
+          "stock_amt": 1718291873,
+          "sales_amt": 131237514
+        },
+        "차기시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당월수량미달": {
+          "stock_amt": 2255884,
+          "sales_amt": 93408
+        },
+        "total_stock_amt": 3504965924,
+        "total_sales_amt": 269339475
+      },
+      "202408": {
+        "month": "202408",
+        "정체재고": {
+          "stock_amt": 952922902,
+          "sales_amt": 59894979
+        },
+        "과시즌": {
+          "stock_amt": 716332387,
+          "sales_amt": 100356139
+        },
+        "당시즌": {
+          "stock_amt": 1730149327,
+          "sales_amt": 171448713
+        },
+        "차기시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당월수량미달": {
+          "stock_amt": 319349,
+          "sales_amt": 45203
+        },
+        "total_stock_amt": 3399723965,
+        "total_sales_amt": 331745034
+      },
+      "202409": {
+        "month": "202409",
+        "정체재고": {
+          "stock_amt": 926154954,
+          "sales_amt": 52648470
+        },
+        "과시즌": {
+          "stock_amt": 626611021,
+          "sales_amt": 87216084
+        },
+        "당시즌": {
+          "stock_amt": 1696624983,
+          "sales_amt": 164181832
+        },
+        "차기시즌": {
+          "stock_amt": 63328071,
+          "sales_amt": 254659
+        },
+        "당월수량미달": {
+          "stock_amt": 350667,
+          "sales_amt": 19387
+        },
+        "total_stock_amt": 3313069696,
+        "total_sales_amt": 304320432
+      },
+      "202410": {
+        "month": "202410",
+        "정체재고": {
+          "stock_amt": 695531146,
+          "sales_amt": 60312595
+        },
+        "과시즌": {
+          "stock_amt": 752238416,
+          "sales_amt": 130315919
+        },
+        "당시즌": {
+          "stock_amt": 1570970032,
+          "sales_amt": 214924012
+        },
+        "차기시즌": {
+          "stock_amt": 70068431,
+          "sales_amt": 2624176
+        },
+        "당월수량미달": {
+          "stock_amt": 348370,
+          "sales_amt": 27998
+        },
+        "total_stock_amt": 3089156395,
+        "total_sales_amt": 408204700
+      },
+      "202411": {
+        "month": "202411",
+        "정체재고": {
+          "stock_amt": 647636413,
+          "sales_amt": 50794141
+        },
+        "과시즌": {
+          "stock_amt": 665792227,
+          "sales_amt": 116568360
+        },
+        "당시즌": {
+          "stock_amt": 1455193494,
+          "sales_amt": 202650432
+        },
+        "차기시즌": {
+          "stock_amt": 175818222,
+          "sales_amt": 4632704
+        },
+        "당월수량미달": {
+          "stock_amt": 343881,
+          "sales_amt": 13139
+        },
+        "total_stock_amt": 2944784237,
+        "total_sales_amt": 374658776
+      },
+      "202412": {
+        "month": "202412",
+        "정체재고": {
+          "stock_amt": 666741146,
+          "sales_amt": 45727633
+        },
+        "과시즌": {
+          "stock_amt": 584799340,
+          "sales_amt": 85858830
+        },
+        "당시즌": {
+          "stock_amt": 1282078716,
+          "sales_amt": 177398070
+        },
+        "차기시즌": {
+          "stock_amt": 486171435,
+          "sales_amt": 20724573
+        },
+        "당월수량미달": {
+          "stock_amt": 379138,
+          "sales_amt": 34208
+        },
+        "total_stock_amt": 3020169775,
+        "total_sales_amt": 329743314
+      },
+      "202501": {
+        "month": "202501",
+        "정체재고": {
+          "stock_amt": 546258504,
+          "sales_amt": 47452901
+        },
+        "과시즌": {
+          "stock_amt": 584052486,
+          "sales_amt": 118783465
+        },
+        "당시즌": {
+          "stock_amt": 1140445352,
+          "sales_amt": 205366359
+        },
+        "차기시즌": {
+          "stock_amt": 626769587,
+          "sales_amt": 108701347
+        },
+        "당월수량미달": {
+          "stock_amt": 395082,
+          "sales_amt": 31511
+        },
+        "total_stock_amt": 2897921011,
+        "total_sales_amt": 480335583
+      },
+      "202502": {
+        "month": "202502",
+        "정체재고": {
+          "stock_amt": 634800828,
+          "sales_amt": 35459960
+        },
+        "과시즌": {
+          "stock_amt": 454980442,
+          "sales_amt": 69838937
+        },
+        "당시즌": {
+          "stock_amt": 1090292157,
+          "sales_amt": 114287242
+        },
+        "차기시즌": {
+          "stock_amt": 659927383,
+          "sales_amt": 78996820
+        },
+        "당월수량미달": {
+          "stock_amt": 446879,
+          "sales_amt": 21218
+        },
+        "total_stock_amt": 2840447689,
+        "total_sales_amt": 298604177
+      },
+      "202503": {
+        "month": "202503",
+        "정체재고": {
+          "stock_amt": 1050867768,
+          "sales_amt": 77829266
+        },
+        "과시즌": {
+          "stock_amt": 1011918465,
+          "sales_amt": 172816394
+        },
+        "당시즌": {
+          "stock_amt": 593290987,
+          "sales_amt": 100499691
+        },
+        "차기시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당월수량미달": {
+          "stock_amt": 492695,
+          "sales_amt": 12363
+        },
+        "total_stock_amt": 2656569915,
+        "total_sales_amt": 351157714
+      },
+      "202504": {
+        "month": "202504",
+        "정체재고": {
+          "stock_amt": 1101419872,
+          "sales_amt": 74147394
+        },
+        "과시즌": {
+          "stock_amt": 957971318,
+          "sales_amt": 157196870
+        },
+        "당시즌": {
+          "stock_amt": 597762400,
+          "sales_amt": 89708865
+        },
+        "차기시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당월수량미달": {
+          "stock_amt": 4879403,
+          "sales_amt": 24090
+        },
+        "total_stock_amt": 2662032993,
+        "total_sales_amt": 321077219
+      },
+      "202505": {
+        "month": "202505",
+        "정체재고": {
+          "stock_amt": 910767395,
+          "sales_amt": 70660886
+        },
+        "과시즌": {
+          "stock_amt": 993259865,
+          "sales_amt": 196267776
+        },
+        "당시즌": {
+          "stock_amt": 561312831,
+          "sales_amt": 105547672
+        },
+        "차기시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당월수량미달": {
+          "stock_amt": 4904881,
+          "sales_amt": 31622
+        },
+        "total_stock_amt": 2470244972,
+        "total_sales_amt": 372507956
+      },
+      "202506": {
+        "month": "202506",
+        "정체재고": {
+          "stock_amt": 1045396567,
+          "sales_amt": 64125868
+        },
+        "과시즌": {
+          "stock_amt": 890540174,
+          "sales_amt": 138061674
+        },
+        "당시즌": {
+          "stock_amt": 970304483,
+          "sales_amt": 87456021
+        },
+        "차기시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당월수량미달": {
+          "stock_amt": 4896046,
+          "sales_amt": 24583
+        },
+        "total_stock_amt": 2911137270,
+        "total_sales_amt": 289668146
+      },
+      "202507": {
+        "month": "202507",
+        "정체재고": {
+          "stock_amt": 1041019555,
+          "sales_amt": 65948458
+        },
+        "과시즌": {
+          "stock_amt": 896131922,
+          "sales_amt": 124523571
+        },
+        "당시즌": {
+          "stock_amt": 1345773274,
+          "sales_amt": 101943698
+        },
+        "차기시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당월수량미달": {
+          "stock_amt": 6798612,
+          "sales_amt": 9119
+        },
+        "total_stock_amt": 3289723363,
+        "total_sales_amt": 292424846
+      },
+      "202508": {
+        "month": "202508",
+        "정체재고": {
+          "stock_amt": 1032838018,
+          "sales_amt": 71777192
+        },
+        "과시즌": {
+          "stock_amt": 933033599,
+          "sales_amt": 125941150
+        },
+        "당시즌": {
+          "stock_amt": 1879090163,
+          "sales_amt": 137688485
+        },
+        "차기시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당월수량미달": {
+          "stock_amt": 5048220,
+          "sales_amt": 15753
+        },
+        "total_stock_amt": 3850010000,
+        "total_sales_amt": 335422580
+      },
+      "202509": {
+        "month": "202509",
+        "정체재고": {
+          "stock_amt": 981756491,
+          "sales_amt": 63394825
+        },
+        "과시즌": {
+          "stock_amt": 878528878,
+          "sales_amt": 106689026
+        },
+        "당시즌": {
+          "stock_amt": 2036424475,
+          "sales_amt": 135053156
+        },
+        "차기시즌": {
+          "stock_amt": 201979205,
+          "sales_amt": 1400770
+        },
+        "당월수량미달": {
+          "stock_amt": 4885835,
+          "sales_amt": 6815
+        },
+        "total_stock_amt": 4103574884,
+        "total_sales_amt": 306544592
+      },
+      "202510": {
+        "month": "202510",
+        "정체재고": {
+          "stock_amt": 816835052,
+          "sales_amt": 77499636
+        },
+        "과시즌": {
+          "stock_amt": 1075423321,
+          "sales_amt": 169332895
+        },
+        "당시즌": {
+          "stock_amt": 2000508588,
+          "sales_amt": 191387770
+        },
+        "차기시즌": {
+          "stock_amt": 375152869,
+          "sales_amt": 13272549
+        },
+        "당월수량미달": {
+          "stock_amt": 4900052,
+          "sales_amt": 12136
+        },
+        "total_stock_amt": 4272819882,
+        "total_sales_amt": 451504986
+      },
+      "202511": {
+        "month": "202511",
+        "정체재고": {
+          "stock_amt": 854804339,
+          "sales_amt": 67695909
+        },
+        "과시즌": {
+          "stock_amt": 1101426294,
+          "sales_amt": 124264642
+        },
+        "당시즌": {
+          "stock_amt": 1948107302,
+          "sales_amt": 165173775
+        },
+        "차기시즌": {
+          "stock_amt": 428786724,
+          "sales_amt": 19600644
+        },
+        "당월수량미달": {
+          "stock_amt": 514113,
+          "sales_amt": 8773
+        },
+        "total_stock_amt": 4333638772,
+        "total_sales_amt": 376743743
+      }
+    },
+    "DISCOVERY": {
+      "202312": {
+        "month": "202312",
+        "정체재고": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "과시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "차기시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당월수량미달": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "total_stock_amt": 0,
+        "total_sales_amt": 0
+      },
+      "202401": {
+        "month": "202401",
+        "정체재고": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "과시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "차기시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당월수량미달": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "total_stock_amt": 0,
+        "total_sales_amt": 0
+      },
+      "202402": {
+        "month": "202402",
+        "정체재고": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "과시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "차기시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당월수량미달": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "total_stock_amt": 0,
+        "total_sales_amt": 0
+      },
+      "202403": {
+        "month": "202403",
+        "정체재고": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "과시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "차기시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당월수량미달": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "total_stock_amt": 0,
+        "total_sales_amt": 0
+      },
+      "202404": {
+        "month": "202404",
+        "정체재고": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "과시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "차기시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당월수량미달": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "total_stock_amt": 0,
+        "total_sales_amt": 0
+      },
+      "202405": {
+        "month": "202405",
+        "정체재고": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "과시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "차기시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당월수량미달": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "total_stock_amt": 0,
+        "total_sales_amt": 0
+      },
+      "202406": {
+        "month": "202406",
+        "정체재고": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "과시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "차기시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당월수량미달": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "total_stock_amt": 0,
+        "total_sales_amt": 0
+      },
+      "202407": {
+        "month": "202407",
+        "정체재고": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "과시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "차기시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당월수량미달": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "total_stock_amt": 0,
+        "total_sales_amt": 0
+      },
+      "202408": {
+        "month": "202408",
+        "정체재고": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "과시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "차기시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당월수량미달": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "total_stock_amt": 0,
+        "total_sales_amt": 0
+      },
+      "202409": {
+        "month": "202409",
+        "정체재고": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "과시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당시즌": {
+          "stock_amt": 2391308,
+          "sales_amt": 990
+        },
+        "차기시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당월수량미달": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "total_stock_amt": 2391308,
+        "total_sales_amt": 990
+      },
+      "202410": {
+        "month": "202410",
+        "정체재고": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "과시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당시즌": {
+          "stock_amt": 2376022,
+          "sales_amt": 28268
+        },
+        "차기시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당월수량미달": {
+          "stock_amt": 39779,
+          "sales_amt": 109
+        },
+        "total_stock_amt": 2415801,
+        "total_sales_amt": 28377
+      },
+      "202411": {
+        "month": "202411",
+        "정체재고": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "과시즌": {
+          "stock_amt": 12480,
+          "sales_amt": 0
+        },
+        "당시즌": {
+          "stock_amt": 3691183,
+          "sales_amt": 49234
+        },
+        "차기시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당월수량미달": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "total_stock_amt": 3703663,
+        "total_sales_amt": 49234
+      },
+      "202412": {
+        "month": "202412",
+        "정체재고": {
+          "stock_amt": 12480,
+          "sales_amt": 0
+        },
+        "과시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당시즌": {
+          "stock_amt": 3346781,
+          "sales_amt": 131534
+        },
+        "차기시즌": {
+          "stock_amt": 2467500,
+          "sales_amt": 0
+        },
+        "당월수량미달": {
+          "stock_amt": 972600,
+          "sales_amt": 0
+        },
+        "total_stock_amt": 6799361,
+        "total_sales_amt": 131534
+      },
+      "202501": {
+        "month": "202501",
+        "정체재고": {
+          "stock_amt": 15600,
+          "sales_amt": 0
+        },
+        "과시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당시즌": {
+          "stock_amt": 5568673,
+          "sales_amt": 135901
+        },
+        "차기시즌": {
+          "stock_amt": 5697470,
+          "sales_amt": 8650
+        },
+        "당월수량미달": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "total_stock_amt": 11281743,
+        "total_sales_amt": 144551
+      },
+      "202502": {
+        "month": "202502",
+        "정체재고": {
+          "stock_amt": 15600,
+          "sales_amt": 0
+        },
+        "과시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당시즌": {
+          "stock_amt": 5693884,
+          "sales_amt": 169351
+        },
+        "차기시즌": {
+          "stock_amt": 6268903,
+          "sales_amt": 47417
+        },
+        "당월수량미달": {
+          "stock_amt": 9150,
+          "sales_amt": 3250
+        },
+        "total_stock_amt": 11987537,
+        "total_sales_amt": 220018
+      },
+      "202503": {
+        "month": "202503",
+        "정체재고": {
+          "stock_amt": 3679403,
+          "sales_amt": -2810
+        },
+        "과시즌": {
+          "stock_amt": 3076167,
+          "sales_amt": 97064
+        },
+        "당시즌": {
+          "stock_amt": 7695362,
+          "sales_amt": 52163
+        },
+        "차기시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당월수량미달": {
+          "stock_amt": 7120,
+          "sales_amt": 0
+        },
+        "total_stock_amt": 14458052,
+        "total_sales_amt": 146417
+      },
+      "202504": {
+        "month": "202504",
+        "정체재고": {
+          "stock_amt": 3468288,
+          "sales_amt": 260
+        },
+        "과시즌": {
+          "stock_amt": 3190908,
+          "sales_amt": 209196
+        },
+        "당시즌": {
+          "stock_amt": 7382029,
+          "sales_amt": 122888
+        },
+        "차기시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당월수량미달": {
+          "stock_amt": 11040,
+          "sales_amt": 560
+        },
+        "total_stock_amt": 14052265,
+        "total_sales_amt": 332904
+      },
+      "202505": {
+        "month": "202505",
+        "정체재고": {
+          "stock_amt": 3694408,
+          "sales_amt": 510
+        },
+        "과시즌": {
+          "stock_amt": 4078845,
+          "sales_amt": 225030
+        },
+        "당시즌": {
+          "stock_amt": 8005357,
+          "sales_amt": 148696
+        },
+        "차기시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당월수량미달": {
+          "stock_amt": 11530,
+          "sales_amt": 0
+        },
+        "total_stock_amt": 15790140,
+        "total_sales_amt": 374236
+      },
+      "202506": {
+        "month": "202506",
+        "정체재고": {
+          "stock_amt": 3691118,
+          "sales_amt": 7421
+        },
+        "과시즌": {
+          "stock_amt": 3938470,
+          "sales_amt": 210430
+        },
+        "당시즌": {
+          "stock_amt": 10270485,
+          "sales_amt": 156373
+        },
+        "차기시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당월수량미달": {
+          "stock_amt": 11530,
+          "sales_amt": 890
+        },
+        "total_stock_amt": 17911603,
+        "total_sales_amt": 375114
+      },
+      "202507": {
+        "month": "202507",
+        "정체재고": {
+          "stock_amt": 4227516,
+          "sales_amt": 10072
+        },
+        "과시즌": {
+          "stock_amt": 3236237,
+          "sales_amt": 170945
+        },
+        "당시즌": {
+          "stock_amt": 12708389,
+          "sales_amt": 185254
+        },
+        "차기시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당월수량미달": {
+          "stock_amt": 10640,
+          "sales_amt": 890
+        },
+        "total_stock_amt": 20182782,
+        "total_sales_amt": 367161
+      },
+      "202508": {
+        "month": "202508",
+        "정체재고": {
+          "stock_amt": 5469612,
+          "sales_amt": 55852
+        },
+        "과시즌": {
+          "stock_amt": 1789253,
+          "sales_amt": 96421
+        },
+        "당시즌": {
+          "stock_amt": 19869598,
+          "sales_amt": 704358
+        },
+        "차기시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당월수량미달": {
+          "stock_amt": 9750,
+          "sales_amt": 890
+        },
+        "total_stock_amt": 27138213,
+        "total_sales_amt": 857521
+      },
+      "202509": {
+        "month": "202509",
+        "정체재고": {
+          "stock_amt": 6251255,
+          "sales_amt": 36736
+        },
+        "과시즌": {
+          "stock_amt": 989040,
+          "sales_amt": 36325
+        },
+        "당시즌": {
+          "stock_amt": 24049759,
+          "sales_amt": 487576
+        },
+        "차기시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당월수량미달": {
+          "stock_amt": 13810,
+          "sales_amt": 1740
+        },
+        "total_stock_amt": 31303864,
+        "total_sales_amt": 562377
+      },
+      "202510": {
+        "month": "202510",
+        "정체재고": {
+          "stock_amt": 6381056,
+          "sales_amt": 40325
+        },
+        "과시즌": {
+          "stock_amt": 760230,
+          "sales_amt": 25082
+        },
+        "당시즌": {
+          "stock_amt": 28588764,
+          "sales_amt": 394454
+        },
+        "차기시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당월수량미달": {
+          "stock_amt": 13810,
+          "sales_amt": 290
+        },
+        "total_stock_amt": 35743860,
+        "total_sales_amt": 460151
+      },
+      "202511": {
+        "month": "202511",
+        "정체재고": {
+          "stock_amt": 6390659,
+          "sales_amt": 26118
+        },
+        "과시즌": {
+          "stock_amt": 630598,
+          "sales_amt": 17979
+        },
+        "당시즌": {
+          "stock_amt": 30244003,
+          "sales_amt": 290200
+        },
+        "차기시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당월수량미달": {
+          "stock_amt": 13520,
+          "sales_amt": 290
+        },
+        "total_stock_amt": 37278780,
+        "total_sales_amt": 334587
+      }
+    },
+    "MLB KIDS": {
+      "202312": {
+        "month": "202312",
+        "정체재고": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "과시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "차기시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당월수량미달": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "total_stock_amt": 0,
+        "total_sales_amt": 0
+      },
+      "202401": {
+        "month": "202401",
+        "정체재고": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "과시즌": {
+          "stock_amt": 41868407,
+          "sales_amt": 3062680
+        },
+        "당시즌": {
+          "stock_amt": 73827351,
+          "sales_amt": 10987364
+        },
+        "차기시즌": {
+          "stock_amt": 97238846,
+          "sales_amt": 5620101
+        },
+        "당월수량미달": {
+          "stock_amt": 121047,
+          "sales_amt": 17389
+        },
+        "total_stock_amt": 213055651,
+        "total_sales_amt": 19687534
+      },
+      "202402": {
+        "month": "202402",
+        "정체재고": {
+          "stock_amt": 2999045,
+          "sales_amt": 242445
+        },
+        "과시즌": {
+          "stock_amt": 2420620,
+          "sales_amt": 1254351
+        },
+        "당시즌": {
+          "stock_amt": 2642935,
+          "sales_amt": 5827056
+        },
+        "차기시즌": {
+          "stock_amt": 34867996,
+          "sales_amt": 8327298
+        },
+        "당월수량미달": {
+          "stock_amt": 264417,
+          "sales_amt": 1168800
+        },
+        "total_stock_amt": 43195013,
+        "total_sales_amt": 16819950
+      },
+      "202403": {
+        "month": "202403",
+        "정체재고": {
+          "stock_amt": 8129004,
+          "sales_amt": 244641
+        },
+        "과시즌": {
+          "stock_amt": 12175629,
+          "sales_amt": 5483849
+        },
+        "당시즌": {
+          "stock_amt": 43845032,
+          "sales_amt": 6940084
+        },
+        "차기시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당월수량미달": {
+          "stock_amt": 167388,
+          "sales_amt": 485267
+        },
+        "total_stock_amt": 64317053,
+        "total_sales_amt": 13153841
+      },
+      "202404": {
+        "month": "202404",
+        "정체재고": {
+          "stock_amt": 4125589,
+          "sales_amt": 71783
+        },
+        "과시즌": {
+          "stock_amt": 4592974,
+          "sales_amt": 3353181
+        },
+        "당시즌": {
+          "stock_amt": 11553958,
+          "sales_amt": 6586079
+        },
+        "차기시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당월수량미달": {
+          "stock_amt": 252202,
+          "sales_amt": 674184
+        },
+        "total_stock_amt": 20524723,
+        "total_sales_amt": 10685227
+      },
+      "202405": {
+        "month": "202405",
+        "정체재고": {
+          "stock_amt": 2870785,
+          "sales_amt": 28260
+        },
+        "과시즌": {
+          "stock_amt": 4722159,
+          "sales_amt": 3112644
+        },
+        "당시즌": {
+          "stock_amt": 7342836,
+          "sales_amt": 7857023
+        },
+        "차기시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당월수량미달": {
+          "stock_amt": 292574,
+          "sales_amt": 854345
+        },
+        "total_stock_amt": 15228354,
+        "total_sales_amt": 11852272
+      },
+      "202406": {
+        "month": "202406",
+        "정체재고": {
+          "stock_amt": 24029681,
+          "sales_amt": 482968
+        },
+        "과시즌": {
+          "stock_amt": 78672019,
+          "sales_amt": 4377693
+        },
+        "당시즌": {
+          "stock_amt": 81793378,
+          "sales_amt": 6376618
+        },
+        "차기시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당월수량미달": {
+          "stock_amt": 123469,
+          "sales_amt": 11943
+        },
+        "total_stock_amt": 184618547,
+        "total_sales_amt": 11249222
+      },
+      "202407": {
+        "month": "202407",
+        "정체재고": {
+          "stock_amt": 81280614,
+          "sales_amt": 2407905
+        },
+        "과시즌": {
+          "stock_amt": 14903812,
+          "sales_amt": 1165449
+        },
+        "당시즌": {
+          "stock_amt": 99415611,
+          "sales_amt": 6177548
+        },
+        "차기시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당월수량미달": {
+          "stock_amt": 130674,
+          "sales_amt": 15603
+        },
+        "total_stock_amt": 195730711,
+        "total_sales_amt": 9766505
+      },
+      "202408": {
+        "month": "202408",
+        "정체재고": {
+          "stock_amt": 63106376,
+          "sales_amt": 3421150
+        },
+        "과시즌": {
+          "stock_amt": 27829639,
+          "sales_amt": 2903936
+        },
+        "당시즌": {
+          "stock_amt": 102936555,
+          "sales_amt": 10180978
+        },
+        "차기시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당월수량미달": {
+          "stock_amt": 127445,
+          "sales_amt": 25261
+        },
+        "total_stock_amt": 194000015,
+        "total_sales_amt": 16531325
+      },
+      "202409": {
+        "month": "202409",
+        "정체재고": {
+          "stock_amt": 65027812,
+          "sales_amt": 2587632
+        },
+        "과시즌": {
+          "stock_amt": 20868918,
+          "sales_amt": 1942393
+        },
+        "당시즌": {
+          "stock_amt": 100901408,
+          "sales_amt": 8691036
+        },
+        "차기시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당월수량미달": {
+          "stock_amt": 135226,
+          "sales_amt": 9704
+        },
+        "total_stock_amt": 186933364,
+        "total_sales_amt": 13230765
+      },
+      "202410": {
+        "month": "202410",
+        "정체재고": {
+          "stock_amt": 50557981,
+          "sales_amt": 2393440
+        },
+        "과시즌": {
+          "stock_amt": 28272181,
+          "sales_amt": 2973628
+        },
+        "당시즌": {
+          "stock_amt": 89447309,
+          "sales_amt": 9936785
+        },
+        "차기시즌": {
+          "stock_amt": 3663791,
+          "sales_amt": 11855
+        },
+        "당월수량미달": {
+          "stock_amt": 2164198,
+          "sales_amt": 8163
+        },
+        "total_stock_amt": 174105460,
+        "total_sales_amt": 15323871
+      },
+      "202411": {
+        "month": "202411",
+        "정체재고": {
+          "stock_amt": 53342697,
+          "sales_amt": 1819799
+        },
+        "과시즌": {
+          "stock_amt": 21317482,
+          "sales_amt": 2014055
+        },
+        "당시즌": {
+          "stock_amt": 82981764,
+          "sales_amt": 7512997
+        },
+        "차기시즌": {
+          "stock_amt": 14246188,
+          "sales_amt": 310762
+        },
+        "당월수량미달": {
+          "stock_amt": 135226,
+          "sales_amt": 5497
+        },
+        "total_stock_amt": 172023357,
+        "total_sales_amt": 11663110
+      },
+      "202412": {
+        "month": "202412",
+        "정체재고": {
+          "stock_amt": 50240767,
+          "sales_amt": 1854342
+        },
+        "과시즌": {
+          "stock_amt": 20342315,
+          "sales_amt": 1913064
+        },
+        "당시즌": {
+          "stock_amt": 75421087,
+          "sales_amt": 7758742
+        },
+        "차기시즌": {
+          "stock_amt": 28764131,
+          "sales_amt": 1084936
+        },
+        "당월수량미달": {
+          "stock_amt": 151914,
+          "sales_amt": 6038
+        },
+        "total_stock_amt": 174920214,
+        "total_sales_amt": 12617122
+      },
+      "202501": {
+        "month": "202501",
+        "정체재고": {
+          "stock_amt": 39447084,
+          "sales_amt": 2033184
+        },
+        "과시즌": {
+          "stock_amt": 25446370,
+          "sales_amt": 3610588
+        },
+        "당시즌": {
+          "stock_amt": 66798033,
+          "sales_amt": 9839768
+        },
+        "차기시즌": {
+          "stock_amt": 36281937,
+          "sales_amt": 6799027
+        },
+        "당월수량미달": {
+          "stock_amt": 151727,
+          "sales_amt": 5388
+        },
+        "total_stock_amt": 168125151,
+        "total_sales_amt": 22287955
+      },
+      "202502": {
+        "month": "202502",
+        "정체재고": {
+          "stock_amt": 50116119,
+          "sales_amt": 1495358
+        },
+        "과시즌": {
+          "stock_amt": 11856938,
+          "sales_amt": 1014655
+        },
+        "당시즌": {
+          "stock_amt": 65287096,
+          "sales_amt": 3666116
+        },
+        "차기시즌": {
+          "stock_amt": 38751493,
+          "sales_amt": 3472941
+        },
+        "당월수량미달": {
+          "stock_amt": 158518,
+          "sales_amt": 7866
+        },
+        "total_stock_amt": 166170164,
+        "total_sales_amt": 9656936
+      },
+      "202503": {
+        "month": "202503",
+        "정체재고": {
+          "stock_amt": 63985143,
+          "sales_amt": 2676299
+        },
+        "과시즌": {
+          "stock_amt": 54542771,
+          "sales_amt": 9240218
+        },
+        "당시즌": {
+          "stock_amt": 37674025,
+          "sales_amt": 4849034
+        },
+        "차기시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당월수량미달": {
+          "stock_amt": 171285,
+          "sales_amt": 11101
+        },
+        "total_stock_amt": 156373224,
+        "total_sales_amt": 16776652
+      },
+      "202504": {
+        "month": "202504",
+        "정체재고": {
+          "stock_amt": 80832251,
+          "sales_amt": 2921465
+        },
+        "과시즌": {
+          "stock_amt": 37523360,
+          "sales_amt": 3548973
+        },
+        "당시즌": {
+          "stock_amt": 33968339,
+          "sales_amt": 4993377
+        },
+        "차기시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당월수량미달": {
+          "stock_amt": 168412,
+          "sales_amt": 8635
+        },
+        "total_stock_amt": 152492362,
+        "total_sales_amt": 11472450
+      },
+      "202505": {
+        "month": "202505",
+        "정체재고": {
+          "stock_amt": 71258123,
+          "sales_amt": 2879214
+        },
+        "과시즌": {
+          "stock_amt": 37169454,
+          "sales_amt": 4561357
+        },
+        "당시즌": {
+          "stock_amt": 36646827,
+          "sales_amt": 5668245
+        },
+        "차기시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당월수량미달": {
+          "stock_amt": 166593,
+          "sales_amt": 14754
+        },
+        "total_stock_amt": 145240997,
+        "total_sales_amt": 13123570
+      },
+      "202506": {
+        "month": "202506",
+        "정체재고": {
+          "stock_amt": 83108816,
+          "sales_amt": 2616567
+        },
+        "과시즌": {
+          "stock_amt": 29200332,
+          "sales_amt": 2897630
+        },
+        "당시즌": {
+          "stock_amt": 47933891,
+          "sales_amt": 4361488
+        },
+        "차기시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당월수량미달": {
+          "stock_amt": 155500,
+          "sales_amt": 2535
+        },
+        "total_stock_amt": 160398539,
+        "total_sales_amt": 9878220
+      },
+      "202507": {
+        "month": "202507",
+        "정체재고": {
+          "stock_amt": 76578389,
+          "sales_amt": 2447430
+        },
+        "과시즌": {
+          "stock_amt": 27730156,
+          "sales_amt": 4554172
+        },
+        "당시즌": {
+          "stock_amt": 63338344,
+          "sales_amt": 4181587
+        },
+        "차기시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당월수량미달": {
+          "stock_amt": 147864,
+          "sales_amt": 5881
+        },
+        "total_stock_amt": 167794753,
+        "total_sales_amt": 11189070
+      },
+      "202508": {
+        "month": "202508",
+        "정체재고": {
+          "stock_amt": 65570097,
+          "sales_amt": 2554111
+        },
+        "과시즌": {
+          "stock_amt": 32436767,
+          "sales_amt": 4918549
+        },
+        "당시즌": {
+          "stock_amt": 68819085,
+          "sales_amt": 7742450
+        },
+        "차기시즌": {
+          "stock_amt": 472012,
+          "sales_amt": 7188
+        },
+        "당월수량미달": {
+          "stock_amt": 151578,
+          "sales_amt": 5719
+        },
+        "total_stock_amt": 167449539,
+        "total_sales_amt": 15228017
+      },
+      "202509": {
+        "month": "202509",
+        "정체재고": {
+          "stock_amt": 64641795,
+          "sales_amt": 2448645
+        },
+        "과시즌": {
+          "stock_amt": 29675316,
+          "sales_amt": 3473482
+        },
+        "당시즌": {
+          "stock_amt": 64279896,
+          "sales_amt": 5445797
+        },
+        "차기시즌": {
+          "stock_amt": 1363123,
+          "sales_amt": 72059
+        },
+        "당월수량미달": {
+          "stock_amt": 165622,
+          "sales_amt": 14218
+        },
+        "total_stock_amt": 160125752,
+        "total_sales_amt": 11454201
+      },
+      "202510": {
+        "month": "202510",
+        "정체재고": {
+          "stock_amt": 54305307,
+          "sales_amt": 2562539
+        },
+        "과시즌": {
+          "stock_amt": 31332912,
+          "sales_amt": 5634386
+        },
+        "당시즌": {
+          "stock_amt": 57406172,
+          "sales_amt": 8164817
+        },
+        "차기시즌": {
+          "stock_amt": 2591513,
+          "sales_amt": 193077
+        },
+        "당월수량미달": {
+          "stock_amt": 161983,
+          "sales_amt": 6393
+        },
+        "total_stock_amt": 145797887,
+        "total_sales_amt": 16561212
+      },
+      "202511": {
+        "month": "202511",
+        "정체재고": {
+          "stock_amt": 59467440,
+          "sales_amt": 2036232
+        },
+        "과시즌": {
+          "stock_amt": 23768957,
+          "sales_amt": 3113054
+        },
+        "당시즌": {
+          "stock_amt": 54871461,
+          "sales_amt": 6449064
+        },
+        "차기시즌": {
+          "stock_amt": 11457004,
+          "sales_amt": 322369
+        },
+        "당월수량미달": {
+          "stock_amt": 169009,
+          "sales_amt": 12952
+        },
+        "total_stock_amt": 149733871,
+        "total_sales_amt": 11933671
+      }
+    }
+  }
+}

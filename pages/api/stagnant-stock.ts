@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { runQuery } from "../../lib/snowflake";
+import { isDealerMonthClosed, readBatchJsonFile } from "../../src/lib/batchDataLoader";
 import type {
   StagnantStockResponse,
   StagnantStockItem,
@@ -84,11 +85,16 @@ function getSeasonGroup(
 // 사용 가능한 월 목록 조회 쿼리
 function buildAvailableMonthsQuery(brand: string): string {
   return `
+    WITH acc_item_map AS (
+      SELECT DISTINCT ITEM
+      FROM FNF.PRCS.DB_PRDT
+      WHERE PARENT_PRDT_KIND_NM_ENG = 'ACC'
+    )
     SELECT DISTINCT TO_CHAR(sale_dt, 'YYYYMM') AS sale_ym
     FROM fnf.chn.dw_sale s
-    LEFT JOIN fnf.sap_fnf.mst_prdt p ON s.prdt_cd = p.prdt_cd
+    LEFT JOIN acc_item_map db ON SUBSTR(s.prdt_scs_cd, 7, 2) = db.ITEM
     WHERE s.brd_cd = '${brand}'
-      AND p.prdt_hrrc1_nm = 'ACC'
+      AND db.ITEM IS NOT NULL
       AND sale_dt >= '2024-01-01'
     ORDER BY sale_ym DESC
   `;
@@ -101,14 +107,19 @@ function buildStyleStockQtyQuery(
   targetMonth: string
 ): string {
   return `
+    WITH acc_item_map AS (
+      SELECT DISTINCT ITEM
+      FROM FNF.PRCS.DB_PRDT
+      WHERE PARENT_PRDT_KIND_NM_ENG = 'ACC'
+    )
     SELECT 
       a.prdt_cd AS style,
       SUM(a.stock_qty_expected) AS current_stock_qty
     FROM fnf.chn.dw_stock_m a
-    LEFT JOIN fnf.sap_fnf.mst_prdt b ON a.prdt_cd = b.prdt_cd
+    LEFT JOIN acc_item_map db ON SUBSTR(a.prdt_scs_cd, 7, 2) = db.ITEM
     WHERE a.yymm = '${targetMonth}'
       AND a.brd_cd = '${brand}'
-      AND b.prdt_hrrc1_nm = 'ACC'
+      AND db.ITEM IS NOT NULL
     GROUP BY a.prdt_cd
   `;
 }
@@ -131,19 +142,24 @@ function buildAccountBreakdownQuery(
   
   return `
     WITH 
+    acc_item_map AS (
+      SELECT DISTINCT ITEM
+      FROM FNF.PRCS.DB_PRDT
+      WHERE PARENT_PRDT_KIND_NM_ENG = 'ACC'
+    ),
     -- FR 재고 데이터 (account_id + dimension_key 단위)
     fr_stock AS (
       SELECT 
         d.account_id,
         ${dimConfig.stockKey} AS dimension_key,
-        SUM(a.stock_tag_amt_expected) AS stock_amt,
+        SUM(COALESCE(a.stock_tag_amt_insp, 0) + COALESCE(a.stock_tag_amt_frozen, 0) + COALESCE(a.stock_tag_amt_expected, 0)) AS stock_amt,
         SUM(a.stock_qty_expected) AS stock_qty
       FROM fnf.chn.dw_stock_m a
-      LEFT JOIN fnf.sap_fnf.mst_prdt b ON a.prdt_cd = b.prdt_cd
+      LEFT JOIN acc_item_map db ON SUBSTR(a.prdt_scs_cd, 7, 2) = db.ITEM
       LEFT JOIN fnf.chn.dw_shop_wh_detail d ON a.shop_id = d.oa_map_shop_id
       WHERE a.yymm = '${targetMonth}'
         AND a.brd_cd = '${brand}'
-        AND b.prdt_hrrc1_nm = 'ACC'
+        AND db.ITEM IS NOT NULL
         AND d.fr_or_cls = 'FR'
       GROUP BY d.account_id, ${dimConfig.stockKey}
     ),
@@ -156,11 +172,11 @@ function buildAccountBreakdownQuery(
         SUM(s.tag_amt) AS tag_amt,
         SUM(COALESCE(s.sale_amt, s.tag_amt)) AS sale_amt
       FROM fnf.chn.dw_sale s
-      LEFT JOIN fnf.sap_fnf.mst_prdt p ON s.prdt_cd = p.prdt_cd
+      LEFT JOIN acc_item_map db ON SUBSTR(s.prdt_scs_cd, 7, 2) = db.ITEM
       LEFT JOIN fnf.chn.dw_shop_wh_detail d ON s.shop_id = d.oa_map_shop_id
       WHERE TO_CHAR(s.sale_dt, 'YYYYMM') = '${targetMonth}'
         AND s.brd_cd = '${brand}'
-        AND p.prdt_hrrc1_nm = 'ACC'
+        AND db.ITEM IS NOT NULL
         AND d.fr_or_cls = 'FR'
       GROUP BY d.account_id, ${dimConfig.salesKey}
     )
@@ -194,16 +210,21 @@ function buildStagnantStockQuery(
   
   return `
     WITH 
+    acc_item_map AS (
+      SELECT DISTINCT ITEM, PRDT_KIND_NM_ENG
+      FROM FNF.PRCS.DB_PRDT
+      WHERE PARENT_PRDT_KIND_NM_ENG = 'ACC'
+    ),
     -- 전월 재고 수량 집계 (정체재고 판단용)
     prev_month_stock AS (
       SELECT 
         ${dimConfig.stockKey} AS dimension_key,
         SUM(a.stock_qty_expected) AS prev_stock_qty
       FROM fnf.chn.dw_stock_m a
-      LEFT JOIN fnf.sap_fnf.mst_prdt b ON a.prdt_cd = b.prdt_cd
+      LEFT JOIN acc_item_map db ON SUBSTR(a.prdt_scs_cd, 7, 2) = db.ITEM
       WHERE a.yymm = '${prevMonth}'
         AND a.brd_cd = '${brand}'
-        AND b.prdt_hrrc1_nm = 'ACC'
+        AND db.ITEM IS NOT NULL
       GROUP BY ${dimConfig.stockKey}
     ),
     
@@ -218,20 +239,21 @@ function buildStagnantStockQuery(
         MAX(p.prdt_nm) AS prdt_nm,
         MAX(SUBSTR(s.prdt_cd, 2, 3)) AS season,
         MAX(CASE
-          WHEN p.prdt_hrrc2_nm = 'Shoes' THEN '신발'
-          WHEN p.prdt_hrrc2_nm = 'Headwear' THEN '모자'
-          WHEN p.prdt_hrrc2_nm = 'Bag' THEN '가방'
-          WHEN p.prdt_hrrc2_nm = 'Acc_etc' THEN '기타'
-          ELSE p.prdt_hrrc2_nm
+          WHEN db.PRDT_KIND_NM_ENG = 'Shoes' THEN '신발'
+          WHEN db.PRDT_KIND_NM_ENG = 'Headwear' THEN '모자'
+          WHEN db.PRDT_KIND_NM_ENG = 'Bag' THEN '가방'
+          WHEN db.PRDT_KIND_NM_ENG = 'Acc_etc' THEN '기타'
+          ELSE db.PRDT_KIND_NM_ENG
         END) AS mid_category_kr,
         SUM(s.tag_amt) AS sales_tag_amt,
         SUM(s.qty) AS sales_qty
       FROM fnf.chn.dw_sale s
       LEFT JOIN fnf.sap_fnf.mst_prdt p ON s.prdt_cd = p.prdt_cd
+      LEFT JOIN acc_item_map db ON SUBSTR(s.prdt_scs_cd, 7, 2) = db.ITEM
       LEFT JOIN fnf.chn.dw_shop_wh_detail d ON s.shop_id = d.oa_map_shop_id
       WHERE TO_CHAR(s.sale_dt, 'YYYYMM') = '${targetMonth}'
         AND s.brd_cd = '${brand}'
-        AND p.prdt_hrrc1_nm = 'ACC'
+        AND db.ITEM IS NOT NULL
         AND d.fr_or_cls IN ('FR', 'OR', 'HQ')
       GROUP BY ${dimConfig.salesKey}, d.fr_or_cls
     ),
@@ -263,20 +285,21 @@ function buildStagnantStockQuery(
         MAX(b.prdt_nm) AS prdt_nm,
         MAX(a.sesn) AS season,
         MAX(CASE
-          WHEN b.prdt_hrrc2_nm = 'Shoes' THEN '신발'
-          WHEN b.prdt_hrrc2_nm = 'Headwear' THEN '모자'
-          WHEN b.prdt_hrrc2_nm = 'Bag' THEN '가방'
-          WHEN b.prdt_hrrc2_nm = 'Acc_etc' THEN '기타'
-          ELSE b.prdt_hrrc2_nm
+          WHEN db.PRDT_KIND_NM_ENG = 'Shoes' THEN '신발'
+          WHEN db.PRDT_KIND_NM_ENG = 'Headwear' THEN '모자'
+          WHEN db.PRDT_KIND_NM_ENG = 'Bag' THEN '가방'
+          WHEN db.PRDT_KIND_NM_ENG = 'Acc_etc' THEN '기타'
+          ELSE db.PRDT_KIND_NM_ENG
         END) AS mid_category_kr,
-        SUM(a.stock_tag_amt_expected) AS stock_amt,
+        SUM(COALESCE(a.stock_tag_amt_insp, 0) + COALESCE(a.stock_tag_amt_frozen, 0) + COALESCE(a.stock_tag_amt_expected, 0)) AS stock_amt,
         SUM(a.stock_qty_expected) AS stock_qty
       FROM fnf.chn.dw_stock_m a
       LEFT JOIN fnf.sap_fnf.mst_prdt b ON a.prdt_cd = b.prdt_cd
+      LEFT JOIN acc_item_map db ON SUBSTR(a.prdt_scs_cd, 7, 2) = db.ITEM
       LEFT JOIN fnf.chn.dw_shop_wh_detail c ON a.shop_id = c.oa_map_shop_id
       WHERE a.yymm = '${targetMonth}'
         AND a.brd_cd = '${brand}'
-        AND b.prdt_hrrc1_nm = 'ACC'
+        AND db.ITEM IS NOT NULL
       GROUP BY ${dimConfig.stockKey}, COALESCE(c.fr_or_cls, 'HQ')
     ),
     
@@ -470,6 +493,205 @@ function createDetailTable(
   };
 }
 
+// 빈 응답 생성 헬퍼 함수
+function createEmptyStagnantStockResponse(
+  targetMonth: string,
+  brand: string,
+  dimensionTab: DimensionTab,
+  thresholdPct: number,
+  daysInMonth: number,
+  minQty: number,
+  currentMonthMinQty: number
+): StagnantStockResponse {
+  const { currentYear, nextYear } = getYearConfig(targetMonth);
+  const emptyItems: StagnantStockItem[] = [];
+  const emptySummaryBox = createSummaryBox("", emptyItems, 0);
+  const emptyDetailTable = createDetailTable("", "과시즌", emptyItems);
+  
+  return {
+    availableMonths: [],
+    totalSummary: { ...emptySummaryBox, title: "전체 재고" },
+    stagnantSummary: { ...emptySummaryBox, title: "정체재고" },
+    normalSummary: { ...emptySummaryBox, title: "정상재고" },
+    lowStockSummary: { ...emptySummaryBox, title: "당월수량미달" },
+    stagnantDetail: { ...emptyDetailTable, title: "정체재고 - 전체", seasonGroup: "정체재고" },
+    currentSeasonDetail: { ...emptyDetailTable, title: "당시즌 정상재고", seasonGroup: "당시즌" },
+    nextSeasonDetail: { ...emptyDetailTable, title: "차기시즌 정상재고", seasonGroup: "차기시즌" },
+    pastSeasonDetail: { ...emptyDetailTable, title: "과시즌 정상재고", seasonGroup: "과시즌" },
+    lowStockDetail: { ...emptyDetailTable, title: "당월수량미달 재고", seasonGroup: "당월수량미달" },
+    excludedStyles: [],
+    accountBreakdown: undefined,
+    meta: {
+      targetMonth,
+      brand,
+      dimensionTab,
+      thresholdPct,
+      currentYear,
+      nextYear,
+      currentMonthMinQty,
+      daysInMonth,
+    },
+  };
+}
+
+// 정체재고 분석 데이터 조회 함수 (다른 파일에서 재사용 가능)
+export async function fetchStagnantStockData(
+  brand: string,
+  targetMonth: string,
+  dimensionTab: DimensionTab = "스타일",
+  thresholdPct: number = 0.01,
+  minQty: number = 10,
+  currentMonthMinQty: number = 10,
+  includeAccountBreakdown: boolean = false,
+  ignoreMinQty: boolean = false
+): Promise<StagnantStockResponse> {
+  const thresholdRatio = thresholdPct / 100; // 0.01% → 0.0001
+  const prevMonth = getPrevMonth(targetMonth); // 전월 계산
+  const daysInMonth = getDaysInMonth(targetMonth); // 해당 월의 일수
+  const { currentYear, nextYear } = getYearConfig(targetMonth);
+
+  // 1. 사용 가능한 월 목록 조회
+  const monthsQuery = buildAvailableMonthsQuery(brand);
+  const monthsResult = await runQuery(monthsQuery);
+  const availableMonths = monthsResult.map((row: any) => row.SALE_YM);
+
+  // 2. 스타일 기준 당월수량 조회 (당월수량미달 판단용)
+  const styleStockQuery = buildStyleStockQtyQuery(brand, targetMonth);
+  const styleStockResult = await runQuery(styleStockQuery);
+  
+  // 스타일별 당월수량 맵 생성 + 당월수량미달 스타일 목록 추출
+  const styleStockQtyMap = new Map<string, number>();
+  const lowStockStyles = new Set<string>();
+  
+  styleStockResult.forEach((row: any) => {
+    const style = row.STYLE || "";
+    const qty = Number(row.CURRENT_STOCK_QTY) || 0;
+    styleStockQtyMap.set(style, qty);
+    
+    // 당월수량 < currentMonthMinQty인 스타일 추출
+    if (qty < currentMonthMinQty) {
+      lowStockStyles.add(style);
+    }
+  });
+
+  // 3. 정체재고 분석 데이터 조회 (전월 재고 수량 포함)
+  const mainQuery = buildStagnantStockQuery(brand, targetMonth, dimensionTab, thresholdRatio, prevMonth);
+  const mainResult = await runQuery(mainQuery);
+
+  // 4. 결과 변환 (채널별 데이터 포함)
+  // 변경: 당월수량미달 먼저 판단 → 나머지에 대해 기존 정체재고 로직
+  const items: StagnantStockItem[] = mainResult.map((row: any) => {
+    const season = row.SEASON || "";
+    const ratio = Number(row.RATIO) || 0;
+    const prevStockQty = Number(row.PREV_STOCK_QTY) || 0;
+    const prdtCd = row.PRDT_CD || "";
+    
+    // 1단계: 스타일 기준 당월수량미달 판단 (스타일이 lowStockStyles에 포함되면 당월수량미달)
+    const isLowStock = lowStockStyles.has(prdtCd);
+    
+    // seasonGroup 결정: 당월수량미달 먼저, 아니면 기존 로직
+    let seasonGroup: SeasonGroup;
+    if (isLowStock) {
+      seasonGroup = "당월수량미달";
+    } else {
+      // 기존 로직: 시즌 구분 먼저, 과시즌인 경우 2단계 판단
+      // ignoreMinQty: 대리상 단위 분석에서는 전월말 수량 조건 무시
+      seasonGroup = getSeasonGroup(season, ratio, thresholdRatio, currentYear, nextYear, prevStockQty, minQty, ignoreMinQty);
+    }
+    
+    // status는 seasonGroup 기반으로 결정 (정체재고이면 정체재고, 당월수량미달/기타는 정상재고)
+    const status: StockStatus = seasonGroup === "정체재고" ? "정체재고" : "정상재고";
+
+    return {
+      dimensionKey: row.DIMENSION_KEY || "",
+      prdt_cd: prdtCd,
+      prdt_nm: row.PRDT_NM || "",
+      color_cd: row.COLOR_CD,
+      size_cd: row.SIZE_CD,
+      mid_category_kr: row.MID_CATEGORY_KR || "기타",
+      season,
+      // 전체 기준 데이터
+      stock_qty: Number(row.STOCK_QTY) || 0,
+      stock_amt: Number(row.STOCK_AMT) || 0,
+      sales_tag_amt: Number(row.SALES_TAG_AMT) || 0,
+      ratio: Number(row.RATIO) || 0,
+      prev_stock_qty: prevStockQty,
+      status,
+      seasonGroup,
+      // 채널별 데이터 (FR)
+      fr_stock_amt: Number(row.FR_STOCK_AMT) || 0,
+      fr_stock_qty: Number(row.FR_STOCK_QTY) || 0,
+      fr_sales_amt: Number(row.FR_SALES_AMT) || 0,
+      // 채널별 데이터 (OR + HQ)
+      or_stock_amt: Number(row.OR_STOCK_AMT) || 0,
+      or_stock_qty: Number(row.OR_STOCK_QTY) || 0,
+      or_sales_amt: Number(row.OR_SALES_AMT) || 0,
+    };
+  });
+
+  // 5. 전체 재고금액 계산 (요약 박스의 % 계산용)
+  const totalStockAmt = items.reduce((sum, item) => sum + item.stock_amt, 0);
+
+  // 6. 정체/정상/당월수량미달 재고 분리
+  const stagnantItems = items.filter(item => item.seasonGroup === "정체재고");
+  const lowStockItems = items.filter(item => item.seasonGroup === "당월수량미달");
+  // 정상재고: 당시즌 + 차기시즌 + 과시즌 (정체재고와 당월수량미달 제외)
+  const normalItems = items.filter(item => 
+    item.seasonGroup !== "정체재고" && item.seasonGroup !== "당월수량미달"
+  );
+
+  // 7. 대리상별 FR 데이터 조회 (includeAccountBreakdown=true인 경우)
+  let accountBreakdown: AccountBreakdownItem[] | undefined;
+  if (includeAccountBreakdown) {
+    const accountQuery = buildAccountBreakdownQuery(brand, targetMonth, dimensionTab);
+    const accountResult = await runQuery(accountQuery);
+    
+    accountBreakdown = accountResult.map((row: any) => ({
+      account_id: row.ACCOUNT_ID || "(미매핑)",
+      dimensionKey: row.DIMENSION_KEY || "",
+      stock_amt: Number(row.STOCK_AMT) || 0,
+      stock_qty: Number(row.STOCK_QTY) || 0,
+      tag_amt: Number(row.TAG_AMT) || 0,
+      sale_amt: Number(row.SALE_AMT) || 0,
+    }));
+  }
+
+  // 8. 응답 생성
+  const response: StagnantStockResponse = {
+    availableMonths,
+    
+    totalSummary: createSummaryBox("전체 재고", items, totalStockAmt),
+    stagnantSummary: createSummaryBox("정체재고", stagnantItems, totalStockAmt),
+    normalSummary: createSummaryBox("정상재고", normalItems, totalStockAmt),
+    lowStockSummary: createSummaryBox("당월수량미달", lowStockItems, totalStockAmt),
+    
+    stagnantDetail: createDetailTable("정체재고 - 전체", "정체재고", items),
+    currentSeasonDetail: createDetailTable("당시즌 정상재고", "당시즌", items),
+    nextSeasonDetail: createDetailTable("차기시즌 정상재고", "차기시즌", items),
+    pastSeasonDetail: createDetailTable("과시즌 정상재고", "과시즌", items),
+    lowStockDetail: createDetailTable("당월수량미달 재고", "당월수량미달", items),
+    
+    // 당월수량미달 스타일 목록 (다른 분석단위에서 참조용)
+    excludedStyles: Array.from(lowStockStyles),
+    
+    // 대리상별 FR 데이터 (대리상 단위 분석용)
+    accountBreakdown,
+    
+    meta: {
+      targetMonth,
+      brand,
+      dimensionTab,
+      thresholdPct,
+      currentYear,
+      nextYear,
+      currentMonthMinQty,
+      daysInMonth,
+    },
+  };
+
+  return response;
+}
+
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<StagnantStockResponse | { error: string }>
@@ -509,147 +731,143 @@ export default async function handler(
 
   const { currentYear, nextYear } = getYearConfig(targetMonth);
 
+  // 기준월을 "YYYY.MM" 형식으로 변환
+  const targetMonthFormatted = targetMonth.length === 6 
+    ? `${targetMonth.substring(0, 4)}.${targetMonth.substring(4, 6)}`
+    : targetMonth;
+
   try {
-    // 1. 사용 가능한 월 목록 조회
-    const monthsQuery = buildAvailableMonthsQuery(brand);
-    const monthsResult = await runQuery(monthsQuery);
-    const availableMonths = monthsResult.map((row: any) => row.SALE_YM);
-
-    // 2. 스타일 기준 당월수량 조회 (당월수량미달 판단용)
-    const styleStockQuery = buildStyleStockQtyQuery(brand, targetMonth);
-    const styleStockResult = await runQuery(styleStockQuery);
+    // 전처리 JSON에서만 읽기
+    console.log(`[stagnant-stock] 전처리 JSON에서 데이터를 읽습니다. brand=${brand}, targetMonth=${targetMonthFormatted}, dimensionTab=${dimTab}`);
     
-    // 스타일별 당월수량 맵 생성 + 당월수량미달 스타일 목록 추출
-    const styleStockQtyMap = new Map<string, number>();
-    const lowStockStyles = new Set<string>();
-    
-    styleStockResult.forEach((row: any) => {
-      const style = row.STYLE || "";
-      const qty = Number(row.CURRENT_STOCK_QTY) || 0;
-      styleStockQtyMap.set(style, qty);
-      
-      // 당월수량 < currentMonthMinQty인 스타일 추출
-      if (qty < currentMonthMinQty) {
-        lowStockStyles.add(style);
+    try {
+      interface StagnantStockSummaryData {
+        brands: {
+          [brand: string]: {
+            [targetMonth: string]: {
+              [dimensionTab: string]: StagnantStockResponse;
+            };
+          };
+        };
       }
-    });
-
-    // 3. 정체재고 분석 데이터 조회 (전월 재고 수량 포함)
-    const mainQuery = buildStagnantStockQuery(brand, targetMonth, dimTab, thresholdRatio, prevMonth);
-    const mainResult = await runQuery(mainQuery);
-
-    // 4. 결과 변환 (채널별 데이터 포함)
-    // 변경: 당월수량미달 먼저 판단 → 나머지에 대해 기존 정체재고 로직
-    const items: StagnantStockItem[] = mainResult.map((row: any) => {
-      const season = row.SEASON || "";
-      const ratio = Number(row.RATIO) || 0;
-      const prevStockQty = Number(row.PREV_STOCK_QTY) || 0;
-      const prdtCd = row.PRDT_CD || "";
       
-      // 1단계: 스타일 기준 당월수량미달 판단 (스타일이 lowStockStyles에 포함되면 당월수량미달)
-      const isLowStock = lowStockStyles.has(prdtCd);
+      const jsonData = readBatchJsonFile<StagnantStockSummaryData>("stagnant_stock_summary.json");
       
-      // seasonGroup 결정: 당월수량미달 먼저, 아니면 기존 로직
-      let seasonGroup: SeasonGroup;
-      if (isLowStock) {
-        seasonGroup = "당월수량미달";
+      // 상세 로깅: 조회 시도하는 키 정보
+      console.log(`[stagnant-stock] 조회 시도: brand="${brand}", targetMonth="${targetMonth}", dimTab="${dimTab}"`);
+      
+      // 상세 로깅: JSON 파일에 실제로 존재하는 브랜드 키 목록
+      const availableBrands = jsonData.brands ? Object.keys(jsonData.brands) : [];
+      console.log(`[stagnant-stock] JSON에 존재하는 브랜드 키: [${availableBrands.join(", ")}]`);
+      
+      // 상세 로깅: 해당 브랜드의 월 목록
+      if (jsonData.brands?.[brand]) {
+        const availableMonths = Object.keys(jsonData.brands[brand]);
+        console.log(`[stagnant-stock] 브랜드 "${brand}"의 월 목록: [${availableMonths.join(", ")}]`);
+        
+        // 상세 로깅: 해당 월의 dimTab 목록
+        if (jsonData.brands[brand][targetMonth]) {
+          const availableDimTabs = Object.keys(jsonData.brands[brand][targetMonth]);
+          console.log(`[stagnant-stock] 브랜드 "${brand}", 월 "${targetMonth}"의 dimTab 목록: [${availableDimTabs.join(", ")}]`);
+        } else {
+          console.warn(`[stagnant-stock] 브랜드 "${brand}"에 월 "${targetMonth}" 데이터가 없습니다.`);
+        }
       } else {
-        // 기존 로직: 시즌 구분 먼저, 과시즌인 경우 2단계 판단
-        // ignoreMinQty: 대리상 단위 분석에서는 전월말 수량 조건 무시
-        seasonGroup = getSeasonGroup(season, ratio, thresholdRatio, currentYear, nextYear, prevStockQty, minQty, ignoreMinQty);
+        console.warn(`[stagnant-stock] 브랜드 "${brand}" 데이터가 JSON에 없습니다.`);
       }
       
-      // status는 seasonGroup 기반으로 결정 (정체재고이면 정체재고, 당월수량미달/기타는 정상재고)
-      const status: StockStatus = seasonGroup === "정체재고" ? "정체재고" : "정상재고";
-
-      return {
-        dimensionKey: row.DIMENSION_KEY || "",
-        prdt_cd: prdtCd,
-        prdt_nm: row.PRDT_NM || "",
-        color_cd: row.COLOR_CD,
-        size_cd: row.SIZE_CD,
-        mid_category_kr: row.MID_CATEGORY_KR || "기타",
-        season,
-        // 전체 기준 데이터
-        stock_qty: Number(row.STOCK_QTY) || 0,
-        stock_amt: Number(row.STOCK_AMT) || 0,
-        sales_tag_amt: Number(row.SALES_TAG_AMT) || 0,
-        ratio: Number(row.RATIO) || 0,
-        prev_stock_qty: prevStockQty,
-        status,
-        seasonGroup,
-        // 채널별 데이터 (FR)
-        fr_stock_amt: Number(row.FR_STOCK_AMT) || 0,
-        fr_stock_qty: Number(row.FR_STOCK_QTY) || 0,
-        fr_sales_amt: Number(row.FR_SALES_AMT) || 0,
-        // 채널별 데이터 (OR + HQ)
-        or_stock_amt: Number(row.OR_STOCK_AMT) || 0,
-        or_stock_qty: Number(row.OR_STOCK_QTY) || 0,
-        or_sales_amt: Number(row.OR_SALES_AMT) || 0,
-      };
-    });
-
-    // 5. 전체 재고금액 계산 (요약 박스의 % 계산용)
-    const totalStockAmt = items.reduce((sum, item) => sum + item.stock_amt, 0);
-
-    // 6. 정체/정상/당월수량미달 재고 분리
-    const stagnantItems = items.filter(item => item.seasonGroup === "정체재고");
-    const lowStockItems = items.filter(item => item.seasonGroup === "당월수량미달");
-    // 정상재고: 당시즌 + 차기시즌 + 과시즌 (정체재고와 당월수량미달 제외)
-    const normalItems = items.filter(item => 
-      item.seasonGroup !== "정체재고" && item.seasonGroup !== "당월수량미달"
-    );
-
-    // 7. 대리상별 FR 데이터 조회 (includeAccountBreakdown=true인 경우)
-    let accountBreakdown: AccountBreakdownItem[] | undefined;
-    if (includeAccountBreakdown) {
-      const accountQuery = buildAccountBreakdownQuery(brand, targetMonth, dimTab);
-      const accountResult = await runQuery(accountQuery);
-      
-      accountBreakdown = accountResult.map((row: any) => ({
-        account_id: row.ACCOUNT_ID || "(미매핑)",
-        dimensionKey: row.DIMENSION_KEY || "",
-        stock_amt: Number(row.STOCK_AMT) || 0,
-        stock_qty: Number(row.STOCK_QTY) || 0,
-        tag_amt: Number(row.TAG_AMT) || 0,
-        sale_amt: Number(row.SALE_AMT) || 0,
-      }));
+      if (jsonData.brands?.[brand]?.[targetMonth]?.[dimTab]) {
+        const response = jsonData.brands[brand][targetMonth][dimTab];
+        console.log(`[stagnant-stock] 데이터 조회 성공 (JSON): brand="${brand}", targetMonth="${targetMonth}", dimTab="${dimTab}", accountBreakdown=${response.accountBreakdown?.length ?? "없음"}`);
+        
+        // includeAccountBreakdown=true인데 JSON에 accountBreakdown이 없으면 실시간 조회
+        if (includeAccountBreakdown && !(response.accountBreakdown?.length)) {
+          console.log(`[stagnant-stock] JSON에 accountBreakdown 없음 → Snowflake에서 실시간 조회`);
+          try {
+            const accountQuery = buildAccountBreakdownQuery(brand, targetMonth, dimTab);
+            const accountResult = await runQuery(accountQuery);
+            response.accountBreakdown = accountResult.map((row: any) => ({
+              account_id: row.ACCOUNT_ID || "(미매핑)",
+              dimensionKey: row.DIMENSION_KEY || "",
+              stock_amt: Number(row.STOCK_AMT) || 0,
+              stock_qty: Number(row.STOCK_QTY) || 0,
+              tag_amt: Number(row.TAG_AMT) || 0,
+              sale_amt: Number(row.SALE_AMT) || 0,
+            }));
+            console.log(`[stagnant-stock] accountBreakdown 실시간 조회 완료: ${response.accountBreakdown.length}개`);
+          } catch (abErr) {
+            console.error(`[stagnant-stock] accountBreakdown 실시간 조회 실패:`, abErr);
+          }
+        }
+        
+        res.status(200).json(response);
+        return;
+      } else {
+        console.warn(`[stagnant-stock] JSON 파일에 해당 데이터가 없습니다. Snowflake에서 실시간 조회합니다. 조회 키: brand="${brand}", targetMonth="${targetMonth}", dimTab="${dimTab}"`);
+        // JSON에 데이터가 없으면 Snowflake에서 실시간 조회
+        try {
+          const response = await fetchStagnantStockData(
+            brand,
+            targetMonth,
+            dimTab,
+            threshold,
+            minQty,
+            currentMonthMinQty,
+            includeAccountBreakdown,
+            ignoreMinQty
+          );
+          console.log(`[stagnant-stock] Snowflake 실시간 조회 완료: brand="${brand}", targetMonth="${targetMonth}", dimTab="${dimTab}", accountBreakdown=${response.accountBreakdown?.length || 0}개`);
+          res.status(200).json(response);
+          return;
+        } catch (fetchError) {
+          console.error(`[stagnant-stock] Snowflake 실시간 조회 실패:`, fetchError);
+          // 실시간 조회 실패 시 빈 데이터 반환
+          const emptyResponse = createEmptyStagnantStockResponse(
+            targetMonth,
+            brand,
+            dimTab,
+            threshold,
+            daysInMonth,
+            minQty,
+            currentMonthMinQty
+          );
+          res.status(200).json(emptyResponse);
+          return;
+        }
+      }
+    } catch (jsonError) {
+      console.error(`[stagnant-stock] JSON 파일 읽기 실패. Snowflake에서 실시간 조회합니다:`, jsonError);
+      // JSON 파일 읽기 실패 시 Snowflake에서 실시간 조회
+      try {
+        const response = await fetchStagnantStockData(
+          brand,
+          targetMonth,
+          dimTab,
+          threshold,
+          minQty,
+          currentMonthMinQty,
+          includeAccountBreakdown,
+          ignoreMinQty
+        );
+        console.log(`[stagnant-stock] Snowflake 실시간 조회 완료 (JSON 읽기 실패 후): brand="${brand}", targetMonth="${targetMonth}", dimTab="${dimTab}"`);
+        res.status(200).json(response);
+        return;
+      } catch (fetchError) {
+        console.error(`[stagnant-stock] Snowflake 실시간 조회 실패:`, fetchError);
+        // 실시간 조회 실패 시 빈 데이터 반환
+        const emptyResponse = createEmptyStagnantStockResponse(
+          targetMonth,
+          brand,
+          dimTab,
+          threshold,
+          daysInMonth,
+          minQty,
+          currentMonthMinQty
+        );
+        res.status(200).json(emptyResponse);
+        return;
+      }
     }
-
-    // 8. 응답 생성
-    const response: StagnantStockResponse = {
-      availableMonths,
-      
-      totalSummary: createSummaryBox("전체 재고", items, totalStockAmt),
-      stagnantSummary: createSummaryBox("정체재고", stagnantItems, totalStockAmt),
-      normalSummary: createSummaryBox("정상재고", normalItems, totalStockAmt),
-      lowStockSummary: createSummaryBox("당월수량미달", lowStockItems, totalStockAmt),
-      
-      stagnantDetail: createDetailTable("정체재고 - 전체", "정체재고", items),
-      currentSeasonDetail: createDetailTable("당시즌 정상재고", "당시즌", items),
-      nextSeasonDetail: createDetailTable("차기시즌 정상재고", "차기시즌", items),
-      pastSeasonDetail: createDetailTable("과시즌 정상재고", "과시즌", items),
-      lowStockDetail: createDetailTable("당월수량미달 재고", "당월수량미달", items),
-      
-      // 당월수량미달 스타일 목록 (다른 분석단위에서 참조용)
-      excludedStyles: Array.from(lowStockStyles),
-      
-      // 대리상별 FR 데이터 (대리상 단위 분석용)
-      accountBreakdown,
-      
-      meta: {
-        targetMonth,
-        brand,
-        dimensionTab: dimTab,
-        thresholdPct: threshold,
-        currentYear,
-        nextYear,
-        currentMonthMinQty,
-        daysInMonth,
-      },
-    };
-
-    res.status(200).json(response);
   } catch (error) {
     console.error("Stagnant stock query error:", error);
     res.status(500).json({ error: String(error) });

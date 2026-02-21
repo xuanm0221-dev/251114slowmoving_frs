@@ -36,6 +36,13 @@ def build_inventory_aggregation_query(start_month: str = '202401', end_month: st
     """
     query = f"""
 WITH 
+-- ACC 아이템 맵: DB_PRDT에서 DISTINCT ITEM, PRDT_KIND_NM_ENG 추출
+acc_item_map AS (
+  SELECT DISTINCT ITEM, PRDT_KIND_NM_ENG
+  FROM FNF.PRCS.DB_PRDT
+  WHERE PARENT_PRDT_KIND_NM_ENG = 'ACC'
+),
+
 -- Step 1: 재고 데이터에 상품/매장 마스터 조인 및 remark 자동 계산
 -- 기준: 2023.12 (remark1) 시작, 3개월씩 자동 확장
 stock_with_master AS (
@@ -46,9 +53,8 @@ stock_with_master AS (
     st.brd_cd,
     st.sesn,
     st.stock_qty_expected,
-    st.stock_tag_amt_expected,
-    p.parent_prdt_kind_cd,
-    p.prdt_kind_nm_en,
+    COALESCE(st.stock_tag_amt_insp, 0) + COALESCE(st.stock_tag_amt_frozen, 0) + COALESCE(st.stock_tag_amt_expected, 0) AS stock_tag_amt_total,
+    db.PRDT_KIND_NM_ENG AS prdt_kind_nm_en,
     d.fr_or_cls,
     -- remark 번호 자동 계산 (23.12 기준, 3개월 단위)
     FLOOR(DATEDIFF('month', TO_DATE('202312', 'YYYYMM'), TO_DATE(st.yymm || '01', 'YYYYMMDD')) / 3) + 1 AS remark_num,
@@ -60,6 +66,7 @@ stock_with_master AS (
     p.remark11, p.remark12, p.remark13, p.remark14, p.remark15
   FROM CHN.DW_STOCK_M st
   LEFT JOIN FNF.CHN.MST_PRDT_SCS p ON st.prdt_scs_cd = p.prdt_scs_cd
+  LEFT JOIN acc_item_map db ON SUBSTR(st.prdt_scs_cd, 7, 2) = db.ITEM
   LEFT JOIN (
     SELECT shop_id, fr_or_cls
     FROM CHN.DW_SHOP_WH_DETAIL
@@ -69,8 +76,7 @@ stock_with_master AS (
   WHERE st.yymm >= '{start_month}'
     AND st.yymm <= '{end_month}'
     AND st.brd_cd IN ('M', 'I', 'X')
-    AND p.parent_prdt_kind_cd = 'A'  -- 악세사리만
-    AND p.prdt_kind_nm_en IN ('Shoes', 'Headwear', 'Bag', 'Acc_etc')
+    AND db.ITEM IS NOT NULL -- ACC 필터
     AND d.fr_or_cls IN ('FR', 'OR', 'HQ')  -- HQ 포함
 ),
 
@@ -111,7 +117,7 @@ stock_classified AS (
     prdt_kind_nm_en,
     fr_or_cls,
     stock_qty_expected,
-    stock_tag_amt_expected,
+    stock_tag_amt_total,
     -- 주력/아울렛 판정 로직
     CASE
       -- 1. op_std가 있으면 우선 판단
@@ -141,7 +147,7 @@ SELECT
   prdt_kind_nm_en AS item_category,
   fr_or_cls AS channel,
   product_type,
-  SUM(stock_tag_amt_expected) AS total_amount,
+  SUM(stock_tag_amt_total) AS total_amount,
   SUM(stock_qty_expected) AS total_qty
 FROM stock_classified
 GROUP BY yymm, brd_cd, prdt_kind_nm_en, fr_or_cls, product_type

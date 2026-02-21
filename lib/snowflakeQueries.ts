@@ -229,7 +229,12 @@ export function buildSalesAggregationQuery(
 
   return `
 WITH 
-${SHOP_MAPPING_CTES},
+acc_item_map AS (
+  SELECT DISTINCT ITEM, PRDT_KIND_NM_ENG
+  FROM FNF.PRCS.DB_PRDT
+  WHERE PARENT_PRDT_KIND_NM_ENG = 'ACC'
+),
+${SHOP_MAPPING_CTES_3WAY},
 
 -- Step 1: 원천 판매 데이터 추출
 sales_raw AS (
@@ -237,7 +242,7 @@ sales_raw AS (
     TO_CHAR(s.sale_dt, 'YYYY.MM') AS sale_ym,
     TO_CHAR(s.sale_dt, 'YYYYMM') AS sale_yyyymm,
     s.brd_cd,
-    p.prdt_kind_nm_en,
+    db.PRDT_KIND_NM_ENG AS prdt_kind_nm_en,
     TO_VARCHAR(s.shop_id) AS shop_id,
     s.tag_amt,
     p.sesn,
@@ -249,22 +254,23 @@ sales_raw AS (
   FROM CHN.DW_SALE s
   INNER JOIN FNF.CHN.MST_PRDT_SCS p 
     ON s.prdt_scs_cd = p.prdt_scs_cd
+  LEFT JOIN acc_item_map db ON SUBSTR(s.prdt_scs_cd, 7, 2) = db.ITEM
   WHERE s.sale_dt >= '${startDate}'
     AND s.sale_dt < '${endDateExclusive}'
     AND s.brd_cd = '${brandCode}'
-    AND p.parent_prdt_kind_cd = 'A'
-    AND p.prdt_kind_nm_en IN ('Shoes', 'Headwear', 'Bag', 'Acc_etc')
+    AND db.ITEM IS NOT NULL -- ACC 필터
 ),
 
--- Step 2: 매장 매핑 (LEFT JOIN, unmapped 추적)
+-- Step 2: 매장 매핑 (3-way LEFT JOIN, unmapped 추적)
 sales_mapped AS (
   SELECT 
     sr.*,
-    sm.fr_or_cls,
-    CASE WHEN sm.fr_or_cls IS NULL THEN 1 ELSE 0 END AS is_unmapped
+    COALESCE(map_norm.fr_or_cls, map_cn.fr_or_cls, map_internal.fr_or_cls) AS fr_or_cls,
+    CASE WHEN COALESCE(map_norm.fr_or_cls, map_cn.fr_or_cls, map_internal.fr_or_cls) IS NULL THEN 1 ELSE 0 END AS is_unmapped
   FROM sales_raw sr
-  LEFT JOIN shop_map_norm sm 
-    ON sr.shop_id = sm.norm_key
+  LEFT JOIN map_norm ON sr.shop_id = map_norm.norm_key
+  LEFT JOIN map_cn ON sr.shop_id = map_cn.cn_key
+  LEFT JOIN map_internal ON sr.shop_id = map_internal.internal_key
 ),
 
 -- Step 3: remark 자동 계산 (23.12 기준, 3개월 단위)
@@ -363,6 +369,11 @@ export function buildInventoryAggregationQuery(
 ): string {
   return `
 WITH 
+acc_item_map AS (
+  SELECT DISTINCT ITEM, PRDT_KIND_NM_ENG
+  FROM FNF.PRCS.DB_PRDT
+  WHERE PARENT_PRDT_KIND_NM_ENG = 'ACC'
+),
 ${SHOP_MAPPING_CTES_3WAY},
 
 -- Step 1: 원천 재고 데이터 추출
@@ -370,9 +381,9 @@ stock_raw AS (
   SELECT 
     s.yymm,
     s.brd_cd,
-    p.prdt_kind_nm_en,
+    db.PRDT_KIND_NM_ENG AS prdt_kind_nm_en,
     TO_VARCHAR(s.shop_id) AS shop_id,
-    s.stock_tag_amt_expected,
+    COALESCE(s.stock_tag_amt_insp, 0) + COALESCE(s.stock_tag_amt_frozen, 0) + COALESCE(s.stock_tag_amt_expected, 0) AS stock_tag_amt_total,
     s.stock_qty_expected,
     p.sesn,
     s.prdt_scs_cd,
@@ -383,11 +394,11 @@ stock_raw AS (
   FROM CHN.DW_STOCK_M s
   INNER JOIN FNF.CHN.MST_PRDT_SCS p 
     ON s.prdt_scs_cd = p.prdt_scs_cd
+  LEFT JOIN acc_item_map db ON SUBSTR(s.prdt_scs_cd, 7, 2) = db.ITEM
   WHERE s.yymm >= '${startMonth}'
     AND s.yymm <= '${endMonth}'
     AND s.brd_cd = '${brandCode}'
-    AND p.parent_prdt_kind_cd = 'A'
-    AND p.prdt_kind_nm_en IN ('Shoes', 'Headwear', 'Bag', 'Acc_etc')
+    AND db.ITEM IS NOT NULL -- ACC 필터
 ),
 
 -- Step 2: 매장 매핑 (3-way LEFT JOIN, 길이 분기 제거)
@@ -396,7 +407,7 @@ stock_mapped AS (
     sr.yymm,
     sr.brd_cd,
     sr.prdt_kind_nm_en,
-    sr.stock_tag_amt_expected,
+    sr.stock_tag_amt_total,
     sr.stock_qty_expected,
     sr.sesn,
     sr.prdt_scs_cd,
@@ -468,7 +479,7 @@ stock_classified AS (
     brd_cd,
     prdt_kind_nm_en,
     fr_or_cls,
-    stock_tag_amt_expected,
+    stock_tag_amt_total,
     stock_qty_expected,
     ${getProductTypeCase('op_std', 'sesn', 'SUBSTRING(yymm, 3, 2)')} AS product_type
   FROM stock_with_remark
@@ -482,7 +493,7 @@ stock_agg AS (
     prdt_kind_nm_en AS item_category,
     fr_or_cls AS channel,
     product_type,
-    SUM(stock_tag_amt_expected) AS total_amt,
+    SUM(stock_tag_amt_total) AS total_amt,
     SUM(stock_qty_expected) AS total_qty,
     COUNT(*) AS record_count
   FROM stock_classified
@@ -494,7 +505,7 @@ or_sales_raw AS (
   SELECT 
     TO_CHAR(s.sale_dt, 'YYYYMM') AS sale_yymm,
     s.brd_cd,
-    p.prdt_kind_nm_en,
+    db.PRDT_KIND_NM_ENG AS prdt_kind_nm_en,
     TO_VARCHAR(s.shop_id) AS shop_id,
     s.tag_amt,
     s.prdt_scs_cd,
@@ -506,11 +517,11 @@ or_sales_raw AS (
   FROM CHN.DW_SALE s
   INNER JOIN FNF.CHN.MST_PRDT_SCS p 
     ON s.prdt_scs_cd = p.prdt_scs_cd
+  LEFT JOIN acc_item_map db ON SUBSTR(s.prdt_scs_cd, 7, 2) = db.ITEM
   WHERE TO_CHAR(s.sale_dt, 'YYYYMM') >= '${startMonth}'
     AND TO_CHAR(s.sale_dt, 'YYYYMM') <= '${endMonth}'
     AND s.brd_cd = '${brandCode}'
-    AND p.parent_prdt_kind_cd = 'A'
-    AND p.prdt_kind_nm_en IN ('Shoes', 'Headwear', 'Bag', 'Acc_etc')
+    AND db.ITEM IS NOT NULL -- ACC 필터
 ),
 
 -- Step 8: OR 판매 매핑 (OR 채널만 필터링)
@@ -585,7 +596,7 @@ or_sales_agg AS (
 unmapped_stats AS (
   SELECT 
     COUNT(*) AS unmapped_records,
-    SUM(stock_tag_amt_expected) AS unmapped_amount
+    SUM(stock_tag_amt_total) AS unmapped_amount
   FROM stock_mapped
   WHERE is_unmapped = 1
 )

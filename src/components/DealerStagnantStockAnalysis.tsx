@@ -497,11 +497,11 @@ export default function DealerStagnantStockAnalysis({
     if (!data) return map;
     
     const allItems = [
-      ...data.stagnantDetail.items,
-      ...data.currentSeasonDetail.items,
-      ...data.nextSeasonDetail.items,
-      ...data.pastSeasonDetail.items,
-      ...data.lowStockDetail.items,
+      ...(data.stagnantDetail?.items || []),
+      ...(data.currentSeasonDetail?.items || []),
+      ...(data.nextSeasonDetail?.items || []),
+      ...(data.pastSeasonDetail?.items || []),
+      ...(data.lowStockDetail?.items || []),
     ].filter(item => item.fr_stock_amt > 0);
     
     allItems.forEach(item => {

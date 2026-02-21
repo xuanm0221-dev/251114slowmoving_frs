@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { runQuery } from "../../lib/snowflake";
+import { readBatchJsonFile } from "../../src/lib/batchDataLoader";
 import { BRAND_CODE_MAP } from "../../src/types/stagnantStock";
 
 // 매장별 집계 데이터 (OR 직영매장 단위) - 매장+시즌+중분류 단위로 최적화
@@ -85,6 +86,12 @@ function buildShopStagnantStockQuery(
   
   return `
 WITH
+acc_item_map AS (
+  SELECT DISTINCT ITEM, PRDT_KIND_NM_ENG
+  FROM FNF.PRCS.DB_PRDT
+  WHERE PARENT_PRDT_KIND_NM_ENG = 'ACC'
+),
+
 -- 1. 전체 채널(OR+HQ+FR) 재고 집계 (prdt_scs_cd 단위)
 -- 시즌: sesn 컬럼 사용 (상품단위 분석과 동일)
 stock_all AS (
@@ -94,20 +101,21 @@ stock_all AS (
     MAX(b.prdt_nm) AS prdt_nm,
     MAX(a.sesn) AS season,
     MAX(CASE
-      WHEN b.prdt_hrrc2_nm = 'Shoes' THEN '신발'
-      WHEN b.prdt_hrrc2_nm = 'Headwear' THEN '모자'
-      WHEN b.prdt_hrrc2_nm = 'Bag' THEN '가방'
-      WHEN b.prdt_hrrc2_nm = 'Acc_etc' THEN '기타'
-      ELSE b.prdt_hrrc2_nm
+      WHEN db.PRDT_KIND_NM_ENG = 'Shoes' THEN '신발'
+      WHEN db.PRDT_KIND_NM_ENG = 'Headwear' THEN '모자'
+      WHEN db.PRDT_KIND_NM_ENG = 'Bag' THEN '가방'
+      WHEN db.PRDT_KIND_NM_ENG = 'Acc_etc' THEN '기타'
+      ELSE db.PRDT_KIND_NM_ENG
     END) AS mid_category_kr,
-    SUM(a.stock_tag_amt_expected) AS stock_amt,
+    SUM(COALESCE(a.stock_tag_amt_insp, 0) + COALESCE(a.stock_tag_amt_frozen, 0) + COALESCE(a.stock_tag_amt_expected, 0)) AS stock_amt,
     SUM(a.stock_qty_expected) AS stock_qty
   FROM fnf.chn.dw_stock_m a
   LEFT JOIN fnf.sap_fnf.mst_prdt b ON a.prdt_cd = b.prdt_cd
+  LEFT JOIN acc_item_map db ON SUBSTR(a.prdt_scs_cd, 7, 2) = db.ITEM
   LEFT JOIN fnf.chn.dw_shop_wh_detail c ON a.shop_id = c.oa_map_shop_id
   WHERE a.yymm = '${targetMonth}'
     AND a.brd_cd = '${brand}'
-    AND b.prdt_hrrc1_nm = 'ACC'
+    AND db.ITEM IS NOT NULL
   GROUP BY a.prdt_scs_cd
 ),
 
@@ -117,11 +125,11 @@ sales_all AS (
     s.prdt_scs_cd,
     SUM(s.tag_amt) AS sales_tag_amt
   FROM fnf.chn.dw_sale s
-  LEFT JOIN fnf.sap_fnf.mst_prdt p ON s.prdt_cd = p.prdt_cd
+  LEFT JOIN acc_item_map db ON SUBSTR(s.prdt_scs_cd, 7, 2) = db.ITEM
   LEFT JOIN fnf.chn.dw_shop_wh_detail d ON s.shop_id = d.oa_map_shop_id
   WHERE TO_CHAR(s.sale_dt, 'YYYYMM') = '${targetMonth}'
     AND s.brd_cd = '${brand}'
-    AND p.prdt_hrrc1_nm = 'ACC'
+    AND db.ITEM IS NOT NULL
     AND d.fr_or_cls IN ('FR', 'OR', 'HQ')
   GROUP BY s.prdt_scs_cd
 ),
@@ -197,22 +205,23 @@ or_stock_base AS (
     a.prdt_cd,
     b.prdt_nm,
     CASE
-      WHEN b.prdt_hrrc2_nm = 'Shoes' THEN '신발'
-      WHEN b.prdt_hrrc2_nm = 'Headwear' THEN '모자'
-      WHEN b.prdt_hrrc2_nm = 'Bag' THEN '가방'
-      WHEN b.prdt_hrrc2_nm = 'Acc_etc' THEN '기타'
-      ELSE b.prdt_hrrc2_nm
+      WHEN db.PRDT_KIND_NM_ENG = 'Shoes' THEN '신발'
+      WHEN db.PRDT_KIND_NM_ENG = 'Headwear' THEN '모자'
+      WHEN db.PRDT_KIND_NM_ENG = 'Bag' THEN '가방'
+      WHEN db.PRDT_KIND_NM_ENG = 'Acc_etc' THEN '기타'
+      ELSE db.PRDT_KIND_NM_ENG
     END AS mid_category_kr,
     a.sesn AS season,
-    a.stock_tag_amt_expected,
+    COALESCE(a.stock_tag_amt_insp, 0) + COALESCE(a.stock_tag_amt_frozen, 0) + COALESCE(a.stock_tag_amt_expected, 0) AS stock_tag_amt_expected,
     a.stock_qty_expected
   FROM fnf.chn.dw_stock_m a
   LEFT JOIN fnf.chn.dw_shop_wh_detail d ON a.shop_id = d.oa_map_shop_id
   LEFT JOIN fnf.chn.mst_shop_all m ON a.shop_id = m.shop_id
   LEFT JOIN fnf.sap_fnf.mst_prdt b ON a.prdt_cd = b.prdt_cd
+  LEFT JOIN acc_item_map db ON SUBSTR(a.prdt_scs_cd, 7, 2) = db.ITEM
   WHERE a.yymm = '${targetMonth}'
     AND a.brd_cd = '${brand}'
-    AND b.prdt_hrrc1_nm = 'ACC'
+    AND db.ITEM IS NOT NULL
     AND COALESCE(d.fr_or_cls, 'HQ') IN ('OR', 'HQ')
 ),
 
@@ -250,10 +259,10 @@ or_sale AS (
     SUM(s.sale_amt) AS sale_amt
   FROM fnf.chn.dw_sale s
   LEFT JOIN fnf.chn.dw_shop_wh_detail d ON s.shop_id = d.oa_map_shop_id
-  LEFT JOIN fnf.sap_fnf.mst_prdt p ON s.prdt_cd = p.prdt_cd
+  LEFT JOIN acc_item_map db ON SUBSTR(s.prdt_scs_cd, 7, 2) = db.ITEM
   WHERE TO_CHAR(s.sale_dt, 'YYYYMM') = '${targetMonth}'
     AND s.brd_cd = '${brand}'
-    AND p.prdt_hrrc1_nm = 'ACC'
+    AND db.ITEM IS NOT NULL
     AND COALESCE(d.fr_or_cls, 'HQ') IN ('OR', 'HQ')
   GROUP BY s.shop_id, s.prdt_scs_cd
 ),
@@ -397,6 +406,12 @@ function buildShopProductBreakdownQuery(
   
   return `
 WITH
+acc_item_map AS (
+  SELECT DISTINCT ITEM, PRDT_KIND_NM_ENG
+  FROM FNF.PRCS.DB_PRDT
+  WHERE PARENT_PRDT_KIND_NM_ENG = 'ACC'
+),
+
 -- 전체 채널 재고 집계 (prdt_scs_cd 단위)
 stock_all AS (
   SELECT 
@@ -405,20 +420,21 @@ stock_all AS (
     MAX(b.prdt_nm) AS prdt_nm,
     MAX(a.sesn) AS season,
     MAX(CASE
-      WHEN b.prdt_hrrc2_nm = 'Shoes' THEN '신발'
-      WHEN b.prdt_hrrc2_nm = 'Headwear' THEN '모자'
-      WHEN b.prdt_hrrc2_nm = 'Bag' THEN '가방'
-      WHEN b.prdt_hrrc2_nm = 'Acc_etc' THEN '기타'
-      ELSE b.prdt_hrrc2_nm
+      WHEN db.PRDT_KIND_NM_ENG = 'Shoes' THEN '신발'
+      WHEN db.PRDT_KIND_NM_ENG = 'Headwear' THEN '모자'
+      WHEN db.PRDT_KIND_NM_ENG = 'Bag' THEN '가방'
+      WHEN db.PRDT_KIND_NM_ENG = 'Acc_etc' THEN '기타'
+      ELSE db.PRDT_KIND_NM_ENG
     END) AS mid_category_kr,
-    SUM(a.stock_tag_amt_expected) AS stock_amt,
+    SUM(COALESCE(a.stock_tag_amt_insp, 0) + COALESCE(a.stock_tag_amt_frozen, 0) + COALESCE(a.stock_tag_amt_expected, 0)) AS stock_amt,
     SUM(a.stock_qty_expected) AS stock_qty
   FROM fnf.chn.dw_stock_m a
   LEFT JOIN fnf.sap_fnf.mst_prdt b ON a.prdt_cd = b.prdt_cd
+  LEFT JOIN acc_item_map db ON SUBSTR(a.prdt_scs_cd, 7, 2) = db.ITEM
   LEFT JOIN fnf.chn.dw_shop_wh_detail c ON a.shop_id = c.oa_map_shop_id
   WHERE a.yymm = '${targetMonth}'
     AND a.brd_cd = '${brand}'
-    AND b.prdt_hrrc1_nm = 'ACC'
+    AND db.ITEM IS NOT NULL
   GROUP BY a.prdt_scs_cd
 ),
 
@@ -428,11 +444,11 @@ sales_all AS (
     s.prdt_scs_cd,
     SUM(s.tag_amt) AS sales_tag_amt
   FROM fnf.chn.dw_sale s
-  LEFT JOIN fnf.sap_fnf.mst_prdt p ON s.prdt_cd = p.prdt_cd
+  LEFT JOIN acc_item_map db ON SUBSTR(s.prdt_scs_cd, 7, 2) = db.ITEM
   LEFT JOIN fnf.chn.dw_shop_wh_detail d ON s.shop_id = d.oa_map_shop_id
   WHERE TO_CHAR(s.sale_dt, 'YYYYMM') = '${targetMonth}'
     AND s.brd_cd = '${brand}'
-    AND p.prdt_hrrc1_nm = 'ACC'
+    AND db.ITEM IS NOT NULL
     AND d.fr_or_cls IN ('FR', 'OR', 'HQ')
   GROUP BY s.prdt_scs_cd
 ),
@@ -486,22 +502,23 @@ or_stock AS (
     a.prdt_cd,
     b.prdt_nm,
     CASE
-      WHEN b.prdt_hrrc2_nm = 'Shoes' THEN '신발'
-      WHEN b.prdt_hrrc2_nm = 'Headwear' THEN '모자'
-      WHEN b.prdt_hrrc2_nm = 'Bag' THEN '가방'
-      WHEN b.prdt_hrrc2_nm = 'Acc_etc' THEN '기타'
-      ELSE b.prdt_hrrc2_nm
+      WHEN db.PRDT_KIND_NM_ENG = 'Shoes' THEN '신발'
+      WHEN db.PRDT_KIND_NM_ENG = 'Headwear' THEN '모자'
+      WHEN db.PRDT_KIND_NM_ENG = 'Bag' THEN '가방'
+      WHEN db.PRDT_KIND_NM_ENG = 'Acc_etc' THEN '기타'
+      ELSE db.PRDT_KIND_NM_ENG
     END AS mid_category_kr,
     a.sesn AS season,
-    a.stock_tag_amt_expected AS stock_amt,
+    COALESCE(a.stock_tag_amt_insp, 0) + COALESCE(a.stock_tag_amt_frozen, 0) + COALESCE(a.stock_tag_amt_expected, 0) AS stock_amt,
     a.stock_qty_expected AS stock_qty
   FROM fnf.chn.dw_stock_m a
   LEFT JOIN fnf.chn.dw_shop_wh_detail d ON a.shop_id = d.oa_map_shop_id
   LEFT JOIN fnf.chn.mst_shop_all m ON a.shop_id = m.shop_id
   LEFT JOIN fnf.sap_fnf.mst_prdt b ON a.prdt_cd = b.prdt_cd
+  LEFT JOIN acc_item_map db ON SUBSTR(a.prdt_scs_cd, 7, 2) = db.ITEM
   WHERE a.yymm = '${targetMonth}'
     AND a.brd_cd = '${brand}'
-    AND b.prdt_hrrc1_nm = 'ACC'
+    AND db.ITEM IS NOT NULL
     AND COALESCE(d.fr_or_cls, 'HQ') IN ('OR', 'HQ')
 ),
 
@@ -514,10 +531,10 @@ or_sale AS (
     SUM(s.sale_amt) AS sale_amt
   FROM fnf.chn.dw_sale s
   LEFT JOIN fnf.chn.dw_shop_wh_detail d ON s.shop_id = d.oa_map_shop_id
-  LEFT JOIN fnf.sap_fnf.mst_prdt p ON s.prdt_cd = p.prdt_cd
+  LEFT JOIN acc_item_map db ON SUBSTR(s.prdt_scs_cd, 7, 2) = db.ITEM
   WHERE TO_CHAR(s.sale_dt, 'YYYYMM') = '${targetMonth}'
     AND s.brd_cd = '${brand}'
-    AND p.prdt_hrrc1_nm = 'ACC'
+    AND db.ITEM IS NOT NULL
     AND COALESCE(d.fr_or_cls, 'HQ') IN ('OR', 'HQ')
   GROUP BY s.shop_id, s.prdt_scs_cd
 )
@@ -547,6 +564,80 @@ ORDER BY os.shop_id, os.stock_amt DESC;
   `;
 }
 
+// 직영매장 정체재고 분석 데이터 조회 함수 (다른 파일에서 재사용 가능)
+export async function fetchShopStagnantStockData(
+  brand: string,
+  targetMonth: string,
+  thresholdPct: number = 0.01
+): Promise<ShopStagnantStockResponse> {
+  const threshold = thresholdPct / 100; // % → 비율
+  const daysInMonth = getDaysInMonth(targetMonth);
+
+  // 1. 사용 가능한 월 목록 조회
+  const monthsQuery = buildAvailableMonthsQuery(brand);
+  const monthsResult = await runQuery(monthsQuery);
+  const availableMonths = monthsResult.map((row: any) => row.SALE_YM);
+
+  // 2. OR 직영매장 정체재고 분석 쿼리 실행 (집계 데이터)
+  const shopQuery = buildShopStagnantStockQuery(brand, targetMonth, threshold);
+  const shopResult = await runQuery(shopQuery);
+
+  // 3. 상품 단위 데이터 쿼리 실행 (모달용)
+  const productQuery = buildShopProductBreakdownQuery(brand, targetMonth, threshold);
+  const productResult = await runQuery(productQuery);
+
+  // 4. 결과 매핑 - 집계 데이터
+  const shopBreakdown: ShopBreakdownItem[] = shopResult.map((row: any) => ({
+    shop_id: row.SHOP_ID || "",
+    shop_nm_en: row.SHOP_NM_EN || row.SHOP_ID || "",
+    onOffType: row.ONOFFTYPE || null,
+    dimensionKey: row.DIMENSION_KEY || "",
+    prdt_nm_cn: row.PRDT_NM_CN || "",
+    stock_amt: Number(row.STOCK_AMT) || 0,
+    stock_qty: Number(row.STOCK_QTY) || 0,
+    tag_amt: Number(row.TAG_AMT) || 0,
+    sale_amt: Number(row.SALE_AMT) || 0,
+    slow_cls: row.SLOW_CLS || "전체",
+    season_bucket: row.SEASON_BUCKET || "",
+    mid_category: row.MID_CATEGORY || "",
+    mid_category_kr: row.MID_CATEGORY_KR || "기타악세",
+    discount_rate: row.DISCOUNT_RATE !== null ? Number(row.DISCOUNT_RATE) : null,
+    item_count: Number(row.ITEM_COUNT) || 0,
+  }));
+
+  // 5. 결과 매핑 - 상품 단위 데이터 (prdt_scs_cd 단위)
+  const shopProductBreakdown: ShopProductBreakdownItem[] = productResult.map((row: any) => ({
+    shop_id: row.SHOP_ID || "",
+    shop_nm_en: row.SHOP_NM_EN || row.SHOP_ID || "",
+    onOffType: row.ONOFFTYPE || null,
+    prdt_cd: row.PRDT_SCS_CD || "",  // prdt_scs_cd를 prdt_cd 필드에 저장
+    prdt_nm: row.PRDT_NM || "",
+    season: row.SEASON || "",
+    season_bucket: row.SEASON_BUCKET || "과시즌",
+    mid_category_kr: row.MID_CATEGORY_KR || "기타",
+    stock_amt: Number(row.STOCK_AMT) || 0,
+    stock_qty: Number(row.STOCK_QTY) || 0,
+    tag_amt: Number(row.TAG_AMT) || 0,
+    sale_amt: Number(row.SALE_AMT) || 0,
+    is_slow: row.IS_SLOW === 1 || row.IS_SLOW === true,
+  }));
+
+  // 6. 응답 생성
+  const response: ShopStagnantStockResponse = {
+    shopBreakdown,
+    shopProductBreakdown,
+    availableMonths,
+    meta: {
+      targetMonth,
+      brand,
+      thresholdPct,
+      daysInMonth,
+    },
+  };
+
+  return response;
+}
+
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<ShopStagnantStockResponse | { error: string }>
@@ -573,69 +664,41 @@ export default async function handler(
     const threshold = thresholdPct / 100; // % → 비율
     const daysInMonth = getDaysInMonth(targetMonth);
 
-    // 1. 사용 가능한 월 목록 조회
-    const monthsQuery = buildAvailableMonthsQuery(brand);
-    const monthsResult = await runQuery(monthsQuery);
-    const availableMonths = monthsResult.map((row: any) => row.SALE_YM);
+    // 기준월을 "YYYY.MM" 형식으로 변환
+    const targetMonthFormatted = targetMonth.length === 6 
+      ? `${targetMonth.substring(0, 4)}.${targetMonth.substring(4, 6)}`
+      : targetMonth;
 
-    // 2. OR 직영매장 정체재고 분석 쿼리 실행 (집계 데이터)
-    const shopQuery = buildShopStagnantStockQuery(brand, targetMonth, threshold);
-    const shopResult = await runQuery(shopQuery);
-
-    // 3. 상품 단위 데이터 쿼리 실행 (모달용)
-    const productQuery = buildShopProductBreakdownQuery(brand, targetMonth, threshold);
-    const productResult = await runQuery(productQuery);
-
-    // 4. 결과 매핑 - 집계 데이터
-    const shopBreakdown: ShopBreakdownItem[] = shopResult.map((row: any) => ({
-      shop_id: row.SHOP_ID || "",
-      shop_nm_en: row.SHOP_NM_EN || row.SHOP_ID || "",
-      onOffType: row.ONOFFTYPE || null,
-      dimensionKey: row.DIMENSION_KEY || "",
-      prdt_nm_cn: row.PRDT_NM_CN || "",
-      stock_amt: Number(row.STOCK_AMT) || 0,
-      stock_qty: Number(row.STOCK_QTY) || 0,
-      tag_amt: Number(row.TAG_AMT) || 0,
-      sale_amt: Number(row.SALE_AMT) || 0,
-      slow_cls: row.SLOW_CLS || "전체",
-      season_bucket: row.SEASON_BUCKET || "",
-      mid_category: row.MID_CATEGORY || "",
-      mid_category_kr: row.MID_CATEGORY_KR || "기타악세",
-      discount_rate: row.DISCOUNT_RATE !== null ? Number(row.DISCOUNT_RATE) : null,
-      item_count: Number(row.ITEM_COUNT) || 0,
-    }));
-
-    // 5. 결과 매핑 - 상품 단위 데이터 (prdt_scs_cd 단위)
-    const shopProductBreakdown: ShopProductBreakdownItem[] = productResult.map((row: any) => ({
-      shop_id: row.SHOP_ID || "",
-      shop_nm_en: row.SHOP_NM_EN || row.SHOP_ID || "",
-      onOffType: row.ONOFFTYPE || null,
-      prdt_cd: row.PRDT_SCS_CD || "",  // prdt_scs_cd를 prdt_cd 필드에 저장
-      prdt_nm: row.PRDT_NM || "",
-      season: row.SEASON || "",
-      season_bucket: row.SEASON_BUCKET || "과시즌",
-      mid_category_kr: row.MID_CATEGORY_KR || "기타",
-      stock_amt: Number(row.STOCK_AMT) || 0,
-      stock_qty: Number(row.STOCK_QTY) || 0,
-      tag_amt: Number(row.TAG_AMT) || 0,
-      sale_amt: Number(row.SALE_AMT) || 0,
-      is_slow: row.IS_SLOW === 1 || row.IS_SLOW === true,
-    }));
-
-    // 6. 응답 생성
-    const response: ShopStagnantStockResponse = {
-      shopBreakdown,
-      shopProductBreakdown,
-      availableMonths,
-      meta: {
-        targetMonth,
-        brand: brandParam as string,
-        thresholdPct,
-        daysInMonth,
-      },
-    };
-
-    res.status(200).json(response);
+    // 전처리 JSON에서만 읽기
+    console.log(`[shop-stagnant-stock] 전처리 JSON에서 데이터를 읽습니다. brand=${brand}, targetMonth=${targetMonthFormatted}`);
+    
+    try {
+      interface ShopStagnantStockSummaryData {
+        brands: {
+          [brand: string]: {
+            [targetMonth: string]: ShopStagnantStockResponse;
+          };
+        };
+      }
+      
+      const jsonData = readBatchJsonFile<ShopStagnantStockSummaryData>("shop_stagnant_stock_summary.json");
+      
+      if (jsonData.brands?.[brand]?.[targetMonth]) {
+        const response = jsonData.brands[brand][targetMonth];
+        res.status(200).json(response);
+        return;
+      } else {
+        console.warn(`[shop-stagnant-stock] JSON에 해당 월 데이터 없음 → Snowflake 실시간 조회: brand=${brand}, targetMonth=${targetMonth}`);
+        const response = await fetchShopStagnantStockData(brand, targetMonth, thresholdPct);
+        res.status(200).json(response);
+        return;
+      }
+    } catch (jsonError) {
+      console.error(`[shop-stagnant-stock] JSON 파일 읽기 실패 → Snowflake 실시간 조회:`, jsonError);
+      const response = await fetchShopStagnantStockData(brand, targetMonth, thresholdPct);
+      res.status(200).json(response);
+      return;
+    }
   } catch (error) {
     console.error("Shop stagnant stock API error:", error);
     res.status(500).json({ error: String(error) });

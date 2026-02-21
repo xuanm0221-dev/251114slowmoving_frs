@@ -47,6 +47,13 @@ def build_sales_aggregation_query(start_month: str = '202401', end_month: str = 
     """
     query = f"""
 WITH 
+-- ACC 아이템 맵: DB_PRDT에서 DISTINCT ITEM, PRDT_KIND_NM_ENG 추출
+acc_item_map AS (
+  SELECT DISTINCT ITEM, PRDT_KIND_NM_ENG
+  FROM FNF.PRCS.DB_PRDT
+  WHERE PARENT_PRDT_KIND_NM_ENG = 'ACC'
+),
+
 -- Step 1: 판매 데이터에 상품/매장 마스터 조인 및 remark 자동 계산
 -- 기준: 2023.12 (remark1) 시작, 3개월씩 자동 확장
 sales_with_master AS (
@@ -58,9 +65,8 @@ sales_with_master AS (
     s.brd_cd,
     s.sesn,
     s.tag_amt,
-    p.parent_prdt_kind_cd,
-    p.prdt_kind_nm_en,
-    d.fr_or_cls,
+    db.PRDT_KIND_NM_ENG AS prdt_kind_nm_en,
+    COALESCE(map_norm.fr_or_cls, map_cn.fr_or_cls, map_internal.fr_or_cls) AS fr_or_cls,
     -- remark 번호 자동 계산 (23.12 기준, 3개월 단위)
     FLOOR(DATEDIFF('month', TO_DATE('202312', 'YYYYMM'), s.sale_dt) / 3) + 1 AS remark_num,
     -- 해당 판매일의 연도 YY (2024 → 24)
@@ -71,18 +77,51 @@ sales_with_master AS (
     p.remark11, p.remark12, p.remark13, p.remark14, p.remark15
   FROM CHN.DW_SALE s
   LEFT JOIN FNF.CHN.MST_PRDT_SCS p ON s.prdt_scs_cd = p.prdt_scs_cd
+  LEFT JOIN acc_item_map db ON SUBSTR(s.prdt_scs_cd, 7, 2) = db.ITEM
+  -- 3-way 매장 매핑 (norm → cn → internal)
   LEFT JOIN (
-    SELECT shop_id, fr_or_cls
+    SELECT 
+      TO_VARCHAR(oa_map_shop_id) AS norm_key,
+      fr_or_cls
     FROM CHN.DW_SHOP_WH_DETAIL
     WHERE fr_or_cls IS NOT NULL
-    QUALIFY ROW_NUMBER() OVER(PARTITION BY shop_id ORDER BY COALESCE(open_dt, '1900-01-01') DESC) = 1
-  ) d ON s.shop_id = d.shop_id
+      AND oa_map_shop_id IS NOT NULL
+    QUALIFY ROW_NUMBER() OVER(
+      PARTITION BY oa_map_shop_id 
+      ORDER BY open_dt DESC NULLS LAST
+    ) = 1
+  ) map_norm ON TO_VARCHAR(s.shop_id) = map_norm.norm_key
+  LEFT JOIN (
+    SELECT 
+      TO_VARCHAR(oa_shop_id) AS cn_key,
+      TO_VARCHAR(oa_map_shop_id) AS norm_key,
+      fr_or_cls
+    FROM CHN.DW_SHOP_WH_DETAIL
+    WHERE fr_or_cls IS NOT NULL
+      AND oa_shop_id IS NOT NULL
+    QUALIFY ROW_NUMBER() OVER(
+      PARTITION BY oa_shop_id 
+      ORDER BY open_dt DESC NULLS LAST
+    ) = 1
+  ) map_cn ON TO_VARCHAR(s.shop_id) = map_cn.cn_key
+  LEFT JOIN (
+    SELECT 
+      TO_VARCHAR(shop_id) AS internal_key,
+      TO_VARCHAR(oa_map_shop_id) AS norm_key,
+      fr_or_cls
+    FROM CHN.DW_SHOP_WH_DETAIL
+    WHERE fr_or_cls IS NOT NULL
+      AND shop_id IS NOT NULL
+    QUALIFY ROW_NUMBER() OVER(
+      PARTITION BY shop_id 
+      ORDER BY open_dt DESC NULLS LAST
+    ) = 1
+  ) map_internal ON TO_VARCHAR(s.shop_id) = map_internal.internal_key
   WHERE TO_CHAR(s.sale_dt, 'YYYYMM') >= '{start_month}'
     AND TO_CHAR(s.sale_dt, 'YYYYMM') <= '{end_month}'
     AND s.brd_cd IN ('M', 'I', 'X')
-    AND p.parent_prdt_kind_cd = 'A'  -- 악세사리만
-    AND p.prdt_kind_nm_en IN ('Shoes', 'Headwear', 'Bag', 'Acc_etc')
-    AND d.fr_or_cls IN ('FR', 'OR')  -- HQ 제외
+    AND db.ITEM IS NOT NULL -- ACC 필터
+    AND COALESCE(map_norm.fr_or_cls, map_cn.fr_or_cls, map_internal.fr_or_cls) IN ('FR', 'OR')  -- HQ 제외, mapped만
 ),
 
 -- Step 2: 동적 remark 선택 (2025년 12월부터 operate_standard 사용)

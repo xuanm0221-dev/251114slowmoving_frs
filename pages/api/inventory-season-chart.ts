@@ -1,11 +1,12 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { runQuery } from "../../lib/snowflake";
+import { readBatchJsonFile } from "../../src/lib/batchDataLoader";
+import type { DimensionTab } from "../../src/types/stagnantStock";
+import * as fs from "fs";
+import * as path from "path";
 
 // 시즌 그룹 타입
 type SeasonGroup = "정체재고" | "당시즌" | "차기시즌" | "과시즌" | "당월수량미달";
-
-// 분석 단위 타입
-type DimensionTab = "스타일" | "컬러" | "사이즈" | "컬러&사이즈";
 
 // 아이템 필터 타입
 type ItemFilterTab = "ACC합계" | "신발" | "모자" | "가방" | "기타";
@@ -133,6 +134,11 @@ function buildMonthlyStockQuery(
 
   return `
     WITH 
+    acc_item_map AS (
+      SELECT DISTINCT ITEM, PRDT_KIND_NM_ENG
+      FROM FNF.PRCS.DB_PRDT
+      WHERE PARENT_PRDT_KIND_NM_ENG = 'ACC'
+    ),
     -- 월별 스타일 기준 당월수량 집계 (당월수량미달 판단용)
     style_monthly_qty AS (
       SELECT 
@@ -140,10 +146,10 @@ function buildMonthlyStockQuery(
         a.prdt_cd AS style,
         SUM(a.stock_qty_expected) AS current_stock_qty
       FROM fnf.chn.dw_stock_m a
-      LEFT JOIN fnf.sap_fnf.mst_prdt b ON a.prdt_cd = b.prdt_cd
+      LEFT JOIN acc_item_map db ON SUBSTR(a.prdt_scs_cd, 7, 2) = db.ITEM
       WHERE ${yymmCondition}
         AND a.brd_cd = '${brand}'
-        AND b.prdt_hrrc1_nm = 'ACC'
+        AND db.ITEM IS NOT NULL
       GROUP BY a.yymm, a.prdt_cd
     ),
     
@@ -155,18 +161,18 @@ function buildMonthlyStockQuery(
         a.prdt_cd AS style,
         MAX(a.sesn) AS season,
         MAX(CASE
-          WHEN b.prdt_hrrc2_nm = 'Shoes' THEN '신발'
-          WHEN b.prdt_hrrc2_nm = 'Headwear' THEN '모자'
-          WHEN b.prdt_hrrc2_nm = 'Bag' THEN '가방'
-          WHEN b.prdt_hrrc2_nm = 'Acc_etc' THEN '기타'
-          ELSE b.prdt_hrrc2_nm
+          WHEN db.PRDT_KIND_NM_ENG = 'Shoes' THEN '신발'
+          WHEN db.PRDT_KIND_NM_ENG = 'Headwear' THEN '모자'
+          WHEN db.PRDT_KIND_NM_ENG = 'Bag' THEN '가방'
+          WHEN db.PRDT_KIND_NM_ENG = 'Acc_etc' THEN '기타'
+          ELSE db.PRDT_KIND_NM_ENG
         END) AS mid_category_kr,
-        SUM(a.stock_tag_amt_expected) AS stock_amt
+        SUM(COALESCE(a.stock_tag_amt_insp, 0) + COALESCE(a.stock_tag_amt_frozen, 0) + COALESCE(a.stock_tag_amt_expected, 0)) AS stock_amt
       FROM fnf.chn.dw_stock_m a
-      LEFT JOIN fnf.sap_fnf.mst_prdt b ON a.prdt_cd = b.prdt_cd
+      LEFT JOIN acc_item_map db ON SUBSTR(a.prdt_scs_cd, 7, 2) = db.ITEM
       WHERE ${yymmCondition}
         AND a.brd_cd = '${brand}'
-        AND b.prdt_hrrc1_nm = 'ACC'
+        AND db.ITEM IS NOT NULL
       GROUP BY a.yymm, ${dimConfig.stockKey}, a.prdt_cd
     ),
     
@@ -177,19 +183,19 @@ function buildMonthlyStockQuery(
         ${dimConfig.salesKey} AS dimension_key,
         MAX(SUBSTR(s.prdt_cd, 2, 3)) AS season,
         MAX(CASE
-          WHEN p.prdt_hrrc2_nm = 'Shoes' THEN '신발'
-          WHEN p.prdt_hrrc2_nm = 'Headwear' THEN '모자'
-          WHEN p.prdt_hrrc2_nm = 'Bag' THEN '가방'
-          WHEN p.prdt_hrrc2_nm = 'Acc_etc' THEN '기타'
-          ELSE p.prdt_hrrc2_nm
+          WHEN db.PRDT_KIND_NM_ENG = 'Shoes' THEN '신발'
+          WHEN db.PRDT_KIND_NM_ENG = 'Headwear' THEN '모자'
+          WHEN db.PRDT_KIND_NM_ENG = 'Bag' THEN '가방'
+          WHEN db.PRDT_KIND_NM_ENG = 'Acc_etc' THEN '기타'
+          ELSE db.PRDT_KIND_NM_ENG
         END) AS mid_category_kr,
         SUM(s.tag_amt) AS sales_amt
       FROM fnf.chn.dw_sale s
-      LEFT JOIN fnf.sap_fnf.mst_prdt p ON s.prdt_cd = p.prdt_cd
+      LEFT JOIN acc_item_map db ON SUBSTR(s.prdt_scs_cd, 7, 2) = db.ITEM
       LEFT JOIN fnf.chn.dw_shop_wh_detail d ON s.shop_id = d.oa_map_shop_id
       WHERE ${salesYymmCondition}
         AND s.brd_cd = '${brand}'
-        AND p.prdt_hrrc1_nm = 'ACC'
+        AND db.ITEM IS NOT NULL
         AND d.fr_or_cls IN ('FR', 'OR')
       GROUP BY TO_CHAR(s.sale_dt, 'YYYYMM'), ${dimConfig.salesKey}
     ),
@@ -212,10 +218,10 @@ function buildMonthlyStockQuery(
         ${dimConfig.stockKey} AS dimension_key,
         SUM(a.stock_qty_expected) AS prev_stock_qty
       FROM fnf.chn.dw_stock_m a
-      LEFT JOIN fnf.sap_fnf.mst_prdt b ON a.prdt_cd = b.prdt_cd
+      LEFT JOIN acc_item_map db ON SUBSTR(a.prdt_scs_cd, 7, 2) = db.ITEM
       WHERE ${prevYymmCondition}
         AND a.brd_cd = '${brand}'
-        AND b.prdt_hrrc1_nm = 'ACC'
+        AND db.ITEM IS NOT NULL
       GROUP BY a.yymm, ${dimConfig.stockKey}
     ),
     
@@ -381,6 +387,90 @@ function transformResultsByMonths(rows: any[], expectedMonths: string[]): MonthS
   return expectedMonths.map((ym) => monthMap.get(ym)!).filter(Boolean);
 }
 
+// 재고 시즌 차트 데이터 조회 함수 (다른 파일에서 재사용 가능)
+export async function fetchInventorySeasonChartData(
+  brand: string,
+  referenceMonth: string,
+  thresholdPct: number = 0.01,
+  dimensionTab: DimensionTab = "스타일",
+  itemFilter: ItemFilterTab = "ACC합계",
+  minQty: number = 10,
+  currentMonthMinQty: number = 10
+): Promise<InventorySeasonChartResponse> {
+  const thresholdRatio = thresholdPct / 100; // 0.01% → 0.0001
+  const { currentYear, nextYear } = getYearConfig(referenceMonth);
+  const refNorm = referenceMonth.replace(".", "");
+
+  // 기준월 포함 최근 12개월 (기준월-11 ~ 기준월) / 전년 동일 구간 12개월
+  const currentMonths = getTwelveMonthsEndingAt(referenceMonth);
+  const prevMonths: string[] = [];
+  for (let i = 23; i >= 12; i--) {
+    prevMonths.push(getMonthBeforeYYYYMM(referenceMonth, i));
+  }
+
+  // 당년 12개월: 연도별로 쿼리 후 병합
+  const yearRangesCurrent = new Map<string, { start: string; end: string }>();
+  currentMonths.forEach((ym) => {
+    const y = ym.slice(0, 4);
+    if (!yearRangesCurrent.has(y)) {
+      yearRangesCurrent.set(y, { start: ym, end: ym });
+    } else {
+      const r = yearRangesCurrent.get(y)!;
+      if (ym < r.start) r.start = ym;
+      if (ym > r.end) r.end = ym;
+    }
+  });
+  const allRowsCurrent: any[] = [];
+  for (const [yearPrefix, range] of Array.from(yearRangesCurrent.entries())) {
+    const q = buildMonthlyStockQuery(
+      brand, yearPrefix, thresholdRatio, currentYear, nextYear,
+      dimensionTab, itemFilter, minQty, currentMonthMinQty, range.start, range.end
+    );
+    const rows = await runQuery(q);
+    rows.forEach((r: any) => allRowsCurrent.push(r));
+  }
+  const data2025 = transformResultsByMonths(allRowsCurrent, currentMonths);
+
+  // 전년 12개월: 연도별로 쿼리 후 병합
+  const yearRangesPrev = new Map<string, { start: string; end: string }>();
+  prevMonths.forEach((ym) => {
+    const y = ym.slice(0, 4);
+    if (!yearRangesPrev.has(y)) {
+      yearRangesPrev.set(y, { start: ym, end: ym });
+    } else {
+      const r = yearRangesPrev.get(y)!;
+      if (ym < r.start) r.start = ym;
+      if (ym > r.end) r.end = ym;
+    }
+  });
+  const allRowsPrev: any[] = [];
+  for (const [yearPrefix, range] of Array.from(yearRangesPrev.entries())) {
+    const prevY = yearPrefix.slice(-2);
+    const prevNext = String(parseInt(prevY, 10) + 1).padStart(2, "0");
+    const q = buildMonthlyStockQuery(
+      brand, yearPrefix, thresholdRatio, prevY, prevNext,
+      dimensionTab, itemFilter, minQty, currentMonthMinQty, range.start, range.end
+    );
+    const rows = await runQuery(q);
+    rows.forEach((r: any) => allRowsPrev.push(r));
+  }
+  const data2024 = transformResultsByMonths(allRowsPrev, prevMonths);
+
+  const response: InventorySeasonChartResponse = {
+    year2024: data2024,
+    year2025: data2025,
+    meta: {
+      brand,
+      thresholdPct,
+      currentYear,
+      nextYear,
+      currentMonthMinQty,
+    },
+  };
+
+  return response;
+}
+
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<InventorySeasonChartResponse | { error: string }>
@@ -422,53 +512,97 @@ export default async function handler(
       prevMonths.push(getMonthBeforeYYYYMM(referenceMonth, i));
     }
 
-    // 당년 12개월: 연도별로 쿼리 후 병합
-    const yearRangesCurrent = new Map<string, { start: string; end: string }>();
-    currentMonths.forEach((ym) => {
-      const y = ym.slice(0, 4);
-      if (!yearRangesCurrent.has(y)) {
-        yearRangesCurrent.set(y, { start: ym, end: ym });
-      } else {
-        const r = yearRangesCurrent.get(y)!;
-        if (ym < r.start) r.start = ym;
-        if (ym > r.end) r.end = ym;
-      }
-    });
-    const allRowsCurrent: any[] = [];
-    for (const [yearPrefix, range] of Array.from(yearRangesCurrent.entries())) {
-      const q = buildMonthlyStockQuery(
-        brand, yearPrefix, thresholdRatio, currentYear, nextYear,
-        dimTab, itemTab, minQty, currentMonthMinQty, range.start, range.end
-      );
-      const rows = await runQuery(q);
-      rows.forEach((r: any) => allRowsCurrent.push(r));
-    }
-    const data2025 = transformResultsByMonths(allRowsCurrent, currentMonths);
+    // 모든 24개월 목록 (YYYYMM 형식)
+    const allMonths = [...prevMonths, ...currentMonths];
 
-    // 전년 12개월: 연도별로 쿼리 후 병합
-    const yearRangesPrev = new Map<string, { start: string; end: string }>();
-    prevMonths.forEach((ym) => {
-      const y = ym.slice(0, 4);
-      if (!yearRangesPrev.has(y)) {
-        yearRangesPrev.set(y, { start: ym, end: ym });
-      } else {
-        const r = yearRangesPrev.get(y)!;
-        if (ym < r.start) r.start = ym;
-        if (ym > r.end) r.end = ym;
-      }
-    });
-    const allRowsPrev: any[] = [];
-    for (const [yearPrefix, range] of Array.from(yearRangesPrev.entries())) {
-      const prevY = yearPrefix.slice(-2);
-      const prevNext = String(parseInt(prevY, 10) + 1).padStart(2, "0");
-      const q = buildMonthlyStockQuery(
-        brand, yearPrefix, thresholdRatio, prevY, prevNext,
-        dimTab, itemTab, minQty, currentMonthMinQty, range.start, range.end
-      );
-      const rows = await runQuery(q);
-      rows.forEach((r: any) => allRowsPrev.push(r));
+    // JSON 파일 경로
+    const jsonFilePath = path.join(process.cwd(), "public", "data", "inventory_season_chart_summary.json");
+    
+    // JSON에서 월별 데이터 조회
+    interface InventorySeasonChartSummaryData {
+      brands: {
+        [brand: string]: {
+          [month: string]: MonthSeasonData; // YYYYMM 형식 키
+        };
+      };
     }
-    const data2024 = transformResultsByMonths(allRowsPrev, prevMonths);
+    
+    let jsonData: InventorySeasonChartSummaryData = { brands: {} };
+    if (fs.existsSync(jsonFilePath)) {
+      try {
+        const fileContent = fs.readFileSync(jsonFilePath, "utf-8");
+        const parsed = JSON.parse(fileContent);
+        // 기존 구조(기준월별)와 새 구조(월별) 모두 지원
+        if (parsed.brands) {
+          for (const brandCode in parsed.brands) {
+            const brandData = parsed.brands[brandCode];
+            if (!jsonData.brands[brandCode]) {
+              jsonData.brands[brandCode] = {};
+            }
+            // 기준월별 구조인지 월별 구조인지 확인
+            for (const key in brandData) {
+              const value = brandData[key];
+              if (value.year2024 && value.year2025) {
+                // 기존 구조: 기준월별 -> 월별로 변환
+                const year2024 = value.year2024 as MonthSeasonData[];
+                const year2025 = value.year2025 as MonthSeasonData[];
+                [...year2024, ...year2025].forEach((monthData) => {
+                  jsonData.brands[brandCode][monthData.month] = monthData;
+                });
+              } else if (value.month) {
+                // 새 구조: 월별
+                jsonData.brands[brandCode][key] = value;
+              }
+            }
+          }
+        }
+      } catch (error) {
+        console.warn(`[inventory-season-chart] JSON 파일 읽기 실패:`, error);
+      }
+    }
+
+    // JSON에서 월별 데이터 조회
+    const monthDataMap = new Map<string, MonthSeasonData>();
+    for (const month of allMonths) {
+      if (jsonData.brands[brand]?.[month]) {
+        monthDataMap.set(month, jsonData.brands[brand][month]);
+      }
+    }
+
+    // 없는 월은 빈 데이터로 처리 (JSON 전용)
+    const missingMonths = allMonths.filter(m => !monthDataMap.has(m));
+    if (missingMonths.length > 0) {
+      console.log(`[inventory-season-chart] JSON에 없는 월: ${missingMonths.length}개 월 (${missingMonths.join(', ')}) - 빈 데이터로 처리`);
+    } else {
+      console.log(`[inventory-season-chart] 모든 월 데이터가 JSON에 있습니다.`);
+    }
+
+    // 24개월 데이터를 조합하여 반환
+    const data2024 = prevMonths.map(month => 
+      monthDataMap.get(month) || {
+        month,
+        정체재고: { stock_amt: 0, sales_amt: 0 },
+        과시즌: { stock_amt: 0, sales_amt: 0 },
+        당시즌: { stock_amt: 0, sales_amt: 0 },
+        차기시즌: { stock_amt: 0, sales_amt: 0 },
+        당월수량미달: { stock_amt: 0, sales_amt: 0 },
+        total_stock_amt: 0,
+        total_sales_amt: 0,
+      }
+    );
+    
+    const data2025 = currentMonths.map(month => 
+      monthDataMap.get(month) || {
+        month,
+        정체재고: { stock_amt: 0, sales_amt: 0 },
+        과시즌: { stock_amt: 0, sales_amt: 0 },
+        당시즌: { stock_amt: 0, sales_amt: 0 },
+        차기시즌: { stock_amt: 0, sales_amt: 0 },
+        당월수량미달: { stock_amt: 0, sales_amt: 0 },
+        total_stock_amt: 0,
+        total_sales_amt: 0,
+      }
+    );
 
     const response: InventorySeasonChartResponse = {
       year2024: data2024,

@@ -130,13 +130,12 @@ export default function Home() {
           </div>
 
           <div className="card">
-            <h3 className="text-lg font-semibold text-white mb-4">🔵 Snowflake</h3>
+            <h3 className="text-lg font-semibold text-white mb-4">🔵 데이터 소스</h3>
             <ul className="space-y-2 text-gray-400 text-sm">
-              <li className="font-semibold text-blue-300">배치 전처리:</li>
-              <li className="ml-2">• 판매/재고 데이터</li>
+              <li className="font-semibold text-blue-300">하이브리드 로딩:</li>
+              <li className="ml-2">• 판매/재고: 마감월까지 JSON, 이후 Snowflake API</li>
               <li className="font-semibold text-blue-300 mt-2">실시간 API:</li>
-              <li className="ml-2">• 실제 입고</li>
-              <li className="ml-2">• 정체재고 분석</li>
+              <li className="ml-2">• 실제 입고, 정체재고, 재고시즌, 품목상세</li>
             </ul>
           </div>
 
@@ -159,7 +158,7 @@ export default function Home() {
             {/* Snowflake 배치 전처리 */}
             <div>
               <h4 className="text-sm font-semibold text-blue-300 mb-3">
-                🔵 Snowflake 데이터 가져오기 (필수)
+                🔵 Snowflake 데이터 전처리 (필수)
               </h4>
               <div className="space-y-3">
                 <div className="flex flex-col gap-1">
@@ -167,7 +166,7 @@ export default function Home() {
                     python scripts/preprocess_sales.py
                   </code>
                   <span className="text-xs text-gray-500 ml-1">
-                    → CHN.DW_SALE에서 판매매출 데이터 가져오기
+                    → 판매매출 데이터 전처리 (증분 처리 지원: 새로 추가된 월만 자동 처리)
                   </span>
                 </div>
                 
@@ -176,8 +175,11 @@ export default function Home() {
                     python scripts/preprocess_inventory.py
                   </code>
                   <span className="text-xs text-gray-500 ml-1">
-                    → CHN.DW_STOCK_M에서 재고자산 데이터 가져오기
+                    → 재고자산 데이터 전처리 (증분 처리 지원: 새로 추가된 월만 자동 처리)
                   </span>
+                </div>
+                <div className="mt-2 p-2 bg-gray-900/50 rounded text-xs text-gray-400">
+                  💡 <span className="font-semibold text-gray-300">증분 처리:</span> ANALYSIS_MONTHS에 새 월을 추가하면 해당 월만 자동으로 처리됩니다. 기존 데이터는 유지됩니다.
                 </div>
               </div>
             </div>
@@ -196,30 +198,29 @@ export default function Home() {
               </ul>
             </div>
 
-            {/* 스냅샷 저장 기능 */}
+            {/* 마감 및 스냅샷 기능 */}
             <div>
               <h4 className="text-sm font-semibold text-orange-300 mb-3">
-                📸 스냅샷 저장 기능
+                📸 월 마감 및 스냅샷 저장
               </h4>
               <ul className="text-xs text-gray-400 space-y-1.5 ml-4">
-                <li>• 판매/재고 스냅샷: 기준월의 판매 및 재고 데이터 저장</li>
-                <li>• 입고예정 스냅샷: 기준월의 입고예정 재고자산 데이터 저장</li>
-                <li>• 기준월이 마감된 월일 때만 저장 가능</li>
-                <li>• 네비게이션 바에서 저장 버튼 확인 및 실행</li>
+                <li>• <span className="font-semibold text-gray-300">월 마감:</span> 기준월을 마감하면 해당 월 데이터가 JSON으로 고정 저장</li>
+                <li>• <span className="font-semibold text-gray-300">스냅샷 저장:</span> 마감된 월의 판매/재고 데이터를 스냅샷으로 별도 저장</li>
+                <li>• <span className="font-semibold text-gray-300">입고예정 스냅샷:</span> 기준월의 입고예정 재고자산 데이터 저장</li>
+                <li>• 마감된 월은 JSON에서 읽어오므로 빠른 조회 가능</li>
+                <li>• 네비게이션 바에서 마감 및 스냅샷 버튼 확인 및 실행</li>
               </ul>
             </div>
 
-            {/* 자동 조회 안내 */}
+            {/* 하이브리드 데이터 로딩 안내 */}
             <div className="pt-4 border-t border-gray-700">
               <h4 className="text-sm font-semibold text-green-300 mb-2">
-                ✅ 자동 조회되는 데이터 (전처리 불필요)
+                ✅ 하이브리드 데이터 로딩
               </h4>
               <ul className="text-xs text-gray-400 space-y-1 ml-4">
-                <li>• 실제 입고 데이터 (Snowflake 실시간 API)</li>
-                <li>• 정체재고 분석 (Snowflake 실시간 API)</li>
-                <li>• 재고 시즌 차트 (Snowflake 실시간 API)</li>
-                <li>• 품목 상세 정보 (Snowflake 실시간 API)</li>
-                <li>• 대리상 마스터 (로컬 CSV 자동 로드)</li>
+                <li>• <span className="font-semibold text-gray-300">판매/재고 데이터:</span> 마감된 월은 JSON 파일에서, 마감되지 않은 월은 Snowflake API에서 자동 조회</li>
+                <li>• <span className="font-semibold text-gray-300">실시간 API:</span> 실제 입고, 정체재고 분석, 재고 시즌 차트, 품목 상세 정보</li>
+                <li>• <span className="font-semibold text-gray-300">로컬 데이터:</span> 대리상 마스터 (CSV), 입고예정 재고자산 (JSON)</li>
               </ul>
             </div>
 

@@ -35,24 +35,126 @@ VALID_BRANDS = {"MLB", "MLB KIDS", "DISCOVERY"}
 VALID_ITEM_CATEGORIES = {"Shoes", "Headwear", "Bag", "Acc_etc"}
 
 
-def process_retail_data() -> Tuple[Dict[str, Any], Set[str]]:
+def get_processed_months_from_json() -> set:
+    """
+    기존 JSON 파일에서 실제로 데이터가 있는 월 목록 추출
+    
+    Returns:
+        set: 처리된 월 목록 (예: {"2024.01", "2024.02", ...})
+    """
+    output_file = OUTPUT_PATH / "accessory_sales_summary.json"
+    if not output_file.exists():
+        return set()
+    
+    try:
+        with open(output_file, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        
+        # months 배열에서 추출
+        months_list = data.get("months", [])
+        return set(months_list)
+    except Exception as e:
+        print(f"[WARNING] 기존 JSON 파일 읽기 실패: {e}")
+        return set()
+
+
+def get_new_months_to_process() -> list:
+    """
+    ANALYSIS_MONTHS에서 새로 추가된 월만 반환
+    
+    Returns:
+        list: 새로 처리할 월 목록 (예: ["2025.12", "2026.01"])
+    """
+    processed_months = get_processed_months_from_json()
+    new_months = [m for m in ANALYSIS_MONTHS if m not in processed_months]
+    return sorted(new_months)
+
+
+def display_preprocessing_status() -> list:
+    """
+    현재 전처리 상태를 명확히 표시하고 새로 처리할 월 목록 반환
+    
+    Returns:
+        list: 새로 처리할 월 목록
+    """
+    processed_months = get_processed_months_from_json()
+    new_months = get_new_months_to_process()
+    
+    print("=" * 60)
+    print("전처리 상태 확인")
+    print("=" * 60)
+    
+    if processed_months:
+        sorted_processed = sorted(processed_months)
+        first_month = sorted_processed[0]
+        last_month = sorted_processed[-1]
+        count = len(processed_months)
+        print(f"[판매] 기존 JSON에 포함된 월: {first_month} ~ {last_month} ({count}개월)")
+    else:
+        print("[판매] 기존 JSON 파일이 없습니다. 전체 기간을 처리합니다.")
+    
+    sorted_analysis = sorted(ANALYSIS_MONTHS)
+    first_analysis = sorted_analysis[0]
+    last_analysis = sorted_analysis[-1]
+    count_analysis = len(ANALYSIS_MONTHS)
+    print(f"[판매] ANALYSIS_MONTHS에 정의된 월: {first_analysis} ~ {last_analysis} ({count_analysis}개월)")
+    
+    if new_months:
+        print(f"[판매] 새로 처리할 월: {', '.join(new_months)} ({len(new_months)}개월)")
+    else:
+        print("[판매] 새로 처리할 월이 없습니다. 모든 월이 이미 처리되었습니다.")
+    
+    print()
+    return new_months
+
+
+def process_retail_data(months_to_process: list = None) -> Tuple[Dict[str, Any], Set[str]]:
     """
     Snowflake에서 판매 데이터 조회 및 집계
     (기존 CSV 기반 로직을 Snowflake로 완전 대체)
+    
+    Args:
+        months_to_process: 처리할 월 목록 (None이면 전체 기간 처리)
+    
+    Returns:
+        Tuple[Dict, Set]: 집계 결과와 예상치 못한 카테고리
     """
     print("=" * 60)
     print("판매 데이터 Snowflake 조회 시작")
     print("=" * 60)
     
     try:
-        # Snowflake에서 전체 기간 데이터 조회
-        start_month = ANALYSIS_MONTHS[0].replace('.', '')  # "2024.01" → "202401"
-        end_month = ANALYSIS_MONTHS[-1].replace('.', '')   # "2025.11" → "202511"
+        if months_to_process is None:
+            # 전체 기간 처리 (기존 동작)
+            start_month = ANALYSIS_MONTHS[0].replace('.', '')  # "2024.01" → "202401"
+            end_month = ANALYSIS_MONTHS[-1].replace('.', '')   # "2026.01" → "202601"
+            print(f"[판매] 전체 기간 처리: {start_month} ~ {end_month}")
+        else:
+            # 선택된 월만 처리
+            if not months_to_process:
+                print("[판매] 처리할 월이 없습니다.")
+                return {}, set()
+            
+            start_month = min(months_to_process).replace('.', '')  # "2025.12" → "202512"
+            end_month = max(months_to_process).replace('.', '')   # "2026.01" → "202601"
+            print(f"[판매] 선택된 월만 처리: {start_month} ~ {end_month}")
+            print(f"[판매] 처리할 월 목록: {', '.join(months_to_process)}")
         
         agg_dict, unexpected_categories = aggregate_sales_from_snowflake(
             start_month=start_month,
             end_month=end_month
         )
+        
+        # months_to_process가 지정된 경우, 해당 월만 필터링
+        if months_to_process:
+            months_set = set(months_to_process)
+            filtered_dict = {}
+            for key, value in agg_dict.items():
+                brand, item_tab, month, channel, ptype = key
+                if month in months_set:
+                    filtered_dict[key] = value
+            agg_dict = filtered_dict
+            print(f"[판매] 필터링 완료: {len(agg_dict):,}개 키 (선택된 월만)")
         
         print(f"[완료] 판매 데이터 집계 완료: {len(agg_dict):,}개 키")
         return agg_dict, unexpected_categories
@@ -98,8 +200,13 @@ def convert_sales_to_json_structure(agg_dict: Dict[Tuple, float], unexpected_cat
 
 
 
-def main():
-    """메인 실행 함수"""
+def main(reference_month: str = None):
+    """
+    메인 실행 함수
+    
+    Args:
+        reference_month: 기준월 (예: "2026.01"). None이면 ANALYSIS_MONTHS에서 새로 추가된 월만 처리
+    """
     print("=" * 60)
     print("악세사리 판매매출 데이터 전처리 시작 (Snowflake 버전)")
     print("=" * 60)
@@ -109,6 +216,25 @@ def main():
     
     # 출력 폴더 생성
     OUTPUT_PATH.mkdir(parents=True, exist_ok=True)
+    
+    # 기준월이 지정된 경우 해당 월만 처리
+    if reference_month:
+        print(f"[판매] 기준월 모드: {reference_month}만 처리합니다.")
+        new_months = [reference_month]
+    else:
+        # 전처리 상태 확인 및 새로 처리할 월 목록 가져오기
+        new_months = display_preprocessing_status()
+    
+    # 기존 JSON 파일 로드 (병합을 위해)
+    sales_output_file = OUTPUT_PATH / "accessory_sales_summary.json"
+    existing_data = None
+    if sales_output_file.exists():
+        try:
+            with open(sales_output_file, 'r', encoding='utf-8') as f:
+                existing_data = json.load(f)
+            print("[판매] 기존 JSON 파일 로드 완료")
+        except Exception as e:
+            print(f"[WARNING] 기존 JSON 파일 읽기 실패: {e}")
     
     # 스냅샷 파일에서 2025년 11월까지 데이터 로드
     snapshot_path = OUTPUT_PATH / "snapshots" / "accessory_sales_summary_202511.json"
@@ -122,11 +248,19 @@ def main():
         print(f"[완료] 스냅샷 로드: {snapshot_path}")
         print()
     
-    # 판매 데이터 처리 (Snowflake에서 조회 - 2025년 12월부터만)
-    print("=" * 40)
-    print("판매(retail) 데이터 처리 중 (Snowflake, 2025년 12월부터)...")
-    print("=" * 40)
-    sales_agg_dict, sales_unexpected = process_retail_data()
+    # 새로 처리할 월이 있으면 해당 월만 처리, 없으면 전체 처리
+    if new_months:
+        print("=" * 60)
+        print("판매 데이터 처리 시작 (증분 처리 모드)")
+        print("=" * 60)
+        months_to_process = new_months
+    else:
+        print("=" * 60)
+        print("판매 데이터 처리 시작 (전체 처리 모드)")
+        print("=" * 60)
+        months_to_process = None
+    
+    sales_agg_dict, sales_unexpected = process_retail_data(months_to_process)
     
     if sales_unexpected:
         print()
@@ -138,6 +272,28 @@ def main():
     print()
     print("판매 데이터 JSON 변환 중...")
     sales_json = convert_sales_to_json_structure(sales_agg_dict, sales_unexpected)
+    
+    # 기존 데이터와 병합
+    if existing_data:
+        print("기존 데이터와 병합 중...")
+        # 기존 월 데이터 유지 (새로 처리한 월만 덮어쓰기)
+        for brand in existing_data.get("brands", {}):
+            if brand not in sales_json["brands"]:
+                sales_json["brands"][brand] = {}
+            for item_tab in existing_data["brands"][brand]:
+                if item_tab not in sales_json["brands"][brand]:
+                    sales_json["brands"][brand][item_tab] = {}
+                # 기존 월 데이터 복사 (새로 처리한 월이 아니면)
+                for month in existing_data["brands"][brand][item_tab]:
+                    if not new_months or month not in new_months:
+                        sales_json["brands"][brand][item_tab][month] = existing_data["brands"][brand][item_tab][month]
+        
+        # months 목록도 병합
+        existing_months = set(existing_data.get("months", []))
+        current_months = set(sales_json.get("months", []))
+        sales_json["months"] = sorted(list(existing_months | current_months))
+        
+        print("[완료] 기존 데이터 병합 완료")
     
     # 스냅샷 데이터와 병합 (2025년 11월까지는 스냅샷 사용)
     if snapshot_data:
@@ -161,20 +317,25 @@ def main():
         
         print("[완료] 스냅샷 데이터 병합 완료 (2025년 11월까지 고정)")
     
-    sales_output_file = OUTPUT_PATH / "accessory_sales_summary.json"
+    # JSON 저장
     with open(sales_output_file, 'w', encoding='utf-8') as f:
         json.dump(sales_json, f, ensure_ascii=False, indent=2)
-    print(f"[DONE] 판매 JSON 저장: {sales_output_file}")
     
-    # 통계 출력
-    print()
+    # 완료 상태 출력
+    print("\n" + "=" * 60)
+    print("전처리 완료")
     print("=" * 60)
-    print("처리 완료 요약")
-    print("=" * 60)
-    print(f"처리된 월 수: {len(ANALYSIS_MONTHS)}")
-    print(f"판매 집계 키 수: {len(sales_agg_dict):,}")
+    final_months = sorted(sales_json.get("months", []))
+    if final_months:
+        first_month = final_months[0]
+        last_month = final_months[-1]
+        count = len(final_months)
+        print(f"[판매] 처리 완료된 월: {first_month} ~ {last_month} ({count}개월)")
+        print(f"[판매] 마지막 처리 월: {last_month}")
+    print(f"[판매] 판매 집계 키 수: {len(sales_agg_dict):,}")
     if sales_unexpected:
-        print(f"판매 예상치 못한 중분류 수: {len(sales_unexpected)}")
+        print(f"[판매] 예상치 못한 중분류 수: {len(sales_unexpected)}")
+    print(f"[DONE] 저장 완료: {sales_output_file}")
     print()
     print("[참고] 재고 데이터는 preprocess_inventory.py를 실행하세요.")
     print()
@@ -353,5 +514,12 @@ if __name__ == "__main__":
             merge_sales_month(months, r"D:\data\retail")
         else:
             print("사용법: python preprocess_sales.py --merge 2025.11 [2025.12 ...]")
+    # 기준월 모드: python preprocess_sales.py --reference-month 2026.01
+    elif len(sys.argv) > 1 and sys.argv[1] == "--reference-month":
+        if len(sys.argv) > 2:
+            reference_month = sys.argv[2]
+            main(reference_month=reference_month)
+        else:
+            print("사용법: python preprocess_sales.py --reference-month 2026.01")
     else:
         main()

@@ -90,7 +90,7 @@ export default function BrandSalesPage({ brand, title }: BrandSalesPageProps) {
     const fetchData = async () => {
       try {
         // Snowflake API에서 판매 데이터 가져오기
-        const salesResponse = await fetch(`/api/sales-data?brand=${brand}`);
+        const salesResponse = await fetch(`/api/sales-data?brand=${brand}&referenceMonth=${referenceMonth}`);
         if (!salesResponse.ok) {
           throw new Error("판매 데이터를 불러오는데 실패했습니다.");
         }
@@ -106,7 +106,7 @@ export default function BrandSalesPage({ brand, title }: BrandSalesPageProps) {
         }
 
         // Snowflake API에서 재고 데이터 가져오기
-        const inventoryResponse = await fetch(`/api/inventory-data?brand=${brand}`);
+        const inventoryResponse = await fetch(`/api/inventory-data?brand=${brand}&referenceMonth=${referenceMonth}`);
         if (!inventoryResponse.ok) {
           throw new Error("재고 데이터를 불러오는데 실패했습니다.");
         }
@@ -403,7 +403,8 @@ export default function BrandSalesPage({ brand, title }: BrandSalesPageProps) {
     });
   }, [salesData?.months, salesBrandData]);
 
-  // 차트용 재고주수 월 목록: 기준월 포함 최근 12개월(실적) + 기준월 다음 6개월(예상) = 총 18개월
+  // 차트용 재고주수 월 목록: 전체(합계)는 기준월+6개월까지, 대리상은 기준월까지만 표시
+  // 전체 차트를 위해 기준월+6개월까지 생성 (대리상은 차트 컴포넌트에서 필터링)
   const stockWeeksChartMonths = useMemo(() => {
     return generateMonthsAroundReference(referenceMonth, 11, 6);
   }, [referenceMonth]);
