@@ -304,9 +304,15 @@ def transform_results_by_months(rows: List[Dict], expected_months: List[str]) ->
         }
     
     for row in rows:
-        month_full = str(row.get("MONTH", ""))
+        raw = str(row.get("MONTH", "")).strip()
+        # Snowflake가 숫자/float로 주면 "202602.0" 등이 되므로 6자리 YYYYMM으로 정규화
+        if "." in raw:
+            month_full = raw.split(".")[0]
+        else:
+            month_full = raw
         if len(month_full) < 6:
             continue
+        month_full = month_full[:6]
         data = month_map.get(month_full)
         season_group = row.get("SEASON_GROUP", "")
         stock_amt = float(row.get("STOCK_AMT", 0) or 0)
@@ -473,8 +479,9 @@ def main(reference_month: str = None):
         brand_code = BRAND_CODE_MAP[brand_name]
         print(f"\n[재고 시즌 차트] 브랜드: {brand_name} ({brand_code})")
         
-        if brand_name not in existing_data["brands"]:
-            existing_data["brands"][brand_name] = {}
+        # API가 brand 쿼리로 M, I, X를 사용하므로 JSON 키는 brand_code 사용
+        if brand_code not in existing_data["brands"]:
+            existing_data["brands"][brand_code] = {}
         
         if months_to_process:
             # 기준월 모드: 지정된 월만 처리
@@ -487,10 +494,10 @@ def main(reference_month: str = None):
                     prev_months = [get_month_before_yyyymm(reference_month_str, i) for i in range(23, 11, -1)]
                     all_24_months = prev_months + current_months
                     
-                    # 기존 JSON에서 브랜드별로 이미 존재하는 월 확인
+                    # 기존 JSON에서 브랜드별로 이미 존재하는 월 확인 (brand_code 키 사용)
                     existing_months = set()
-                    if brand_name in existing_data.get("brands", {}):
-                        existing_months = set(existing_data["brands"][brand_name].keys())
+                    if brand_code in existing_data.get("brands", {}):
+                        existing_months = set(existing_data["brands"][brand_code].keys())
                     
                     # 누락된 월만 필터링
                     missing_months = [m for m in all_24_months if m not in existing_months]
@@ -513,11 +520,11 @@ def main(reference_month: str = None):
                         months_to_fetch=missing_months
                     )
                     
-                    # 조회한 데이터를 월별로 저장 (누락된 월만)
+                    # 조회한 데이터를 월별로 저장 (누락된 월만, brand_code 키로 저장)
                     for month_data in response["year2024"] + response["year2025"]:
                         month = month_data["month"]
                         if month in missing_months:  # 누락된 월만 저장
-                            existing_data["brands"][brand_name][month] = month_data
+                            existing_data["brands"][brand_code][month] = month_data
                     
                     print(f"  완료: {reference_month_str} (누락된 {len(missing_months)}개월 조회 및 저장)")
                 except Exception as e:
