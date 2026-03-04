@@ -37,13 +37,24 @@ export function ReferenceMonthProvider({ children }: { children: ReactNode }) {
   const [referenceMonth, setReferenceMonthState] = useState<string>(getLatestClosedMonth());
   
   // 클라이언트에서만 localStorage에서 저장된 기준월 가져오기
+  // 최신 마감월(26.02 등)이 있으면 그걸 우선 적용 (저장된 값이 더 최신이면 그대로 사용)
   useEffect(() => {
     if (typeof window === "undefined") return;
     
+    const latest = getLatestClosedMonth();
     const stored = localStorage.getItem(STORAGE_KEY);
     const closedMonthsArray = Array.from(CLOSED_MONTHS) as string[];
+    
     if (stored && closedMonthsArray.includes(stored)) {
-      setReferenceMonthState(stored);
+      // 저장된 월이 최신 마감월 이상이면 유지, 아니면 최신 마감월로 설정
+      const useLatest = latest >= stored;
+      setReferenceMonthState(useLatest ? latest : stored);
+      if (useLatest) {
+        localStorage.setItem(STORAGE_KEY, latest);
+      }
+    } else {
+      setReferenceMonthState(latest);
+      localStorage.setItem(STORAGE_KEY, latest);
     }
   }, []);
 
