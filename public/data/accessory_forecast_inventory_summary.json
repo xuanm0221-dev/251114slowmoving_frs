@@ -133,7 +133,7 @@
         "Acc_etc": 0
       },
       "2026.03": {
-        "Shoes": 454000,
+        "Shoes": 0,
         "Headwear": 0,
         "Bag": 0,
         "Acc_etc": 168390
@@ -157,7 +157,7 @@
       "lastUpdated": "2026-03-23T23:48:50.958Z"
     },
     "DISCOVERY": {
-      "lastUpdated": "2026-03-09T13:22:00.139Z"
+      "lastUpdated": "2026-03-23T23:50:03.213Z"
     }
   }
 }
