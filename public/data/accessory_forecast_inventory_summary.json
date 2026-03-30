@@ -77,15 +77,15 @@
         "Acc_etc": 0
       },
       "2026.03": {
-        "Shoes": 4804930,
+        "Shoes": 3664900,
         "Headwear": 300010,
-        "Bag": 0,
+        "Bag": 2575700,
         "Acc_etc": 0
       },
       "2026.04": {
-        "Shoes": 569000,
+        "Shoes": 796600,
         "Headwear": 1220573,
-        "Bag": 2575700,
+        "Bag": 0,
         "Acc_etc": 0
       },
       "2026.05": {
@@ -154,7 +154,7 @@
       "lastUpdated": "2026-03-30T23:46:16.630Z"
     },
     "MLB KIDS": {
-      "lastUpdated": "2026-03-23T23:48:50.958Z"
+      "lastUpdated": "2026-03-30T23:47:46.465Z"
     },
     "DISCOVERY": {
       "lastUpdated": "2026-03-23T23:50:03.213Z"
