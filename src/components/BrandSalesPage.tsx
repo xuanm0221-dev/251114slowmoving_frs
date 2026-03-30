@@ -768,11 +768,11 @@ export default function BrandSalesPage({ brand, title }: BrandSalesPageProps) {
                         <div className="pt-2 border-t border-gray-300">
                           <div className="text-xs text-gray-500">
                             <span className="font-semibold">📦 데이터 소스:</span>
-                            <span className="ml-2">Snowflake 테이블 - CHN.DW_SALE (매출), CHN.DW_SHOP_WH_DETAIL (매장), FNF.CHN.MST_PRDT_SCS (상품마스터)</span>
+                            <span className="ml-2">CHN.DW_SALE (매출), CHN.DW_SHOP_WH_DETAIL (매장), FNF.CHN.MST_PRDT_SCS (상품마스터), CHN.PREP_MST_PRDT_SCS (운영기준 25.12~)</span>
                           </div>
                           <div className="text-xs text-gray-500 mt-1">
                             <span className="font-semibold">🔧 주요 컬럼:</span>
-                            <span className="ml-2">sale_amt (판매금액), shop_id (매장ID), fr_or_cls (채널), prdt_cd (상품코드), parent_prdt_kind_cd (상위제품분류), prdt_kind_nm_en (제품분류영문명), brd_cd (브랜드), remark1~8 (운영기준), sesn (시즌)</span>
+                            <span className="ml-2">sale_amt (판매금액), shop_id (매장ID), fr_or_cls (채널), prdt_cd (상품코드), prdt_kind_nm_en (제품분류영문명), brd_cd (브랜드), remark1~8 (~25.11 운영기준) / operate_standard via PREP (25.12~ 운영기준), sesn (시즌)</span>
                           </div>
                           <div className="text-xs text-gray-500 mt-1">
                             <span className="font-semibold">⚙️ 처리방식:</span>
@@ -810,11 +810,11 @@ export default function BrandSalesPage({ brand, title }: BrandSalesPageProps) {
                         <div className="pt-2 border-t border-gray-300">
                           <div className="text-xs text-gray-500">
                             <span className="font-semibold">📦 데이터 소스:</span>
-                            <span className="ml-2">Snowflake 테이블 - CHN.DW_STOCK_M (재고), CHN.DW_SHOP_WH_DETAIL (매장), FNF.CHN.MST_PRDT_SCS (상품마스터)</span>
+                            <span className="ml-2">CHN.DW_STOCK_M (재고), CHN.DW_SHOP_WH_DETAIL (매장), FNF.CHN.MST_PRDT_SCS (상품마스터), CHN.PREP_MST_PRDT_SCS (운영기준 25.12~)</span>
                           </div>
                           <div className="text-xs text-gray-500 mt-1">
                             <span className="font-semibold">🔧 주요 컬럼:</span>
-                            <span className="ml-2">stock_amt (재고금액), shop_id (매장ID), fr_or_cls (채널), prdt_cd (상품코드), parent_prdt_kind_cd (상위제품분류), prdt_kind_nm_en (제품분류영문명), brd_cd (브랜드), remark1~8 (운영기준), sesn (시즌)</span>
+                            <span className="ml-2">stock_amt (재고금액), shop_id (매장ID), fr_or_cls (채널), prdt_cd (상품코드), prdt_kind_nm_en (제품분류영문명), brd_cd (브랜드), remark1~8 (~25.11 운영기준) / operate_standard via PREP (25.12~ 운영기준), sesn (시즌)</span>
                           </div>
                           <div className="text-xs text-gray-500 mt-1">
                             <span className="font-semibold">⚙️ 처리방식:</span>

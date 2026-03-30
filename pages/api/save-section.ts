@@ -78,9 +78,10 @@ async function fetchDealerData(
       ELSE 'outlet'
     END`;
 
+  // 25.12~26.02: PREP 202602 고정 스냅샷, 26.03~: PREP 월별 스냅샷, 24.01~25.11: remark1~8
   const remarkCaseSQL = (ym: string) => `
     CASE
-      WHEN '${ym}' >= '202512' THEN operate_standard
+      WHEN '${ym}' >= '202512' THEN prep_operate_standard
       WHEN (FLOOR(DATEDIFF('month',TO_DATE('202312','YYYYMM'),TO_DATE('${ym}01','YYYYMMDD'))/3)+1)=1 THEN remark1
       WHEN (FLOOR(DATEDIFF('month',TO_DATE('202312','YYYYMM'),TO_DATE('${ym}01','YYYYMMDD'))/3)+1)=2 THEN remark2
       WHEN (FLOOR(DATEDIFF('month',TO_DATE('202312','YYYYMM'),TO_DATE('${ym}01','YYYYMMDD'))/3)+1)=3 THEN remark3
@@ -89,13 +90,6 @@ async function fetchDealerData(
       WHEN (FLOOR(DATEDIFF('month',TO_DATE('202312','YYYYMM'),TO_DATE('${ym}01','YYYYMMDD'))/3)+1)=6 THEN remark6
       WHEN (FLOOR(DATEDIFF('month',TO_DATE('202312','YYYYMM'),TO_DATE('${ym}01','YYYYMMDD'))/3)+1)=7 THEN remark7
       WHEN (FLOOR(DATEDIFF('month',TO_DATE('202312','YYYYMM'),TO_DATE('${ym}01','YYYYMMDD'))/3)+1)=8 THEN remark8
-      WHEN (FLOOR(DATEDIFF('month',TO_DATE('202312','YYYYMM'),TO_DATE('${ym}01','YYYYMMDD'))/3)+1)=9 THEN remark9
-      WHEN (FLOOR(DATEDIFF('month',TO_DATE('202312','YYYYMM'),TO_DATE('${ym}01','YYYYMMDD'))/3)+1)=10 THEN remark10
-      WHEN (FLOOR(DATEDIFF('month',TO_DATE('202312','YYYYMM'),TO_DATE('${ym}01','YYYYMMDD'))/3)+1)=11 THEN remark11
-      WHEN (FLOOR(DATEDIFF('month',TO_DATE('202312','YYYYMM'),TO_DATE('${ym}01','YYYYMMDD'))/3)+1)=12 THEN remark12
-      WHEN (FLOOR(DATEDIFF('month',TO_DATE('202312','YYYYMM'),TO_DATE('${ym}01','YYYYMMDD'))/3)+1)=13 THEN remark13
-      WHEN (FLOOR(DATEDIFF('month',TO_DATE('202312','YYYYMM'),TO_DATE('${ym}01','YYYYMMDD'))/3)+1)=14 THEN remark14
-      WHEN (FLOOR(DATEDIFF('month',TO_DATE('202312','YYYYMM'),TO_DATE('${ym}01','YYYYMMDD'))/3)+1)=15 THEN remark15
       ELSE NULL
     END`;
 
@@ -118,15 +112,21 @@ shop_dealer_map AS (
 stock_raw AS (
   SELECT s.yymm, TO_VARCHAR(s.shop_id) AS shop_id, s.prdt_scs_cd,
     COALESCE(s.stock_tag_amt_insp,0)+COALESCE(s.stock_tag_amt_frozen,0)+COALESCE(s.stock_tag_amt_expected,0) AS stock_amt,
-    p.operate_standard,
     p.remark1,p.remark2,p.remark3,p.remark4,p.remark5,
-    p.remark6,p.remark7,p.remark8,p.remark9,p.remark10,
-    p.remark11,p.remark12,p.remark13,p.remark14,p.remark15,
+    p.remark6,p.remark7,p.remark8,
+    prep.operate_standard AS prep_operate_standard,
     p.sesn, m.prdt_nm
   FROM CHN.DW_STOCK_M s
   INNER JOIN FNF.CHN.MST_PRDT_SCS p ON s.prdt_scs_cd = p.prdt_scs_cd
   INNER JOIN acc_item_map db ON SUBSTR(s.prdt_scs_cd, 7, 2) = db.ITEM
   LEFT JOIN fnf.sap_fnf.mst_prdt m ON p.prdt_cd = m.prdt_cd
+  LEFT JOIN CHN.PREP_MST_PRDT_SCS prep
+    ON s.prdt_scs_cd = prep.prdt_scs_cd
+    AND prep.yyyymm = CASE
+      WHEN s.yymm BETWEEN '202512' AND '202602' THEN '202602'
+      WHEN s.yymm >= '202603' THEN s.yymm
+      ELSE NULL
+    END
   WHERE s.yymm IN ('${baseMonth}','${priorMonth}') AND s.brd_cd = '${brandCode}'
     AND db.PRDT_KIND_NM_ENG IN ('Shoes','Headwear','Bag','Acc_etc')
 ),
@@ -147,14 +147,20 @@ stock_classified AS (
 sales_raw AS (
   SELECT TO_CHAR(s.sale_dt,'YYYYMM') AS yymm, TO_VARCHAR(s.shop_id) AS shop_id,
     s.prdt_scs_cd, s.tag_amt,
-    p.operate_standard,
     p.remark1,p.remark2,p.remark3,p.remark4,p.remark5,
-    p.remark6,p.remark7,p.remark8,p.remark9,p.remark10,
-    p.remark11,p.remark12,p.remark13,p.remark14,p.remark15,
+    p.remark6,p.remark7,p.remark8,
+    prep.operate_standard AS prep_operate_standard,
     p.sesn
   FROM CHN.DW_SALE s
   INNER JOIN FNF.CHN.MST_PRDT_SCS p ON s.prdt_scs_cd = p.prdt_scs_cd
   INNER JOIN acc_item_map db ON SUBSTR(s.prdt_scs_cd, 7, 2) = db.ITEM
+  LEFT JOIN CHN.PREP_MST_PRDT_SCS prep
+    ON s.prdt_scs_cd = prep.prdt_scs_cd
+    AND prep.yyyymm = CASE
+      WHEN TO_CHAR(s.sale_dt,'YYYYMM') BETWEEN '202512' AND '202602' THEN '202602'
+      WHEN TO_CHAR(s.sale_dt,'YYYYMM') >= '202603' THEN TO_CHAR(s.sale_dt,'YYYYMM')
+      ELSE NULL
+    END
   WHERE TO_CHAR(s.sale_dt,'YYYYMM') IN ('${baseMonth}','${priorMonth}') AND s.brd_cd = '${brandCode}'
     AND db.PRDT_KIND_NM_ENG IN ('Shoes','Headwear','Bag','Acc_etc')
 ),

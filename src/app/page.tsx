@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Navigation from "@/components/Navigation";
 import { BRANDS } from "@/types/sales";
-import { PRODUCT_TYPE_RULES, CHANNEL_RULES } from "@/constants/businessRules";
+import { PRODUCT_TYPE_RULES, CHANNEL_RULES, DATA_INFO, REMARK_PERIODS } from "@/constants/businessRules";
 import { useReferenceMonth } from "@/contexts/ReferenceMonthContext";
 
 /**
@@ -17,7 +17,7 @@ function calculateMonths(startMonth: string, endMonth: string): number {
 
 export default function Home() {
   const { referenceMonth } = useReferenceMonth();
-  const startMonth = "2024.01";
+  const startMonth = DATA_INFO.startMonth;
   const totalMonths = calculateMonths(startMonth, referenceMonth);
   return (
     <>
@@ -148,94 +148,120 @@ export default function Home() {
           </div>
         </div>
 
-        {/* 데이터 전처리 안내 */}
-        <div className="mt-6 p-6 bg-blue-900/20 border border-blue-700/30 rounded-xl">
-          <h3 className="text-lg font-semibold text-white mb-4 text-center">
-            💡 데이터 전처리 안내
-          </h3>
-          
-          <div className="space-y-6">
-            {/* Snowflake 배치 전처리 */}
-            <div>
-              <h4 className="text-sm font-semibold text-blue-300 mb-3">
-                🔵 Snowflake 데이터 전처리 (필수)
-              </h4>
-              <div className="space-y-3">
-                <div className="flex flex-col gap-1">
-                  <code className="px-4 py-2 bg-gray-900 rounded-lg text-gray-300 font-mono text-sm">
-                    python scripts/preprocess_sales.py
-                  </code>
-                  <span className="text-xs text-gray-500 ml-1">
-                    → 판매매출 데이터 전처리 (증분 처리 지원: 새로 추가된 월만 자동 처리)
-                  </span>
-                </div>
-                
-                <div className="flex flex-col gap-1">
-                  <code className="px-4 py-2 bg-gray-900 rounded-lg text-gray-300 font-mono text-sm">
-                    python scripts/preprocess_inventory.py
-                  </code>
-                  <span className="text-xs text-gray-500 ml-1">
-                    → 재고자산 데이터 전처리 (증분 처리 지원: 새로 추가된 월만 자동 처리)
-                  </span>
-                </div>
-                <div className="mt-2 p-2 bg-gray-900/50 rounded text-xs text-gray-400">
-                  💡 <span className="font-semibold text-gray-300">증분 처리:</span> ANALYSIS_MONTHS에 새 월을 추가하면 해당 월만 자동으로 처리됩니다. 기존 데이터는 유지됩니다.
-                </div>
-              </div>
-            </div>
+        {/* 2분할: 운영기준 구간(좌) + 데이터 전처리 안내(우) */}
+        <div className="mt-6 grid lg:grid-cols-2 gap-6">
 
-            {/* 입고예정 재고자산 관리 */}
-            <div>
-              <h4 className="text-sm font-semibold text-purple-300 mb-3">
-                💾 입고예정 재고자산 관리 (대시보드)
-              </h4>
-              <ul className="text-xs text-gray-400 space-y-1.5 ml-4">
-                <li>• 각 브랜드 페이지에서 직접 수정 및 저장</li>
-                <li>• 기준월 이후 데이터만 수정 가능 (과거 데이터 보호)</li>
-                <li>• 저장 시 JSON 파일에 영구 저장</li>
-                <li>• 로컬 환경: 자동 Git commit & push → Vercel 배포</li>
-                <li>• 마지막 업데이트 날짜 자동 기록</li>
-              </ul>
+          {/* 좌: 운영기준(remark) 구간 안내 */}
+          <div className="p-6 bg-gray-900 border border-gray-600 rounded-xl">
+            <h3 className="text-base font-bold text-white mb-4 text-center tracking-wide">
+              📋 운영기준 (operate_standard) 적용 구간
+            </h3>
+            <div className="overflow-x-auto rounded-lg border border-gray-700">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="bg-gray-700">
+                    <th className="text-left py-2 px-4 text-gray-100 font-semibold text-xs">구간</th>
+                    <th className="text-left py-2 px-4 text-gray-100 font-semibold text-xs">적용 기준</th>
+                    <th className="text-left py-2 px-4 text-gray-100 font-semibold text-xs">소스 테이블</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {REMARK_PERIODS.map((p, i) => {
+                    const isPREP = p.source.startsWith('PREP');
+                    return (
+                      <tr key={i} className={`border-t border-gray-700 ${isPREP ? 'bg-violet-950' : 'bg-gray-800'}`}>
+                        <td className="py-2 px-4 text-gray-100 font-mono text-xs whitespace-nowrap">{p.range}</td>
+                        <td className="py-2 px-4 text-xs">
+                          <span className={`inline-block px-2 py-0.5 rounded font-semibold ${isPREP ? 'bg-violet-700 text-white' : 'bg-blue-700 text-white'}`}>
+                            {p.remark}
+                          </span>
+                        </td>
+                        <td className={`py-2 px-4 text-xs font-medium ${isPREP ? 'text-violet-300' : 'text-gray-300'}`}>{p.source}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
-
-            {/* 마감 및 스냅샷 기능 */}
-            <div>
-              <h4 className="text-sm font-semibold text-orange-300 mb-3">
-                📸 월 마감 및 스냅샷 저장
-              </h4>
-              <ul className="text-xs text-gray-400 space-y-1.5 ml-4">
-                <li>• <span className="font-semibold text-gray-300">월 마감:</span> 기준월을 마감하면 해당 월 데이터가 JSON으로 고정 저장</li>
-                <li>• <span className="font-semibold text-gray-300">스냅샷 저장:</span> 마감된 월의 판매/재고 데이터를 스냅샷으로 별도 저장</li>
-                <li>• <span className="font-semibold text-gray-300">입고예정 스냅샷:</span> 기준월의 입고예정 재고자산 데이터 저장</li>
-                <li>• 마감된 월은 JSON에서 읽어오므로 빠른 조회 가능</li>
-                <li>• 네비게이션 바에서 마감 및 스냅샷 버튼 확인 및 실행</li>
-              </ul>
-            </div>
-
-            {/* 하이브리드 데이터 로딩 안내 */}
-            <div className="pt-4 border-t border-gray-700">
-              <h4 className="text-sm font-semibold text-green-300 mb-2">
-                ✅ 하이브리드 데이터 로딩
-              </h4>
-              <ul className="text-xs text-gray-400 space-y-1 ml-4">
-                <li>• <span className="font-semibold text-gray-300">판매/재고 데이터:</span> 마감된 월은 JSON 파일에서, 마감되지 않은 월은 Snowflake API에서 자동 조회</li>
-                <li>• <span className="font-semibold text-gray-300">실시간 API:</span> 실제 입고, 정체재고 분석, 재고 시즌 차트, 품목 상세 정보</li>
-                <li>• <span className="font-semibold text-gray-300">로컬 데이터:</span> 대리상 마스터 (CSV), 입고예정 재고자산 (JSON)</li>
-              </ul>
-            </div>
-
-            {/* UI 입력 안내 */}
-            <div className="pt-2">
-              <h4 className="text-sm font-semibold text-yellow-300 mb-2">
-                ✏️ 대시보드에서 직접 수정 (입고예정)
-              </h4>
-              <ul className="text-xs text-gray-400 space-y-1 ml-4">
-                <li>• 각 브랜드 페이지 → 입고예정 재고자산 섹션</li>
-                <li>• 숫자 수정 → [YY.MM.DD 업데이트] 버튼 클릭</li>
-                <li>• JSON 파일 저장 + 자동 Git push (로컬)</li>
-              </ul>
+            <div className="mt-3 flex gap-3 justify-center">
+              <span className="inline-flex items-center gap-1.5 text-xs text-gray-300">
+                <span className="w-3 h-3 rounded bg-blue-700 inline-block"></span> MST (remark1~8)
+              </span>
+              <span className="inline-flex items-center gap-1.5 text-xs text-gray-300">
+                <span className="w-3 h-3 rounded bg-violet-700 inline-block"></span> PREP (operate_standard)
+              </span>
             </div>
           </div>
+
+          {/* 우: 데이터 전처리 안내 */}
+          <div className="p-6 bg-gray-900 border border-gray-600 rounded-xl">
+            <h3 className="text-base font-bold text-white mb-4 text-center tracking-wide">
+              💡 데이터 전처리 안내
+            </h3>
+
+            <div className="space-y-4">
+              {/* Snowflake 배치 전처리 */}
+              <div className="p-3 bg-blue-950 border border-blue-700 rounded-lg">
+                <h4 className="text-xs font-bold text-blue-300 mb-2 uppercase tracking-wider">
+                  🔵 Snowflake 데이터 전처리 (필수)
+                </h4>
+                <div className="space-y-2">
+                  <div>
+                    <code className="block px-3 py-1.5 bg-gray-950 rounded text-cyan-300 font-mono text-xs">
+                      python scripts/preprocess_sales.py
+                    </code>
+                    <span className="text-xs text-gray-400 ml-1">→ 판매매출 전처리 (증분 처리)</span>
+                  </div>
+                  <div>
+                    <code className="block px-3 py-1.5 bg-gray-950 rounded text-cyan-300 font-mono text-xs">
+                      python scripts/preprocess_inventory.py
+                    </code>
+                    <span className="text-xs text-gray-400 ml-1">→ 재고자산 전처리 (증분 처리)</span>
+                  </div>
+                  <p className="text-xs text-blue-200 mt-1">
+                    ※ ANALYSIS_MONTHS에 새 월 추가 시 해당 월만 자동 처리
+                  </p>
+                </div>
+              </div>
+
+              {/* 입고예정 */}
+              <div className="p-3 bg-purple-950 border border-purple-700 rounded-lg">
+                <h4 className="text-xs font-bold text-purple-300 mb-2 uppercase tracking-wider">
+                  💾 입고예정 재고자산 관리
+                </h4>
+                <ul className="text-xs text-gray-200 space-y-1">
+                  <li>• 각 브랜드 페이지에서 직접 수정 및 저장</li>
+                  <li>• 기준월 이후 데이터만 수정 가능 (과거 보호)</li>
+                  <li>• 로컬 환경: 자동 Git commit &amp; push → Vercel 배포</li>
+                </ul>
+              </div>
+
+              {/* 마감 & 스냅샷 */}
+              <div className="p-3 bg-orange-950 border border-orange-700 rounded-lg">
+                <h4 className="text-xs font-bold text-orange-300 mb-2 uppercase tracking-wider">
+                  📸 월 마감 및 스냅샷 저장
+                </h4>
+                <ul className="text-xs text-gray-200 space-y-1">
+                  <li>• <span className="text-white font-semibold">월 마감:</span> 해당 월 데이터 JSON 고정 저장</li>
+                  <li>• <span className="text-white font-semibold">스냅샷:</span> 판매/재고 스냅샷 별도 저장</li>
+                  <li>• 마감월은 JSON 조회로 빠른 로딩</li>
+                </ul>
+              </div>
+
+              {/* 하이브리드 & UI 수정 */}
+              <div className="p-3 bg-green-950 border border-green-700 rounded-lg">
+                <h4 className="text-xs font-bold text-green-300 mb-2 uppercase tracking-wider">
+                  ✅ 하이브리드 로딩 &amp; 직접 수정
+                </h4>
+                <ul className="text-xs text-gray-200 space-y-1">
+                  <li>• <span className="text-white font-semibold">판매/재고:</span> 마감월 → JSON, 미마감월 → Snowflake</li>
+                  <li>• <span className="text-white font-semibold">실시간:</span> 입고·정체재고·시즌차트·품목상세</li>
+                  <li>• <span className="text-white font-semibold">입고예정 수정:</span> 브랜드 페이지 → 숫자 수정 → 업데이트 클릭</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
         </div>
       </main>
     </>

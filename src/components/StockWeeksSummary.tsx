@@ -180,33 +180,38 @@ export default function StockWeeksSummary({
       const [yearStr, monthStr] = yearMonth.split(".");
       const year = parseInt(yearStr);
       const monthNum = parseInt(monthStr);
-      
-      // 2025.12부터는 operate_standard 사용
-      if (year > 2025 || (year === 2025 && monthNum >= 12)) {
-        const startYY = String(year).slice(2);
-        const endYY = String(year + 1).slice(2);
-        return `operate_standard: ${startYY}.12~${endYY}.02`;
+      const ym = `${yearStr}${monthStr.padStart(2, '0')}`;
+
+      // 26.03~: PREP 월별 스냅샷
+      if (year > 2026 || (year === 2026 && monthNum >= 3)) {
+        const yy = String(year).slice(2);
+        const mm = String(monthNum).padStart(2, '0');
+        return `operate_standard (PREP ${yy}.${mm})`;
       }
-      
-      // 23.12 기준으로 remark 번호 계산
+
+      // 25.12~26.02: PREP 202602 고정 스냅샷
+      if (ym >= '202512' && ym <= '202602') {
+        return `operate_standard (PREP 26.02)`;
+      }
+
+      // 24.01~25.11: 분기별 remark1~8
       const baseYear = 2023;
       const baseMonth = 12;
-      
       const monthsSinceBase = (year - baseYear) * 12 + (monthNum - baseMonth);
       const remarkNum = Math.floor(monthsSinceBase / 3) + 1;
-      
-      // remark 기간 계산 (base 2023.12 + N개월 → 해당 연/월)
+
+      // remark 기간 계산
       const startMonthsSinceBase = (remarkNum - 1) * 3;
-      const startYear = baseYear + Math.floor(startMonthsSinceBase / 12);
-      const startMonth = ((baseMonth + startMonthsSinceBase - 1) % 12) + 1;
-      
+      const startYear = baseYear + Math.floor((baseMonth - 1 + startMonthsSinceBase) / 12);
+      const startMonth = ((baseMonth - 1 + startMonthsSinceBase) % 12) + 1;
+
       const endMonthsSinceBase = remarkNum * 3 - 1;
-      const endYear = baseYear + Math.floor((baseMonth + endMonthsSinceBase) / 12);
-      const endMonth = ((baseMonth + endMonthsSinceBase - 1) % 12) + 1;
-      
+      const endYear = baseYear + Math.floor((baseMonth - 1 + endMonthsSinceBase) / 12);
+      const endMonth = ((baseMonth - 1 + endMonthsSinceBase) % 12) + 1;
+
       const startYY = String(startYear).slice(2);
       const endYY = String(endYear).slice(2);
-      
+
       return `remark${remarkNum}: ${startYY}.${String(startMonth).padStart(2, '0')}~${endYY}.${String(endMonth).padStart(2, '0')}`;
     };
 

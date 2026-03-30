@@ -44,7 +44,7 @@ acc_item_map AS (
 ),
 
 -- Step 1: 재고 데이터에 상품/매장 마스터 조인 및 remark 자동 계산
--- 기준: 2023.12 (remark1) 시작, 3개월씩 자동 확장
+-- 기준: 24.01~25.11은 분기별 remark1~8, 25.12~은 PREP_MST_PRDT_SCS.operate_standard
 stock_with_master AS (
   SELECT 
     st.yymm,
@@ -56,14 +56,14 @@ stock_with_master AS (
     COALESCE(st.stock_tag_amt_insp, 0) + COALESCE(st.stock_tag_amt_frozen, 0) + COALESCE(st.stock_tag_amt_expected, 0) AS stock_tag_amt_total,
     db.PRDT_KIND_NM_ENG AS prdt_kind_nm_en,
     d.fr_or_cls,
-    -- remark 번호 자동 계산 (23.12 기준, 3개월 단위)
+    -- remark 번호 자동 계산 (23.12 기준, 3개월 단위) → remark1~8: 24.01~25.11
     FLOOR(DATEDIFF('month', TO_DATE('202312', 'YYYYMM'), TO_DATE(st.yymm || '01', 'YYYYMMDD')) / 3) + 1 AS remark_num,
     -- 연도 YY 추출 (202401 → 24)
     SUBSTR(st.yymm, 3, 2) AS row_yy,
-    p.operate_standard,
     p.remark1, p.remark2, p.remark3, p.remark4, p.remark5,
-    p.remark6, p.remark7, p.remark8, p.remark9, p.remark10,
-    p.remark11, p.remark12, p.remark13, p.remark14, p.remark15
+    p.remark6, p.remark7, p.remark8,
+    -- 25.12~26.02: PREP yyyymm='202602' 고정, 26.03~: PREP yyyymm=재고월
+    prep.operate_standard AS prep_operate_standard
   FROM CHN.DW_STOCK_M st
   LEFT JOIN FNF.CHN.MST_PRDT_SCS p ON st.prdt_scs_cd = p.prdt_scs_cd
   LEFT JOIN acc_item_map db ON SUBSTR(st.prdt_scs_cd, 7, 2) = db.ITEM
@@ -73,6 +73,13 @@ stock_with_master AS (
     WHERE fr_or_cls IS NOT NULL
     QUALIFY ROW_NUMBER() OVER(PARTITION BY shop_id ORDER BY COALESCE(open_dt, '1900-01-01') DESC) = 1
   ) d ON st.shop_id = d.shop_id
+  LEFT JOIN CHN.PREP_MST_PRDT_SCS prep
+    ON st.prdt_scs_cd = prep.prdt_scs_cd
+    AND prep.yyyymm = CASE
+      WHEN st.yymm BETWEEN '202512' AND '202602' THEN '202602'
+      WHEN st.yymm >= '202603' THEN st.yymm
+      ELSE NULL
+    END
   WHERE st.yymm >= '{start_month}'
     AND st.yymm <= '{end_month}'
     AND st.brd_cd IN ('M', 'I', 'X')
@@ -80,14 +87,15 @@ stock_with_master AS (
     AND d.fr_or_cls IN ('FR', 'OR', 'HQ')  -- HQ 포함
 ),
 
--- Step 2: 동적 remark 선택 (2025년 12월부터 operate_standard 사용)
+-- Step 2: 동적 remark 선택
+-- 24.01~25.11: remark1~8 (분기별 고정), 25.12~: PREP_MST_PRDT_SCS.operate_standard
 stock_with_remark AS (
   SELECT 
     s.*,
     CASE 
-      -- 2025년 12월부터 operate_standard 사용
-      WHEN s.yymm >= '202512' THEN s.operate_standard
-      -- 2025년 11월까지는 remark 방식 유지
+      -- 25.12~26.02: PREP 202602 고정 스냅샷, 26.03~: PREP 월별 스냅샷
+      WHEN s.yymm >= '202512' THEN s.prep_operate_standard
+      -- 24.01~25.11: 분기별 remark (remark1~8)
       WHEN s.remark_num = 1 THEN s.remark1
       WHEN s.remark_num = 2 THEN s.remark2
       WHEN s.remark_num = 3 THEN s.remark3
@@ -96,17 +104,10 @@ stock_with_remark AS (
       WHEN s.remark_num = 6 THEN s.remark6
       WHEN s.remark_num = 7 THEN s.remark7
       WHEN s.remark_num = 8 THEN s.remark8
-      WHEN s.remark_num = 9 THEN s.remark9
-      WHEN s.remark_num = 10 THEN s.remark10
-      WHEN s.remark_num = 11 THEN s.remark11
-      WHEN s.remark_num = 12 THEN s.remark12
-      WHEN s.remark_num = 13 THEN s.remark13
-      WHEN s.remark_num = 14 THEN s.remark14
-      WHEN s.remark_num = 15 THEN s.remark15
       ELSE NULL
     END AS op_std
   FROM stock_with_master s
-  WHERE (s.yymm >= '202512' OR (s.remark_num >= 1 AND s.remark_num <= 15))
+  WHERE (s.yymm >= '202512' OR (s.remark_num >= 1 AND s.remark_num <= 8))
 ),
 
 -- Step 3: 주력/아울렛 판정 (판매와 동일 로직)

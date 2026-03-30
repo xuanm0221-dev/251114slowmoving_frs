@@ -51,8 +51,7 @@ export const CHANNEL_RULES = {
  * 데이터 기본 정보
  */
 export const DATA_INFO = {
-  period: '2024.01 ~ 2026.01',
-  periodMonths: '25개월',
+  startMonth: '2024.01',
   brands: ['MLB', 'MLB KIDS', 'DISCOVERY'],
   category: '악세사리',
   categoryEn: '饰品',
@@ -60,6 +59,25 @@ export const DATA_INFO = {
   unit: '吊牌金额',
   unitDescription: 'M (백만 위안)',
 } as const;
+
+/**
+ * 운영기준(operate_standard) 구간 정의
+ * - 24.01~25.11: MST_PRDT_SCS의 분기별 remark1~8
+ * - 25.12~26.02: PREP_MST_PRDT_SCS yyyymm='202602' 고정 스냅샷
+ * - 26.03~    : PREP_MST_PRDT_SCS yyyymm=기준월 (월별 스냅샷)
+ */
+export const REMARK_PERIODS = [
+  { range: '24.01 ~ 24.02', remark: 'remark1', source: 'MST_PRDT_SCS' },
+  { range: '24.03 ~ 24.05', remark: 'remark2', source: 'MST_PRDT_SCS' },
+  { range: '24.06 ~ 24.08', remark: 'remark3', source: 'MST_PRDT_SCS' },
+  { range: '24.09 ~ 24.11', remark: 'remark4', source: 'MST_PRDT_SCS' },
+  { range: '24.12 ~ 25.02', remark: 'remark5', source: 'MST_PRDT_SCS' },
+  { range: '25.03 ~ 25.05', remark: 'remark6', source: 'MST_PRDT_SCS' },
+  { range: '25.06 ~ 25.08', remark: 'remark7', source: 'MST_PRDT_SCS' },
+  { range: '25.09 ~ 25.11', remark: 'remark8', source: 'MST_PRDT_SCS' },
+  { range: '25.12 ~ 26.02', remark: 'operate_standard', source: 'PREP_MST_PRDT_SCS (202602 고정)' },
+  { range: '26.03 ~', remark: 'operate_standard', source: 'PREP_MST_PRDT_SCS (월별)' },
+] as const;
 
 /**
  * 마감된 월 목록
