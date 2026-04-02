@@ -134,8 +134,9 @@ export default function Home() {
             <ul className="space-y-2 text-gray-400 text-sm">
               <li className="font-semibold text-blue-300">하이브리드 로딩:</li>
               <li className="ml-2">• 판매/재고: 마감월까지 JSON, 이후 Snowflake API</li>
-              <li className="font-semibold text-blue-300 mt-2">실시간 API:</li>
-              <li className="ml-2">• 실제 입고, 정체재고, 재고시즌, 품목상세</li>
+              <li className="font-semibold text-blue-300 mt-2">실시간 / 혼합:</li>
+              <li className="ml-2">• 입고·정체재고·매장·대리상 등 (JSON 없으면 Snowflake)</li>
+              <li className="ml-2">• 시즌 막대차트: JSON 전처리 필수</li>
             </ul>
           </div>
 
@@ -224,6 +225,25 @@ export default function Home() {
                 </div>
               </div>
 
+              {/* 시즌 막대차트: JSON 전용 (판매/재고 증분과 별도) */}
+              <div className="p-3 bg-amber-950 border border-amber-600 rounded-lg">
+                <h4 className="text-xs font-bold text-amber-200 mb-2 uppercase tracking-wider">
+                  📊 정체재고 시즌 막대차트 (필수 · 별도 실행)
+                </h4>
+                <div className="space-y-2">
+                  <code className="block px-3 py-1.5 bg-gray-950 rounded text-amber-200 font-mono text-xs break-all">
+                    python scripts/preprocess_inventory_season_chart.py --reference-month YYYY.MM
+                  </code>
+                  <p className="text-xs text-amber-100/90">
+                    → <code className="text-amber-200">public/data/inventory_season_chart_summary.json</code> 갱신.
+                    이 차트 API는 JSON에 없는 월을 0으로만 채우고 Snowflake 실시간 조회를 하지 않습니다.
+                  </p>
+                  <p className="text-xs text-gray-400">
+                    마감한 기준월과 동일하게 지정하세요. 예: <code className="text-gray-300">--reference-month 2026.03</code>
+                  </p>
+                </div>
+              </div>
+
               {/* 입고예정 */}
               <div className="p-3 bg-purple-950 border border-purple-700 rounded-lg">
                 <h4 className="text-xs font-bold text-purple-300 mb-2 uppercase tracking-wider">
@@ -255,7 +275,8 @@ export default function Home() {
                 </h4>
                 <ul className="text-xs text-gray-200 space-y-1">
                   <li>• <span className="text-white font-semibold">판매/재고:</span> 마감월 → JSON, 미마감월 → Snowflake</li>
-                  <li>• <span className="text-white font-semibold">실시간:</span> 입고·정체재고·시즌차트·품목상세</li>
+                  <li>• <span className="text-white font-semibold">실시간:</span> 입고·정체재고·매장정체·대리상 등 (JSON 없으면 Snowflake)</li>
+                  <li>• <span className="text-white font-semibold">시즌 막대:</span> 위 전처리 JSON만 사용 (누락 시 막대 없음)</li>
                   <li>• <span className="text-white font-semibold">입고예정 수정:</span> 브랜드 페이지 → 숫자 수정 → 업데이트 클릭</li>
                 </ul>
               </div>

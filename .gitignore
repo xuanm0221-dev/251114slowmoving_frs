@@ -2,3 +2,5 @@ node_modules
 .next
 .env.local
 *.log
+__pycache__/
+*.pyc
