@@ -218,8 +218,11 @@ export function getProductTypeCase(opStdColumn: string, sesnColumn: string, year
 export function buildSalesAggregationQuery(
   brandCode: string,
   startMonth: string = '202401',
-  endMonth: string = '202511'
+  endMonth: string = '202511',
+  referenceMonth?: string  // 기준월 (YYYYMM). 없으면 endMonth 사용
 ): string {
+  // 기준월: 이 월은 MST 실시간, 25.12~기준월 미만은 PREP 익월
+  const ref = referenceMonth || endMonth;
   const startDate = `${startMonth.substring(0, 4)}-${startMonth.substring(4, 6)}-01`;
   const endYear = parseInt(endMonth.substring(0, 4), 10);
   const endMonthNum = parseInt(endMonth.substring(4, 6), 10);
@@ -237,6 +240,7 @@ acc_item_map AS (
 ${SHOP_MAPPING_CTES_3WAY},
 
 -- Step 1: 원천 판매 데이터 추출
+-- operate_standard 규칙: ref월=MST 실시간, 25.12~ref미만=PREP 익월, 24.01~25.11=remark
 sales_raw AS (
   SELECT 
     TO_CHAR(s.sale_dt, 'YYYY.MM') AS sale_ym,
@@ -248,6 +252,7 @@ sales_raw AS (
     p.sesn,
     s.prdt_scs_cd,
     p.operate_standard,
+    prep.operate_standard AS prep_operate_standard,
     p.remark1, p.remark2, p.remark3, p.remark4, p.remark5,
     p.remark6, p.remark7, p.remark8, p.remark9, p.remark10,
     p.remark11, p.remark12, p.remark13, p.remark14, p.remark15
@@ -255,6 +260,15 @@ sales_raw AS (
   INNER JOIN FNF.CHN.MST_PRDT_SCS p 
     ON s.prdt_scs_cd = p.prdt_scs_cd
   LEFT JOIN acc_item_map db ON SUBSTR(s.prdt_scs_cd, 7, 2) = db.ITEM
+  -- PREP 익월 조인: 25.12 <= 판매월 < ref만 매칭
+  LEFT JOIN CHN.PREP_MST_PRDT_SCS prep
+    ON s.prdt_scs_cd = prep.prdt_scs_cd
+    AND prep.yyyymm = CASE
+      WHEN TO_CHAR(s.sale_dt, 'YYYYMM') >= '202512'
+        AND TO_CHAR(s.sale_dt, 'YYYYMM') < '${ref}'
+        THEN TO_VARCHAR(ADD_MONTHS(TO_DATE(TO_CHAR(s.sale_dt, 'YYYYMM') || '01', 'YYYYMMDD'), 1), 'YYYYMM')
+      ELSE NULL
+    END
   WHERE s.sale_dt >= '${startDate}'
     AND s.sale_dt < '${endDateExclusive}'
     AND s.brd_cd = '${brandCode}'
@@ -284,9 +298,11 @@ sales_with_remark AS (
   SELECT 
     swr.*,
     CASE 
-      -- 2025년 12월부터 operate_standard 사용
-      WHEN swr.sale_yyyymm >= '202512' THEN swr.operate_standard
-      -- 2025년 11월까지는 remark 방식 유지
+      -- 기준월: MST 실시간 (operate_standard = MST 컬럼)
+      WHEN swr.sale_yyyymm = '${ref}' THEN swr.operate_standard
+      -- 25.12 ~ 기준월 미만: PREP 익월 스냅샷
+      WHEN swr.sale_yyyymm >= '202512' AND swr.sale_yyyymm < '${ref}' THEN swr.prep_operate_standard
+      -- 24.01~25.11: remark 방식
       WHEN swr.remark_num = 1 THEN swr.remark1
       WHEN swr.remark_num = 2 THEN swr.remark2
       WHEN swr.remark_num = 3 THEN swr.remark3
@@ -365,8 +381,11 @@ ORDER BY sa.sale_ym, sa.brd_cd, sa.item_category, sa.channel, sa.product_type
 export function buildInventoryAggregationQuery(
   brandCode: string,
   startMonth: string = '202401',
-  endMonth: string = '202511'
+  endMonth: string = '202511',
+  referenceMonth?: string  // 기준월 (YYYYMM). 없으면 endMonth 사용
 ): string {
+  // 기준월: 이 월은 MST 실시간, 25.12~기준월 미만은 PREP 익월
+  const ref = referenceMonth || endMonth;
   return `
 WITH 
 acc_item_map AS (
@@ -377,6 +396,7 @@ acc_item_map AS (
 ${SHOP_MAPPING_CTES_3WAY},
 
 -- Step 1: 원천 재고 데이터 추출
+-- operate_standard 규칙: ref월=MST 실시간, 25.12~ref미만=PREP 익월, 24.01~25.11=remark
 stock_raw AS (
   SELECT 
     s.yymm,
@@ -388,6 +408,7 @@ stock_raw AS (
     p.sesn,
     s.prdt_scs_cd,
     p.operate_standard,
+    prep.operate_standard AS prep_operate_standard,
     p.remark1, p.remark2, p.remark3, p.remark4, p.remark5,
     p.remark6, p.remark7, p.remark8, p.remark9, p.remark10,
     p.remark11, p.remark12, p.remark13, p.remark14, p.remark15
@@ -395,6 +416,14 @@ stock_raw AS (
   INNER JOIN FNF.CHN.MST_PRDT_SCS p 
     ON s.prdt_scs_cd = p.prdt_scs_cd
   LEFT JOIN acc_item_map db ON SUBSTR(s.prdt_scs_cd, 7, 2) = db.ITEM
+  -- PREP 익월 조인: 25.12 <= yymm < ref만 매칭
+  LEFT JOIN CHN.PREP_MST_PRDT_SCS prep
+    ON s.prdt_scs_cd = prep.prdt_scs_cd
+    AND prep.yyyymm = CASE
+      WHEN s.yymm >= '202512' AND s.yymm < '${ref}'
+        THEN TO_VARCHAR(ADD_MONTHS(TO_DATE(s.yymm || '01', 'YYYYMMDD'), 1), 'YYYYMM')
+      ELSE NULL
+    END
   WHERE s.yymm >= '${startMonth}'
     AND s.yymm <= '${endMonth}'
     AND s.brd_cd = '${brandCode}'
@@ -448,9 +477,11 @@ stock_with_remark AS (
   SELECT 
     swr.*,
     CASE 
-      -- 2025년 12월부터 operate_standard 사용
-      WHEN swr.yymm >= '202512' THEN swr.operate_standard
-      -- 2025년 11월까지는 remark 방식 유지
+      -- 기준월: MST 실시간 (operate_standard = MST 컬럼)
+      WHEN swr.yymm = '${ref}' THEN swr.operate_standard
+      -- 25.12 ~ 기준월 미만: PREP 익월 스냅샷
+      WHEN swr.yymm >= '202512' AND swr.yymm < '${ref}' THEN swr.prep_operate_standard
+      -- 24.01~25.11: remark 방식
       WHEN swr.remark_num = 1 THEN swr.remark1
       WHEN swr.remark_num = 2 THEN swr.remark2
       WHEN swr.remark_num = 3 THEN swr.remark3

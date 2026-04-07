@@ -95,9 +95,16 @@ def fetch_dealer_data_for_brand(
     base_month: str,
     prior_month: str,
     days_in_month: int,
-    dealer_korean_names: Dict[str, str]
+    dealer_korean_names: Dict[str, str],
+    reference_month: str = None
 ) -> Dict[str, Any]:
-    """브랜드별 대리상 주력/아울렛 데이터 조회"""
+    """브랜드별 대리상 주력/아울렛 데이터 조회
+
+    Args:
+        reference_month: 기준월 (YYYYMM). None이면 base_month를 사용.
+                         기준월 행은 MST 실시간, 25.12~기준월 미만은 PREP 익월.
+    """
+    ref = reference_month if reference_month else base_month
     query = f"""
 WITH 
 acc_item_map AS (
@@ -127,6 +134,10 @@ shop_dealer_map AS (
 ),
 
 -- 재고 데이터 (당월 + 전년동월)
+-- operate_standard 규칙:
+--   yymm = {ref} → MST 실시간 (p.operate_standard)
+--   25.12 <= yymm < {ref} → PREP 익월 스냅샷
+--   24.01 ~ 25.11 → remark1~8
 stock_raw AS (
   SELECT 
     s.yymm,
@@ -135,6 +146,7 @@ stock_raw AS (
     COALESCE(s.stock_tag_amt_insp, 0) + COALESCE(s.stock_tag_amt_frozen, 0) + COALESCE(s.stock_tag_amt_expected, 0) AS stock_amt,
     p.remark1, p.remark2, p.remark3, p.remark4, p.remark5,
     p.remark6, p.remark7, p.remark8,
+    p.operate_standard AS mst_operate_standard,
     prep.operate_standard AS prep_operate_standard,
     p.sesn,
     m.prdt_nm
@@ -142,11 +154,12 @@ stock_raw AS (
   INNER JOIN FNF.CHN.MST_PRDT_SCS p ON s.prdt_scs_cd = p.prdt_scs_cd
   INNER JOIN acc_item_map db ON SUBSTR(s.prdt_scs_cd, 7, 2) = db.ITEM
   LEFT JOIN fnf.sap_fnf.mst_prdt m ON p.prdt_cd = m.prdt_cd
+  -- PREP 익월 조인: 25.12 <= yymm < 기준월만 매칭
   LEFT JOIN CHN.PREP_MST_PRDT_SCS prep
     ON s.prdt_scs_cd = prep.prdt_scs_cd
     AND prep.yyyymm = CASE
-      WHEN s.yymm BETWEEN '202512' AND '202602' THEN '202602'
-      WHEN s.yymm >= '202603' THEN s.yymm
+      WHEN s.yymm >= '202512' AND s.yymm < '{ref}'
+        THEN TO_VARCHAR(ADD_MONTHS(TO_DATE(s.yymm || '01', 'YYYYMMDD'), 1), 'YYYYMM')
       ELSE NULL
     END
   WHERE s.yymm IN ('{base_month}', '{prior_month}')
@@ -154,7 +167,7 @@ stock_raw AS (
     {get_category_filter('all')}
 ),
 
--- 재고 + 대리상 매핑 + remark 자동 계산
+-- 재고 + 대리상 매핑 + operate_standard 선택
 stock_with_segment AS (
   SELECT 
     sr.yymm,
@@ -163,7 +176,10 @@ stock_with_segment AS (
     sr.prdt_nm,
     sr.stock_amt,
     CASE 
-      WHEN sr.yymm >= '202512' THEN sr.prep_operate_standard
+      -- 기준월: MST 실시간
+      WHEN sr.yymm = '{ref}' THEN sr.mst_operate_standard
+      -- 25.12 ~ 기준월 미만: PREP 익월
+      WHEN sr.yymm >= '202512' AND sr.yymm < '{ref}' THEN sr.prep_operate_standard
       WHEN (FLOOR(DATEDIFF('month', TO_DATE('202312', 'YYYYMM'), TO_DATE(sr.yymm || '01', 'YYYYMMDD')) / 3) + 1) = 1 THEN sr.remark1
       WHEN (FLOOR(DATEDIFF('month', TO_DATE('202312', 'YYYYMM'), TO_DATE(sr.yymm || '01', 'YYYYMMDD')) / 3) + 1) = 2 THEN sr.remark2
       WHEN (FLOOR(DATEDIFF('month', TO_DATE('202312', 'YYYYMM'), TO_DATE(sr.yymm || '01', 'YYYYMMDD')) / 3) + 1) = 3 THEN sr.remark3
@@ -201,16 +217,19 @@ sales_raw AS (
     s.tag_amt,
     p.remark1, p.remark2, p.remark3, p.remark4, p.remark5,
     p.remark6, p.remark7, p.remark8,
+    p.operate_standard AS mst_operate_standard,
     prep.operate_standard AS prep_operate_standard,
     p.sesn
   FROM CHN.DW_SALE s
   INNER JOIN FNF.CHN.MST_PRDT_SCS p ON s.prdt_scs_cd = p.prdt_scs_cd
   INNER JOIN acc_item_map db ON SUBSTR(s.prdt_scs_cd, 7, 2) = db.ITEM
+  -- PREP 익월 조인: 25.12 <= 판매월 < 기준월만 매칭
   LEFT JOIN CHN.PREP_MST_PRDT_SCS prep
     ON s.prdt_scs_cd = prep.prdt_scs_cd
     AND prep.yyyymm = CASE
-      WHEN TO_CHAR(s.sale_dt, 'YYYYMM') BETWEEN '202512' AND '202602' THEN '202602'
-      WHEN TO_CHAR(s.sale_dt, 'YYYYMM') >= '202603' THEN TO_CHAR(s.sale_dt, 'YYYYMM')
+      WHEN TO_CHAR(s.sale_dt, 'YYYYMM') >= '202512'
+        AND TO_CHAR(s.sale_dt, 'YYYYMM') < '{ref}'
+        THEN TO_VARCHAR(ADD_MONTHS(TO_DATE(TO_CHAR(s.sale_dt, 'YYYYMM') || '01', 'YYYYMMDD'), 1), 'YYYYMM')
       ELSE NULL
     END
   WHERE TO_CHAR(s.sale_dt, 'YYYYMM') IN ('{base_month}', '{prior_month}')
@@ -218,7 +237,7 @@ sales_raw AS (
     {get_category_filter('all')}
 ),
 
--- 판매 + 대리상 매핑 + remark 자동 계산
+-- 판매 + 대리상 매핑 + operate_standard 선택
 sales_with_segment AS (
   SELECT 
     sr.yymm,
@@ -226,7 +245,10 @@ sales_with_segment AS (
     sr.prdt_scs_cd,
     sr.tag_amt,
     CASE 
-      WHEN sr.yymm >= '202512' THEN sr.prep_operate_standard
+      -- 기준월: MST 실시간
+      WHEN sr.yymm = '{ref}' THEN sr.mst_operate_standard
+      -- 25.12 ~ 기준월 미만: PREP 익월
+      WHEN sr.yymm >= '202512' AND sr.yymm < '{ref}' THEN sr.prep_operate_standard
       WHEN (FLOOR(DATEDIFF('month', TO_DATE('202312', 'YYYYMM'), TO_DATE(sr.yymm || '01', 'YYYYMMDD')) / 3) + 1) = 1 THEN sr.remark1
       WHEN (FLOOR(DATEDIFF('month', TO_DATE('202312', 'YYYYMM'), TO_DATE(sr.yymm || '01', 'YYYYMMDD')) / 3) + 1) = 2 THEN sr.remark2
       WHEN (FLOOR(DATEDIFF('month', TO_DATE('202312', 'YYYYMM'), TO_DATE(sr.yymm || '01', 'YYYYMMDD')) / 3) + 1) = 3 THEN sr.remark3
@@ -547,9 +569,14 @@ def main(reference_month: str = None):
         month = int(base_month[4:6])
         days_in_month = calendar.monthrange(year, month)[1]
         
+        # reference_month가 지정된 경우: 기준월(YYYYMM)을 명시적으로 사용
+        # 지정 안 된 경우: base_month가 곧 기준월
+        ref_yyyymm = base_month
         print(f"\n[대리상 주력/아울렛] 기준월 모드: {reference_month} ({base_month})만 처리합니다.")
+        print(f"[대리상 주력/아울렛] ref={ref_yyyymm}  ← 이 월=MST 실시간, 25.12~이전=PREP 익월")
         months_to_process = [base_month]
     else:
+        ref_yyyymm = None  # fetch 함수 내에서 base_month를 사용
         print("\n[대리상 주력/아울렛] 전체 처리 모드: 모든 브랜드와 월을 처리합니다.")
         months_to_process = None
     
@@ -596,7 +623,8 @@ def main(reference_month: str = None):
                         base_month,
                         prior_month,
                         days_in_month,
-                        dealer_korean_names
+                        dealer_korean_names,
+                        reference_month=ref_yyyymm
                     )
                     
                     existing_data["brands"][brand_name][base_month] = response

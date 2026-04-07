@@ -109,13 +109,27 @@ def display_preprocessing_status() -> list:
     return new_months
 
 
-def load_sales_or_data(months_to_process: list = None) -> Dict[Tuple, float]:
+def get_reference_month(months_to_process: list = None) -> str:
+    """
+    기준월(reference_month) 계산: ANALYSIS_MONTHS 중 최대값 (YYYYMM)
+
+    기준월은 operate_standard 소스를 결정한다.
+    - 기준월 행 → MST 실시간
+    - 25.12 ~ 기준월 미만 → PREP 익월
+    CLI --reference-month 오버라이드가 있으면 그 값이 우선됨(호출자에서 처리).
+    """
+    ref_display = max(ANALYSIS_MONTHS)  # 예: "2026.03"
+    return ref_display.replace('.', '')  # → "202603"
+
+
+def load_sales_or_data(months_to_process: list = None, reference_month: str = None) -> Dict[Tuple, float]:
     """
     Snowflake에서 OR 판매 매출 데이터 조회
     (재고 JSON에서 OR_sales 필드에 사용)
     
     Args:
         months_to_process: 처리할 월 목록 (None이면 전체 기간 처리)
+        reference_month: 기준월 (YYYYMM). None이면 max(ANALYSIS_MONTHS) 사용.
     """
     print("[재고] OR 판매 데이터 조회 중...")
     
@@ -128,7 +142,8 @@ def load_sales_or_data(months_to_process: list = None) -> Dict[Tuple, float]:
         start_month = min(months_to_process).replace('.', '')
         end_month = max(months_to_process).replace('.', '')
     
-    sales_agg_dict, _ = aggregate_sales_from_snowflake(start_month, end_month)
+    ref = reference_month if reference_month else get_reference_month()
+    sales_agg_dict, _ = aggregate_sales_from_snowflake(start_month, end_month, reference_month=ref)
     
     # OR 채널 데이터만 추출
     sales_or_dict: Dict[Tuple, float] = {}
@@ -143,13 +158,15 @@ def load_sales_or_data(months_to_process: list = None) -> Dict[Tuple, float]:
     return sales_or_dict
 
 
-def process_inventory_data(months_to_process: list = None) -> Tuple[Dict[Tuple, float], Set[str]]:
+def process_inventory_data(months_to_process: list = None, reference_month: str = None) -> Tuple[Dict[Tuple, float], Set[str]]:
     """
     Snowflake에서 재고 데이터 조회 및 집계
     (기존 CSV 기반 로직을 Snowflake로 완전 대체)
     
     Args:
         months_to_process: 처리할 월 목록 (None이면 전체 기간 처리)
+        reference_month: 기준월 (YYYYMM). None이면 max(ANALYSIS_MONTHS) 사용.
+                         기준월 행은 MST 실시간, 25.12~기준월 미만은 PREP 익월.
     
     Returns:
         Tuple[Dict, Set]: 집계 결과와 예상치 못한 카테고리
@@ -157,12 +174,15 @@ def process_inventory_data(months_to_process: list = None) -> Tuple[Dict[Tuple, 
     print("=" * 60)
     print("재고 데이터 Snowflake 조회 시작")
     print("=" * 60)
+
+    ref = reference_month if reference_month else get_reference_month()
+    print(f"[재고] 기준월(ref): {ref}  ← 이 월은 MST 실시간, 25.12~이전은 PREP 익월")
     
     try:
         if months_to_process is None:
             # 전체 기간 처리 (기존 동작)
             start_month = ANALYSIS_MONTHS[0].replace('.', '')  # "2024.01" → "202401"
-            end_month = ANALYSIS_MONTHS[-1].replace('.', '')   # "2026.01" → "202601"
+            end_month = ANALYSIS_MONTHS[-1].replace('.', '')   # "2026.03" → "202603"
             print(f"[재고] 전체 기간 처리: {start_month} ~ {end_month}")
         else:
             # 선택된 월만 처리
@@ -171,13 +191,14 @@ def process_inventory_data(months_to_process: list = None) -> Tuple[Dict[Tuple, 
                 return {}, set()
             
             start_month = min(months_to_process).replace('.', '')  # "2025.12" → "202512"
-            end_month = max(months_to_process).replace('.', '')   # "2026.01" → "202601"
+            end_month = max(months_to_process).replace('.', '')   # "2026.03" → "202603"
             print(f"[재고] 선택된 월만 처리: {start_month} ~ {end_month}")
             print(f"[재고] 처리할 월 목록: {', '.join(months_to_process)}")
         
         agg_dict, unexpected_categories = aggregate_inventory_from_snowflake(
             start_month=start_month,
-            end_month=end_month
+            end_month=end_month,
+            reference_month=ref
         )
         
         # months_to_process가 지정된 경우, 해당 월만 필터링
@@ -287,12 +308,16 @@ def main(reference_month: str = None):
         print("=" * 60)
         months_to_process = None
     
+    # reference_month: CLI "--reference-month YYYY.MM" 값 또는 max(ANALYSIS_MONTHS)
+    ref_yyyymm = reference_month.replace('.', '') if reference_month else get_reference_month()
+    print(f"\n[기준월] {ref_yyyymm}  ← 이 월=MST 실시간, 25.12~이전=PREP 익월")
+
     print("\n판매 OR 데이터 로드 중 (Snowflake)...")
-    sales_or_dict = load_sales_or_data(months_to_process)
+    sales_or_dict = load_sales_or_data(months_to_process, reference_month=ref_yyyymm)
     print(f"OR 판매 키 수: {len(sales_or_dict):,}")
     
     print("\n재고 데이터 처리 중 (Snowflake)...")
-    inv_agg, unexpected = process_inventory_data(months_to_process)
+    inv_agg, unexpected = process_inventory_data(months_to_process, reference_month=ref_yyyymm)
     
     if unexpected:
         print(f"\n[WARNING] 예상치 못한 중분류: {sorted(unexpected)}")

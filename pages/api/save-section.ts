@@ -65,8 +65,12 @@ async function fetchDealerData(
   baseMonth: string,
   priorMonth: string,
   daysInMonth: number,
-  dealerNames: Map<string, string>
+  dealerNames: Map<string, string>,
+  referenceMonth?: string  // 기준월 (YYYYMM). 없으면 baseMonth 사용
 ) {
+  // 기준월: 이 월은 MST 실시간, 25.12~기준월 미만은 PREP 익월
+  const ref = referenceMonth || baseMonth;
+
   const productTypeSQL = `
     CASE
       WHEN op_std IN ('FOCUS', 'INTRO') THEN 'core'
@@ -78,10 +82,14 @@ async function fetchDealerData(
       ELSE 'outlet'
     END`;
 
-  // 25.12~26.02: PREP 202602 고정 스냅샷, 26.03~: PREP 월별 스냅샷, 24.01~25.11: remark1~8
-  const remarkCaseSQL = (ym: string) => `
+  // operate_standard 선택 CASE:
+  //   yymm = ref → MST 실시간 (mst_operate_standard)
+  //   25.12 <= yymm < ref → PREP 익월 (prep_operate_standard)
+  //   24.01~25.11 → remark1~8
+  const opStdCaseSQL = (ym: string) => `
     CASE
-      WHEN '${ym}' >= '202512' THEN prep_operate_standard
+      WHEN '${ym}' = '${ref}' THEN mst_operate_standard
+      WHEN '${ym}' >= '202512' AND '${ym}' < '${ref}' THEN prep_operate_standard
       WHEN (FLOOR(DATEDIFF('month',TO_DATE('202312','YYYYMM'),TO_DATE('${ym}01','YYYYMMDD'))/3)+1)=1 THEN remark1
       WHEN (FLOOR(DATEDIFF('month',TO_DATE('202312','YYYYMM'),TO_DATE('${ym}01','YYYYMMDD'))/3)+1)=2 THEN remark2
       WHEN (FLOOR(DATEDIFF('month',TO_DATE('202312','YYYYMM'),TO_DATE('${ym}01','YYYYMMDD'))/3)+1)=3 THEN remark3
@@ -114,6 +122,7 @@ stock_raw AS (
     COALESCE(s.stock_tag_amt_insp,0)+COALESCE(s.stock_tag_amt_frozen,0)+COALESCE(s.stock_tag_amt_expected,0) AS stock_amt,
     p.remark1,p.remark2,p.remark3,p.remark4,p.remark5,
     p.remark6,p.remark7,p.remark8,
+    p.operate_standard AS mst_operate_standard,
     prep.operate_standard AS prep_operate_standard,
     p.sesn, m.prdt_nm
   FROM CHN.DW_STOCK_M s
@@ -123,8 +132,8 @@ stock_raw AS (
   LEFT JOIN CHN.PREP_MST_PRDT_SCS prep
     ON s.prdt_scs_cd = prep.prdt_scs_cd
     AND prep.yyyymm = CASE
-      WHEN s.yymm BETWEEN '202512' AND '202602' THEN '202602'
-      WHEN s.yymm >= '202603' THEN s.yymm
+      WHEN s.yymm >= '202512' AND s.yymm < '${ref}'
+        THEN TO_VARCHAR(ADD_MONTHS(TO_DATE(s.yymm||'01','YYYYMMDD'),1),'YYYYMM')
       ELSE NULL
     END
   WHERE s.yymm IN ('${baseMonth}','${priorMonth}') AND s.brd_cd = '${brandCode}'
@@ -133,8 +142,8 @@ stock_raw AS (
 stock_with_segment AS (
   SELECT sr.yymm, sdm.account_id, sr.prdt_scs_cd, sr.prdt_nm, sr.stock_amt,
     CASE sr.yymm
-      WHEN '${baseMonth}' THEN ${remarkCaseSQL(baseMonth)}
-      WHEN '${priorMonth}' THEN ${remarkCaseSQL(priorMonth)}
+      WHEN '${baseMonth}' THEN ${opStdCaseSQL(baseMonth)}
+      WHEN '${priorMonth}' THEN ${opStdCaseSQL(priorMonth)}
       ELSE NULL
     END AS op_std,
     sr.sesn, SUBSTRING(sr.yymm, 3, 2) AS yy
@@ -149,6 +158,7 @@ sales_raw AS (
     s.prdt_scs_cd, s.tag_amt,
     p.remark1,p.remark2,p.remark3,p.remark4,p.remark5,
     p.remark6,p.remark7,p.remark8,
+    p.operate_standard AS mst_operate_standard,
     prep.operate_standard AS prep_operate_standard,
     p.sesn
   FROM CHN.DW_SALE s
@@ -157,8 +167,9 @@ sales_raw AS (
   LEFT JOIN CHN.PREP_MST_PRDT_SCS prep
     ON s.prdt_scs_cd = prep.prdt_scs_cd
     AND prep.yyyymm = CASE
-      WHEN TO_CHAR(s.sale_dt,'YYYYMM') BETWEEN '202512' AND '202602' THEN '202602'
-      WHEN TO_CHAR(s.sale_dt,'YYYYMM') >= '202603' THEN TO_CHAR(s.sale_dt,'YYYYMM')
+      WHEN TO_CHAR(s.sale_dt,'YYYYMM') >= '202512'
+        AND TO_CHAR(s.sale_dt,'YYYYMM') < '${ref}'
+        THEN TO_VARCHAR(ADD_MONTHS(TO_DATE(TO_CHAR(s.sale_dt,'YYYYMM')||'01','YYYYMMDD'),1),'YYYYMM')
       ELSE NULL
     END
   WHERE TO_CHAR(s.sale_dt,'YYYYMM') IN ('${baseMonth}','${priorMonth}') AND s.brd_cd = '${brandCode}'
@@ -167,8 +178,8 @@ sales_raw AS (
 sales_with_segment AS (
   SELECT sr.yymm, sdm.account_id, sr.prdt_scs_cd, sr.tag_amt,
     CASE sr.yymm
-      WHEN '${baseMonth}' THEN ${remarkCaseSQL(baseMonth)}
-      WHEN '${priorMonth}' THEN ${remarkCaseSQL(priorMonth)}
+      WHEN '${baseMonth}' THEN ${opStdCaseSQL(baseMonth)}
+      WHEN '${priorMonth}' THEN ${opStdCaseSQL(priorMonth)}
       ELSE NULL
     END AS op_std,
     sr.sesn, SUBSTRING(sr.yymm, 3, 2) AS yy
@@ -546,7 +557,8 @@ export default async function handler(
       for (const brandName of BRAND_NAMES) {
         const brandCode = BRAND_NAME_TO_CODE[brandName];
         console.log(`[save-section] dealer: fetching ${brandName} for ${referenceMonth}...`);
-        const data = await fetchDealerData(brandCode, yyyymm, priorMonth, daysInMonthVal, dealerNames);
+        // yyyymm = baseMonth = referenceMonth (save-section은 단월 저장)
+        const data = await fetchDealerData(brandCode, yyyymm, priorMonth, daysInMonthVal, dealerNames, yyyymm);
         if (!existing.brands[brandName]) existing.brands[brandName] = {};
         existing.brands[brandName][yyyymm] = data;
       }
@@ -648,7 +660,7 @@ export default async function handler(
       for (const brandName of BRAND_NAMES) {
         const brandCode = BRAND_NAME_TO_CODE[brandName];
         console.log(`[save-section] sales: ${brandName} ${startMm}~${yyyymm}...`);
-        const q = buildSalesAggregationQuery(brandCode, startMm, yyyymm);
+        const q = buildSalesAggregationQuery(brandCode, startMm, yyyymm, yyyymm);
         salesRows.push(...(await runQuery(q) as any[]));
       }
 
@@ -679,7 +691,7 @@ export default async function handler(
       for (const brandName of BRAND_NAMES) {
         const brandCode = BRAND_NAME_TO_CODE[brandName];
         console.log(`[save-section] inventory: ${brandName} ${startMm}~${yyyymm}...`);
-        const q = buildInventoryAggregationQuery(brandCode, startMm, yyyymm);
+        const q = buildInventoryAggregationQuery(brandCode, startMm, yyyymm, yyyymm);
         inventoryRows.push(...(await runQuery(q) as any[]));
       }
 

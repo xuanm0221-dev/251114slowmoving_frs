@@ -222,6 +222,10 @@ export default function Home() {
                   <p className="text-xs text-blue-200 mt-1">
                     ※ ANALYSIS_MONTHS에 새 월 추가 시 해당 월만 자동 처리
                   </p>
+                  <p className="text-xs text-amber-300 mt-1">
+                    ⚠ 마감월(기준월) 변경 시 <strong>25.12 이상 전월도 재집계 필요</strong>
+                    — operate_standard 익월 PREP 규칙이 바뀌기 때문
+                  </p>
                 </div>
               </div>
 

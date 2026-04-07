@@ -63,8 +63,14 @@ export const DATA_INFO = {
 /**
  * 운영기준(operate_standard) 구간 정의
  * - 24.01~25.11: MST_PRDT_SCS의 분기별 remark1~8
- * - 25.12~26.02: PREP_MST_PRDT_SCS yyyymm='202602' 고정 스냅샷
- * - 26.03~    : PREP_MST_PRDT_SCS yyyymm=기준월 (월별 스냅샷)
+ * - 25.12 ~ (기준월 미만): PREP_MST_PRDT_SCS 익월 스냅샷
+ *     25.12→PREP 202601, 26.01→PREP 202602, 26.02→PREP 202603 …
+ *     (PREP_MST_PRDT_SCS는 26.01부터 데이터 존재)
+ * - 기준월(현재 마감월): MST_PRDT_SCS.operate_standard 실시간
+ *
+ * ※ 마감월이 올라가면 25.12 이상 월은 재집계 필요:
+ *    python scripts/preprocess_inventory.py
+ *    python scripts/preprocess_sales.py
  */
 export const REMARK_PERIODS = [
   { range: '24.01 ~ 24.02', remark: 'remark1', source: 'MST_PRDT_SCS' },
@@ -75,8 +81,10 @@ export const REMARK_PERIODS = [
   { range: '25.03 ~ 25.05', remark: 'remark6', source: 'MST_PRDT_SCS' },
   { range: '25.06 ~ 25.08', remark: 'remark7', source: 'MST_PRDT_SCS' },
   { range: '25.09 ~ 25.11', remark: 'remark8', source: 'MST_PRDT_SCS' },
-  { range: '25.12 ~ 26.02', remark: 'operate_standard', source: 'PREP_MST_PRDT_SCS (202602 고정)' },
-  { range: '26.03 ~', remark: 'operate_standard', source: 'PREP_MST_PRDT_SCS (월별)' },
+  { range: '25.12', remark: 'operate_standard', source: 'PREP_MST_PRDT_SCS (202601)' },
+  { range: '26.01', remark: 'operate_standard', source: 'PREP_MST_PRDT_SCS (202602)' },
+  { range: '26.02', remark: 'operate_standard', source: 'PREP_MST_PRDT_SCS (202603)' },
+  { range: '26.03 ★현재', remark: 'operate_standard', source: 'MST_PRDT_SCS (실시간)' },
 ] as const;
 
 /**

@@ -20,19 +20,27 @@ BRAND_CODE_MAP = {
 }
 
 
-def build_inventory_aggregation_query(start_month: str = '202401', end_month: str = '202511') -> str:
+def build_inventory_aggregation_query(
+    start_month: str = '202401',
+    end_month: str = '202511',
+    reference_month: str = '202603'
+) -> str:
     """
     재고 집계 SQL 쿼리 생성
-    
+
     Args:
         start_month: 시작월 (YYYYMM)
         end_month: 종료월 (YYYYMM)
-    
+        reference_month: 기준월 (YYYYMM). 이 월은 MST 실시간, 이전 25.12~는 PREP 익월 스냅샷 사용.
+
     Returns:
         str: 실행할 SQL 쿼리
-    
+
     Note:
-        VIEW 권한이 없어도 동작하도록 CTE로 remark 정규화 포함
+        operate_standard 소스 규칙:
+        - 행_월 = reference_month → MST_PRDT_SCS.operate_standard (실시간)
+        - 25.12 <= 행_월 < reference_month → PREP_MST_PRDT_SCS.operate_standard 익월 (행_월+1)
+        - 24.01 ~ 25.11 → remark1~8 (분기별 고정)
     """
     query = f"""
 WITH 
@@ -44,7 +52,10 @@ acc_item_map AS (
 ),
 
 -- Step 1: 재고 데이터에 상품/매장 마스터 조인 및 remark 자동 계산
--- 기준: 24.01~25.11은 분기별 remark1~8, 25.12~은 PREP_MST_PRDT_SCS.operate_standard
+-- operate_standard 규칙:
+--   행_월 = {reference_month} → MST 실시간 (p.operate_standard)
+--   25.12 <= 행_월 < {reference_month} → PREP 익월 스냅샷 (ADD_MONTHS 1)
+--   24.01 ~ 25.11 → remark1~8
 stock_with_master AS (
   SELECT 
     st.yymm,
@@ -62,7 +73,9 @@ stock_with_master AS (
     SUBSTR(st.yymm, 3, 2) AS row_yy,
     p.remark1, p.remark2, p.remark3, p.remark4, p.remark5,
     p.remark6, p.remark7, p.remark8,
-    -- 25.12~26.02: PREP yyyymm='202602' 고정, 26.03~: PREP yyyymm=재고월
+    -- MST 실시간 operate_standard (기준월에 사용)
+    p.operate_standard AS mst_operate_standard,
+    -- PREP 익월 스냅샷 (25.12 ~ 기준월 미만에 사용)
     prep.operate_standard AS prep_operate_standard
   FROM CHN.DW_STOCK_M st
   LEFT JOIN FNF.CHN.MST_PRDT_SCS p ON st.prdt_scs_cd = p.prdt_scs_cd
@@ -73,11 +86,12 @@ stock_with_master AS (
     WHERE fr_or_cls IS NOT NULL
     QUALIFY ROW_NUMBER() OVER(PARTITION BY shop_id ORDER BY COALESCE(open_dt, '1900-01-01') DESC) = 1
   ) d ON st.shop_id = d.shop_id
+  -- PREP 익월 조인: 25.12 <= 행_월 < 기준월만 매칭, 기준월은 NULL (MST 사용)
   LEFT JOIN CHN.PREP_MST_PRDT_SCS prep
     ON st.prdt_scs_cd = prep.prdt_scs_cd
     AND prep.yyyymm = CASE
-      WHEN st.yymm BETWEEN '202512' AND '202602' THEN '202602'
-      WHEN st.yymm >= '202603' THEN st.yymm
+      WHEN st.yymm >= '202512' AND st.yymm < '{reference_month}'
+        THEN TO_VARCHAR(ADD_MONTHS(TO_DATE(st.yymm || '01', 'YYYYMMDD'), 1), 'YYYYMM')
       ELSE NULL
     END
   WHERE st.yymm >= '{start_month}'
@@ -87,14 +101,16 @@ stock_with_master AS (
     AND d.fr_or_cls IN ('FR', 'OR', 'HQ')  -- HQ 포함
 ),
 
--- Step 2: 동적 remark 선택
--- 24.01~25.11: remark1~8 (분기별 고정), 25.12~: PREP_MST_PRDT_SCS.operate_standard
+-- Step 2: 동적 operate_standard 선택
+-- 24.01~25.11: remark1~8, 25.12~(기준월 미만): PREP 익월, 기준월: MST 실시간
 stock_with_remark AS (
   SELECT 
     s.*,
     CASE 
-      -- 25.12~26.02: PREP 202602 고정 스냅샷, 26.03~: PREP 월별 스냅샷
-      WHEN s.yymm >= '202512' THEN s.prep_operate_standard
+      -- 기준월: MST 실시간
+      WHEN s.yymm = '{reference_month}' THEN s.mst_operate_standard
+      -- 25.12 ~ 기준월 미만: PREP 익월 스냅샷
+      WHEN s.yymm >= '202512' AND s.yymm < '{reference_month}' THEN s.prep_operate_standard
       -- 24.01~25.11: 분기별 remark (remark1~8)
       WHEN s.remark_num = 1 THEN s.remark1
       WHEN s.remark_num = 2 THEN s.remark2
@@ -159,23 +175,27 @@ ORDER BY yymm, brd_cd, item_category, channel, product_type
 
 def aggregate_inventory_from_snowflake(
     start_month: str = '202401',
-    end_month: str = '202511'
+    end_month: str = '202511',
+    reference_month: str = None
 ) -> Tuple[Dict[Tuple, float], Set[str]]:
     """
     Snowflake에서 재고 데이터 집계
-    
+
     Args:
         start_month: 시작월 (YYYYMM)
         end_month: 종료월 (YYYYMM)
-    
+        reference_month: 기준월 (YYYYMM). None이면 end_month를 사용.
+                         이 월은 MST 실시간, 이전 25.12~는 PREP 익월 스냅샷.
+
     Returns:
         Tuple[Dict, Set]: 
             - Dict: (brand, item_tab, month, channel_group, product_type) → amount
             - Set: 예상치 못한 카테고리 (빈 set 반환)
     """
-    print(f"[재고] Snowflake에서 데이터 조회 중... ({start_month} ~ {end_month})")
-    
-    query = build_inventory_aggregation_query(start_month, end_month)
+    ref = reference_month if reference_month else end_month
+    print(f"[재고] Snowflake에서 데이터 조회 중... ({start_month} ~ {end_month}), 기준월(ref)={ref}")
+
+    query = build_inventory_aggregation_query(start_month, end_month, ref)
     results = execute_query_batch(query)
     
     print(f"[재고] 조회 완료: {len(results):,}행")
