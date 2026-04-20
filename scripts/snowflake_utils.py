@@ -3,8 +3,8 @@ Snowflake 연결 및 쿼리 실행 유틸리티
 
 환경변수 설정 필요:
 - SNOWFLAKE_ACCOUNT
-- SNOWFLAKE_USER
-- SNOWFLAKE_PASSWORD
+- SNOWFLAKE_USERNAME
+- SNOWFLAKE_PRIVATE_KEY
 - SNOWFLAKE_WAREHOUSE
 - SNOWFLAKE_DATABASE
 - SNOWFLAKE_SCHEMA
@@ -16,6 +16,7 @@ import os
 from typing import List, Dict, Any, Optional
 from pathlib import Path
 from dotenv import load_dotenv
+from cryptography.hazmat.primitives import serialization
 
 # .env 파일 로드 (프로젝트 루트에서)
 env_path = Path(__file__).parent.parent / '.env.local'
@@ -25,34 +26,48 @@ else:
     print(f"[WARNING] .env.local 파일을 찾을 수 없습니다: {env_path}")
 
 
+def _load_private_key_bytes() -> bytes:
+    """SNOWFLAKE_PRIVATE_KEY 환경변수를 DER 바이트로 변환"""
+    private_key_str = os.getenv('SNOWFLAKE_PRIVATE_KEY', '').replace('\\n', '\n')
+    p_key = serialization.load_pem_private_key(
+        private_key_str.encode(),
+        password=None,
+    )
+    return p_key.private_bytes(
+        encoding=serialization.Encoding.DER,
+        format=serialization.PrivateFormat.PKCS8,
+        encryption_algorithm=serialization.NoEncryption(),
+    )
+
+
 def get_snowflake_connection() -> snowflake.connector.SnowflakeConnection:
     """
-    Snowflake 연결 생성
-    
+    Snowflake 연결 생성 (JWT / private key 인증)
+
     Returns:
         snowflake.connector.SnowflakeConnection: Snowflake 연결 객체
-    
+
     Raises:
         ValueError: 필수 환경변수가 없을 경우
     """
     required_env_vars = [
         'SNOWFLAKE_ACCOUNT',
-        'SNOWFLAKE_USER',
-        'SNOWFLAKE_PASSWORD',
+        'SNOWFLAKE_USERNAME',
+        'SNOWFLAKE_PRIVATE_KEY',
         'SNOWFLAKE_WAREHOUSE',
         'SNOWFLAKE_DATABASE',
         'SNOWFLAKE_SCHEMA'
     ]
-    
+
     missing_vars = [var for var in required_env_vars if not os.getenv(var)]
     if missing_vars:
         raise ValueError(f"필수 환경변수가 설정되지 않았습니다: {', '.join(missing_vars)}")
-    
+
     try:
         conn = snowflake.connector.connect(
             account=os.getenv('SNOWFLAKE_ACCOUNT'),
-            user=os.getenv('SNOWFLAKE_USER'),
-            password=os.getenv('SNOWFLAKE_PASSWORD'),
+            user=os.getenv('SNOWFLAKE_USERNAME'),
+            private_key=_load_private_key_bytes(),
             warehouse=os.getenv('SNOWFLAKE_WAREHOUSE'),
             database=os.getenv('SNOWFLAKE_DATABASE'),
             schema=os.getenv('SNOWFLAKE_SCHEMA'),
@@ -66,14 +81,14 @@ def get_snowflake_connection() -> snowflake.connector.SnowflakeConnection:
 def execute_query(query: str, params: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
     """
     Snowflake 쿼리 실행 및 결과 반환
-    
+
     Args:
         query: 실행할 SQL 쿼리
         params: 쿼리 파라미터 (선택적)
-    
+
     Returns:
         List[Dict[str, Any]]: 쿼리 결과 (딕셔너리 리스트)
-    
+
     Example:
         results = execute_query("SELECT * FROM table WHERE id = %(id)s", {'id': 123})
     """
@@ -81,23 +96,23 @@ def execute_query(query: str, params: Optional[Dict[str, Any]] = None) -> List[D
     try:
         conn = get_snowflake_connection()
         cursor = conn.cursor(snowflake.connector.DictCursor)
-        
+
         if params:
             cursor.execute(query, params)
         else:
             cursor.execute(query)
-        
+
         results = cursor.fetchall()
         cursor.close()
-        
+
         return results
-    
+
     except Exception as e:
         print(f"[ERROR] 쿼리 실행 실패:")
         print(f"  쿼리: {query[:200]}...")
         print(f"  에러: {e}")
         raise
-    
+
     finally:
         if conn:
             conn.close()
@@ -106,36 +121,36 @@ def execute_query(query: str, params: Optional[Dict[str, Any]] = None) -> List[D
 def execute_query_batch(query: str, batch_size: int = 10000) -> List[Dict[str, Any]]:
     """
     대용량 쿼리를 배치로 실행하여 메모리 효율적으로 처리
-    
+
     Args:
         query: 실행할 SQL 쿼리
         batch_size: 한 번에 가져올 행 수
-    
+
     Returns:
         List[Dict[str, Any]]: 전체 쿼리 결과
     """
     conn = None
     all_results = []
-    
+
     try:
         conn = get_snowflake_connection()
         cursor = conn.cursor(snowflake.connector.DictCursor)
         cursor.execute(query)
-        
+
         while True:
             batch = cursor.fetchmany(batch_size)
             if not batch:
                 break
             all_results.extend(batch)
             print(f"  배치 로드: {len(all_results):,}행...")
-        
+
         cursor.close()
         return all_results
-    
+
     except Exception as e:
         print(f"[ERROR] 배치 쿼리 실행 실패: {e}")
         raise
-    
+
     finally:
         if conn:
             conn.close()
@@ -144,7 +159,7 @@ def execute_query_batch(query: str, batch_size: int = 10000) -> List[Dict[str, A
 def test_connection() -> bool:
     """
     Snowflake 연결 테스트
-    
+
     Returns:
         bool: 연결 성공 여부
     """

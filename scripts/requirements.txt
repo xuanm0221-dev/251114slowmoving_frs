@@ -1,6 +1,9 @@
 # Snowflake 연결
 snowflake-connector-python>=3.0.0
 
+# JWT 인증용 private key 파싱
+cryptography>=41.0.0
+
 # 환경변수 관리
 python-dotenv>=1.0.0
 

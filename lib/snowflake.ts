@@ -1,10 +1,13 @@
 import snowflake from "snowflake-sdk";
 
 export function runQuery(sql: string): Promise<any[]> {
+  const privateKey = process.env.SNOWFLAKE_PRIVATE_KEY?.replace(/\\n/g, '\n');
+
   const connection = snowflake.createConnection({
     account: process.env.SNOWFLAKE_ACCOUNT as string,
-    username: process.env.SNOWFLAKE_USER as string,
-    password: process.env.SNOWFLAKE_PASSWORD as string,
+    username: process.env.SNOWFLAKE_USERNAME as string,
+    authenticator: 'SNOWFLAKE_JWT',
+    privateKey: privateKey as string,
     warehouse: process.env.SNOWFLAKE_WAREHOUSE as string,
     database: process.env.SNOWFLAKE_DATABASE as string,
     schema: process.env.SNOWFLAKE_SCHEMA as string,
