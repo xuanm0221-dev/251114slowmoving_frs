@@ -25,7 +25,7 @@ ANALYSIS_MONTHS = [
     "2024.07", "2024.08", "2024.09", "2024.10", "2024.11", "2024.12",
     "2025.01", "2025.02", "2025.03", "2025.04", "2025.05", "2025.06",
     "2025.07", "2025.08", "2025.09", "2025.10", "2025.11", "2025.12",
-    "2026.01", "2026.02", "2026.03"
+    "2026.01", "2026.02", "2026.03", "2026.04"
 ]
 
 VALID_BRANDS = {"MLB", "MLB KIDS", "DISCOVERY"}
@@ -397,6 +397,24 @@ def main(reference_month: str = None):
     print(f"[재고] 재고 집계 키 수: {len(inv_agg):,}")
     print(f"[DONE] 저장 완료: {output_file}")
     print()
+
+    # 시즌 차트 자동 갱신: 신규 처리 월이 있을 때만, 각 월에 대해 reference_month로 호출
+    season_targets = new_months if new_months else []
+    if season_targets:
+        print("=" * 60)
+        print("재고 시즌 차트 자동 갱신")
+        print("=" * 60)
+        try:
+            from preprocess_inventory_season_chart import main as run_season_chart
+            for ym in season_targets:
+                print(f"[시즌차트] reference_month={ym}")
+                run_season_chart(reference_month=ym)
+        except Exception as e:
+            print(f"[WARNING] 시즌 차트 갱신 실패: {e}")
+            import traceback
+            traceback.print_exc()
+    else:
+        print("[시즌차트] 신규 처리 월이 없어 자동 갱신을 건너뜁니다.")
 
 
 def merge_inventory_month(months_to_merge: list, new_inventory_path: str = None):

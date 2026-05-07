@@ -64,7 +64,7 @@ export const DATA_INFO = {
  * 운영기준(operate_standard) 구간 정의
  * - 24.01~25.11: MST_PRDT_SCS의 분기별 remark1~8
  * - 25.12 ~ (기준월 미만): PREP_MST_PRDT_SCS 익월 스냅샷
- *     25.12→PREP 202601, 26.01→PREP 202602, 26.02→PREP 202603 …
+ *     25.12→PREP 202601, 26.01→PREP 202602, 26.02→PREP 202603, 26.03→PREP 202604 …
  *     (PREP_MST_PRDT_SCS는 26.01부터 데이터 존재)
  * - 기준월(현재 마감월): MST_PRDT_SCS.operate_standard 실시간
  *
@@ -84,7 +84,8 @@ export const REMARK_PERIODS = [
   { range: '25.12', remark: 'operate_standard', source: 'PREP_MST_PRDT_SCS (202601)' },
   { range: '26.01', remark: 'operate_standard', source: 'PREP_MST_PRDT_SCS (202602)' },
   { range: '26.02', remark: 'operate_standard', source: 'PREP_MST_PRDT_SCS (202603)' },
-  { range: '26.03 ★현재', remark: 'operate_standard', source: 'MST_PRDT_SCS (실시간)' },
+  { range: '26.03', remark: 'operate_standard', source: 'PREP_MST_PRDT_SCS (202604)' },
+  { range: '26.04 ★현재', remark: 'operate_standard', source: 'MST_PRDT_SCS (실시간)' },
 ] as const;
 
 /**
@@ -98,7 +99,7 @@ export const CLOSED_MONTHS = [
   "2024.07", "2024.08", "2024.09", "2024.10", "2024.11", "2024.12",
   "2025.01", "2025.02", "2025.03", "2025.04", "2025.05", "2025.06",
   "2025.07", "2025.08", "2025.09", "2025.10", "2025.11", "2025.12",
-  "2026.01", "2026.02", "2026.03"
+  "2026.01", "2026.02", "2026.03", "2026.04"
 ] as const;
 
 

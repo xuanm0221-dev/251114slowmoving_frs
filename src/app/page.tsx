@@ -243,7 +243,7 @@ export default function Home() {
                     이 차트 API는 JSON에 없는 월을 0으로만 채우고 Snowflake 실시간 조회를 하지 않습니다.
                   </p>
                   <p className="text-xs text-gray-400">
-                    마감한 기준월과 동일하게 지정하세요. 예: <code className="text-gray-300">--reference-month 2026.03</code>
+                    마감한 기준월과 동일하게 지정하세요. 예: <code className="text-gray-300">--reference-month 2026.04</code>
                   </p>
                 </div>
               </div>

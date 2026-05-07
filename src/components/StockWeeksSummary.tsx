@@ -175,26 +175,38 @@ export default function StockWeeksSummary({
   };
 
   // 현재 월에 적용된 remark 정보 계산 (당년 + 전년)
+  // SQL 룰과 동일하게 동작 (inventory_aggregation.py / sales_aggregation.py):
+  //   - 행_월 = 기준월 → MST 실시간
+  //   - 25.12 ≤ 행_월 < 기준월 → PREP 익월 (행_월+1)
+  //   - 24.01~25.11 → 분기별 remark1~8
   const getRemarkInfo = (month: string): { current: string; previous: string } => {
+    const refYm = referenceMonth.replace('.', '');
+
     const calculateRemark = (yearMonth: string): string => {
       const [yearStr, monthStr] = yearMonth.split(".");
       const year = parseInt(yearStr);
       const monthNum = parseInt(monthStr);
       const ym = `${yearStr}${monthStr.padStart(2, '0')}`;
 
-      // 26.03~: PREP 월별 스냅샷
-      if (year > 2026 || (year === 2026 && monthNum >= 3)) {
-        const yy = String(year).slice(2);
-        const mm = String(monthNum).padStart(2, '0');
-        return `operate_standard (PREP ${yy}.${mm})`;
+      // 1) 기준월 → MST 실시간
+      if (ym === refYm) {
+        return `operate_standard (MST 실시간)`;
       }
 
-      // 25.12~26.02: PREP 202602 고정 스냅샷
-      if (ym >= '202512' && ym <= '202602') {
-        return `operate_standard (PREP 26.02)`;
+      // 2) 25.12 ≤ 행_월 < 기준월 → PREP 익월 (행_월+1)
+      if (ym >= '202512' && ym < refYm) {
+        let nextYear = year;
+        let nextMonth = monthNum + 1;
+        if (nextMonth > 12) {
+          nextMonth = 1;
+          nextYear += 1;
+        }
+        const nextYY = String(nextYear).slice(2);
+        const nextMM = String(nextMonth).padStart(2, '0');
+        return `operate_standard (PREP ${nextYY}.${nextMM})`;
       }
 
-      // 24.01~25.11: 분기별 remark1~8
+      // 3) 24.01~25.11: 분기별 remark1~8
       const baseYear = 2023;
       const baseMonth = 12;
       const monthsSinceBase = (year - baseYear) * 12 + (monthNum - baseMonth);

@@ -700,6 +700,31 @@
         },
         "total_stock_amt": 4043414604.0,
         "total_sales_amt": 356887878.0
+      },
+      "202604": {
+        "month": "202604",
+        "정체재고": {
+          "stock_amt": 1648650797.0,
+          "sales_amt": 90867545.0
+        },
+        "과시즌": {
+          "stock_amt": 962153118.0,
+          "sales_amt": 134074619.0
+        },
+        "당시즌": {
+          "stock_amt": 1124596054.0,
+          "sales_amt": 112853659.0
+        },
+        "차기시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당월수량미달": {
+          "stock_amt": 941057.0,
+          "sales_amt": 12612.0
+        },
+        "total_stock_amt": 3736341026.0,
+        "total_sales_amt": 337808435.0
       }
     },
     "I": {
@@ -1402,6 +1427,31 @@
         },
         "total_stock_amt": 157017963.0,
         "total_sales_amt": 12064015.0
+      },
+      "202604": {
+        "month": "202604",
+        "정체재고": {
+          "stock_amt": 69177024.0,
+          "sales_amt": 2886090.0
+        },
+        "과시즌": {
+          "stock_amt": 32756387.0,
+          "sales_amt": 4066296.0
+        },
+        "당시즌": {
+          "stock_amt": 38552381.0,
+          "sales_amt": 3565169.0
+        },
+        "차기시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당월수량미달": {
+          "stock_amt": 184753.0,
+          "sales_amt": 4896.0
+        },
+        "total_stock_amt": 140670545.0,
+        "total_sales_amt": 10522451.0
       }
     },
     "X": {
@@ -2104,6 +2154,31 @@
         },
         "total_stock_amt": 39032943.0,
         "total_sales_amt": 342296.0
+      },
+      "202604": {
+        "month": "202604",
+        "정체재고": {
+          "stock_amt": 31936230.0,
+          "sales_amt": 93422.0
+        },
+        "과시즌": {
+          "stock_amt": 3899776.0,
+          "sales_amt": 133125.0
+        },
+        "당시즌": {
+          "stock_amt": 3118478.0,
+          "sales_amt": 122289.0
+        },
+        "차기시즌": {
+          "stock_amt": 0,
+          "sales_amt": 0
+        },
+        "당월수량미달": {
+          "stock_amt": 11890.0,
+          "sales_amt": 270.0
+        },
+        "total_stock_amt": 38966374.0,
+        "total_sales_amt": 349106.0
       }
     },
     "MLB": {
