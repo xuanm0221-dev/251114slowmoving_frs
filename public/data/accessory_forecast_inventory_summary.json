@@ -161,12 +161,12 @@
         "Shoes": 454000
       },
       "2026.06": {
-        "Headwear": 473000,
+        "Headwear": 130000,
         "Bag": 477500
       },
       "2026.07": {
         "Shoes": 0,
-        "Headwear": 321000,
+        "Headwear": 664000,
         "Bag": 0,
         "Acc_etc": 52000
       },
@@ -191,7 +191,7 @@
       "lastUpdated": "2026-07-01T08:03:58.372Z"
     },
     "DISCOVERY": {
-      "lastUpdated": "2026-06-16T07:37:33.104Z"
+      "lastUpdated": "2026-07-01T08:05:01.471Z"
     }
   }
 }
