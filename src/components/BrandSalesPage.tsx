@@ -950,15 +950,15 @@ export default function BrandSalesPage({ brand, title }: BrandSalesPageProps) {
                         <div className="pt-2 border-t border-gray-300">
                           <div className="text-xs text-gray-500">
                             <span className="font-semibold">📦 데이터 소스:</span>
-                            <span className="ml-2">Snowflake 테이블 - sap_fnf.dw_cn_ivtr_prdt_m (수불부), sap_fnf.mst_prdt (상품마스터)</span>
+                            <span className="ml-2">Snowflake 테이블 - sap_fnf.dw_cn_ivtr_prdt_m (수불부), FNF.PRCS.DB_PRDT (ACC 상품마스터)</span>
                           </div>
                           <div className="text-xs text-gray-500 mt-1">
                             <span className="font-semibold">🔧 주요 컬럼:</span>
-                            <span className="ml-2">trns_cls_cd (거래구분코드, '10'=입고), stock_amt (재고금액), prdt_cd (상품코드), prdt_kind_nm_en (제품분류영문명), brd_cd (브랜드)</span>
+                            <span className="ml-2">stor_amt (입고금액, 吊牌 추정), prdt_cd (상품코드, SUBSTR(7,2)로 ITEM 매칭), yyyymm, brd_cd (M/I/X), PRDT_KIND_NM_ENG (Shoes/Headwear/Bag/Acc_etc)</span>
                           </div>
                           <div className="text-xs text-gray-500 mt-1">
                             <span className="font-semibold">⚙️ 처리방식:</span>
-                            <span className="ml-2">API 실시간 조회 (/api/actual-arrival) - 페이지 로드 시 Snowflake에서 직접 조회</span>
+                            <span className="ml-2">하이브리드 - 기준월이 JSON 캐시(accessory_actual_arrival_summary.json)에 저장돼 있으면 그대로 사용, 없으면 Snowflake 실시간 조회 (/api/actual-arrival). JSON은 preprocess_actual_arrival.py로 갱신.</span>
                           </div>
                         </div>
                       </div>
