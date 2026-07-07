@@ -105,9 +105,16 @@ export default async function handler(
       
       const jsonData = readBatchJsonFile<ActualArrivalSummaryData>("accessory_actual_arrival_summary.json");
       const jsonBrandData = jsonData.brands[brand] || {};
-      
+
       // 기준월이 JSON에 있는지 확인 (저장완료 여부)
-      currentMonthInJson = !!(jsonBrandData[endMonth] && Object.keys(jsonBrandData[endMonth]).length > 0);
+      // 값이 전부 0인 경우도 "미저장"으로 취급 → Snowflake 실시간 재조회
+      // (preprocess를 데이터 적재 전에 돌리면 zero-폴루션이 캐시될 수 있어서 방어)
+      const refMonthData = jsonBrandData[endMonth];
+      currentMonthInJson = !!(
+        refMonthData &&
+        Object.keys(refMonthData).length > 0 &&
+        Object.values(refMonthData).some((v) => Number(v) > 0)
+      );
       
       // 기준월이 JSON에 있으면 전체 월 JSON에서 읽기, 없으면 이전 월만
       months.forEach(month => {

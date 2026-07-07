@@ -237,11 +237,25 @@ def main(reference_month: str = None):
                 )
                 
                 # 기존 데이터와 병합 (기존 월 데이터 유지, 새로 처리한 월만 덮어쓰기)
+                # 예외: end_month(마지막 처리 월)의 값이 전부 0이면 JSON에 저장하지 않음.
+                #       (Snowflake에 아직 실적이 안 들어온 상황일 수 있어, API에서 실시간 조회하도록 유도)
                 for month, month_data in result.items():
-                    if month <= end_month:  # 기준월 이전만 저장
-                        existing_data["brands"][brand_name][month] = month_data
-                        if month not in existing_data["months"]:
-                            existing_data["months"].append(month)
+                    if month > end_month:
+                        continue
+
+                    is_all_zero = bool(month_data) and all(
+                        (v or 0) == 0 for v in month_data.values()
+                    )
+                    if month == end_month and is_all_zero:
+                        # 이전 실행에서 zero-폴루션이 남아 있으면 정리
+                        if month in existing_data["brands"][brand_name]:
+                            del existing_data["brands"][brand_name][month]
+                        print(f"  [SKIP] {month}: 모든 아이템 0 → JSON 미저장 (API에서 실시간 조회)")
+                        continue
+
+                    existing_data["brands"][brand_name][month] = month_data
+                    if month not in existing_data["months"]:
+                        existing_data["months"].append(month)
                 
                 print(f"  완료: {START_MONTH} ~ {end_month}")
             except Exception as e:
