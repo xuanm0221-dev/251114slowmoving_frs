@@ -129,7 +129,7 @@ stock_raw AS (
   INNER JOIN FNF.CHN.MST_PRDT_SCS p ON s.prdt_scs_cd = p.prdt_scs_cd
   INNER JOIN acc_item_map db ON SUBSTR(s.prdt_scs_cd, 7, 2) = db.ITEM
   LEFT JOIN fnf.sap_fnf.mst_prdt m ON p.prdt_cd = m.prdt_cd
-  LEFT JOIN CHN.PREP_MST_PRDT_SCS prep
+  LEFT JOIN FNF.CHN.HST_PRDT_SCS prep
     ON s.prdt_scs_cd = prep.prdt_scs_cd
     AND prep.yyyymm = CASE
       WHEN s.yymm >= '202512' AND s.yymm < '${ref}'
@@ -164,7 +164,7 @@ sales_raw AS (
   FROM CHN.DW_SALE s
   INNER JOIN FNF.CHN.MST_PRDT_SCS p ON s.prdt_scs_cd = p.prdt_scs_cd
   INNER JOIN acc_item_map db ON SUBSTR(s.prdt_scs_cd, 7, 2) = db.ITEM
-  LEFT JOIN CHN.PREP_MST_PRDT_SCS prep
+  LEFT JOIN FNF.CHN.HST_PRDT_SCS prep
     ON s.prdt_scs_cd = prep.prdt_scs_cd
     AND prep.yyyymm = CASE
       WHEN TO_CHAR(s.sale_dt,'YYYYMM') >= '202512'

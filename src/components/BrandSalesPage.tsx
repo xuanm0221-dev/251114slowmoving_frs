@@ -768,7 +768,7 @@ export default function BrandSalesPage({ brand, title }: BrandSalesPageProps) {
                         <div className="pt-2 border-t border-gray-300">
                           <div className="text-xs text-gray-500">
                             <span className="font-semibold">📦 데이터 소스:</span>
-                            <span className="ml-2">CHN.DW_SALE (매출), CHN.DW_SHOP_WH_DETAIL (매장), FNF.CHN.MST_PRDT_SCS (상품마스터), CHN.PREP_MST_PRDT_SCS (운영기준 25.12~)</span>
+                            <span className="ml-2">CHN.DW_SALE (매출), CHN.DW_SHOP_WH_DETAIL (매장), FNF.CHN.MST_PRDT_SCS (상품마스터), FNF.CHN.HST_PRDT_SCS (운영기준 25.12~, 구 PREP_MST_PRDT_SCS)</span>
                           </div>
                           <div className="text-xs text-gray-500 mt-1">
                             <span className="font-semibold">🔧 주요 컬럼:</span>
@@ -810,7 +810,7 @@ export default function BrandSalesPage({ brand, title }: BrandSalesPageProps) {
                         <div className="pt-2 border-t border-gray-300">
                           <div className="text-xs text-gray-500">
                             <span className="font-semibold">📦 데이터 소스:</span>
-                            <span className="ml-2">CHN.DW_STOCK_M (재고), CHN.DW_SHOP_WH_DETAIL (매장), FNF.CHN.MST_PRDT_SCS (상품마스터), CHN.PREP_MST_PRDT_SCS (운영기준 25.12~)</span>
+                            <span className="ml-2">CHN.DW_STOCK_M (재고), CHN.DW_SHOP_WH_DETAIL (매장), FNF.CHN.MST_PRDT_SCS (상품마스터), FNF.CHN.HST_PRDT_SCS (운영기준 25.12~, 구 PREP_MST_PRDT_SCS)</span>
                           </div>
                           <div className="text-xs text-gray-500 mt-1">
                             <span className="font-semibold">🔧 주요 컬럼:</span>

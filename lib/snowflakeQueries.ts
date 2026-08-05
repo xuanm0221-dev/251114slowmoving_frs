@@ -260,8 +260,8 @@ sales_raw AS (
   INNER JOIN FNF.CHN.MST_PRDT_SCS p 
     ON s.prdt_scs_cd = p.prdt_scs_cd
   LEFT JOIN acc_item_map db ON SUBSTR(s.prdt_scs_cd, 7, 2) = db.ITEM
-  -- PREP 익월 조인: 25.12 <= 판매월 < ref만 매칭
-  LEFT JOIN CHN.PREP_MST_PRDT_SCS prep
+  -- HST 익월 조인 (구 PREP): 25.12 <= 판매월 < ref만 매칭
+  LEFT JOIN FNF.CHN.HST_PRDT_SCS prep
     ON s.prdt_scs_cd = prep.prdt_scs_cd
     AND prep.yyyymm = CASE
       WHEN TO_CHAR(s.sale_dt, 'YYYYMM') >= '202512'
@@ -416,8 +416,8 @@ stock_raw AS (
   INNER JOIN FNF.CHN.MST_PRDT_SCS p 
     ON s.prdt_scs_cd = p.prdt_scs_cd
   LEFT JOIN acc_item_map db ON SUBSTR(s.prdt_scs_cd, 7, 2) = db.ITEM
-  -- PREP 익월 조인: 25.12 <= yymm < ref만 매칭
-  LEFT JOIN CHN.PREP_MST_PRDT_SCS prep
+  -- HST 익월 조인 (구 PREP): 25.12 <= yymm < ref만 매칭
+  LEFT JOIN FNF.CHN.HST_PRDT_SCS prep
     ON s.prdt_scs_cd = prep.prdt_scs_cd
     AND prep.yyyymm = CASE
       WHEN s.yymm >= '202512' AND s.yymm < '${ref}'

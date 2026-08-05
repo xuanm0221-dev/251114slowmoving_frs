@@ -154,8 +154,8 @@ stock_raw AS (
   INNER JOIN FNF.CHN.MST_PRDT_SCS p ON s.prdt_scs_cd = p.prdt_scs_cd
   INNER JOIN acc_item_map db ON SUBSTR(s.prdt_scs_cd, 7, 2) = db.ITEM
   LEFT JOIN fnf.sap_fnf.mst_prdt m ON p.prdt_cd = m.prdt_cd
-  -- PREP 익월 조인: 25.12 <= yymm < 기준월만 매칭
-  LEFT JOIN CHN.PREP_MST_PRDT_SCS prep
+  -- HST 익월 조인 (구 PREP): 25.12 <= yymm < 기준월만 매칭
+  LEFT JOIN FNF.CHN.HST_PRDT_SCS prep
     ON s.prdt_scs_cd = prep.prdt_scs_cd
     AND prep.yyyymm = CASE
       WHEN s.yymm >= '202512' AND s.yymm < '{ref}'
@@ -178,7 +178,7 @@ stock_with_segment AS (
     CASE 
       -- 기준월: MST 실시간
       WHEN sr.yymm = '{ref}' THEN sr.mst_operate_standard
-      -- 25.12 ~ 기준월 미만: PREP 익월
+      -- 25.12 ~ 기준월 미만: HST 익월 (구 PREP)
       WHEN sr.yymm >= '202512' AND sr.yymm < '{ref}' THEN sr.prep_operate_standard
       WHEN (FLOOR(DATEDIFF('month', TO_DATE('202312', 'YYYYMM'), TO_DATE(sr.yymm || '01', 'YYYYMMDD')) / 3) + 1) = 1 THEN sr.remark1
       WHEN (FLOOR(DATEDIFF('month', TO_DATE('202312', 'YYYYMM'), TO_DATE(sr.yymm || '01', 'YYYYMMDD')) / 3) + 1) = 2 THEN sr.remark2
@@ -223,8 +223,8 @@ sales_raw AS (
   FROM CHN.DW_SALE s
   INNER JOIN FNF.CHN.MST_PRDT_SCS p ON s.prdt_scs_cd = p.prdt_scs_cd
   INNER JOIN acc_item_map db ON SUBSTR(s.prdt_scs_cd, 7, 2) = db.ITEM
-  -- PREP 익월 조인: 25.12 <= 판매월 < 기준월만 매칭
-  LEFT JOIN CHN.PREP_MST_PRDT_SCS prep
+  -- HST 익월 조인 (구 PREP): 25.12 <= 판매월 < 기준월만 매칭
+  LEFT JOIN FNF.CHN.HST_PRDT_SCS prep
     ON s.prdt_scs_cd = prep.prdt_scs_cd
     AND prep.yyyymm = CASE
       WHEN TO_CHAR(s.sale_dt, 'YYYYMM') >= '202512'
@@ -247,7 +247,7 @@ sales_with_segment AS (
     CASE 
       -- 기준월: MST 실시간
       WHEN sr.yymm = '{ref}' THEN sr.mst_operate_standard
-      -- 25.12 ~ 기준월 미만: PREP 익월
+      -- 25.12 ~ 기준월 미만: HST 익월 (구 PREP)
       WHEN sr.yymm >= '202512' AND sr.yymm < '{ref}' THEN sr.prep_operate_standard
       WHEN (FLOOR(DATEDIFF('month', TO_DATE('202312', 'YYYYMM'), TO_DATE(sr.yymm || '01', 'YYYYMMDD')) / 3) + 1) = 1 THEN sr.remark1
       WHEN (FLOOR(DATEDIFF('month', TO_DATE('202312', 'YYYYMM'), TO_DATE(sr.yymm || '01', 'YYYYMMDD')) / 3) + 1) = 2 THEN sr.remark2

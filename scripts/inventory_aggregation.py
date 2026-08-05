@@ -39,7 +39,8 @@ def build_inventory_aggregation_query(
     Note:
         operate_standard 소스 규칙:
         - 행_월 = reference_month → MST_PRDT_SCS.operate_standard (실시간)
-        - 25.12 <= 행_월 < reference_month → PREP_MST_PRDT_SCS.operate_standard 익월 (행_월+1)
+        - 25.12 <= 행_월 < reference_month → HST_PRDT_SCS.operate_standard 익월 (행_월+1)
+          (구 PREP_MST_PRDT_SCS 폐지, HST_PRDT_SCS로 이관됨 - 스키마 동일)
         - 24.01 ~ 25.11 → remark1~8 (분기별 고정)
     """
     query = f"""
@@ -54,10 +55,10 @@ acc_item_map AS (
 -- Step 1: 재고 데이터에 상품/매장 마스터 조인 및 remark 자동 계산
 -- operate_standard 규칙:
 --   행_월 = {reference_month} → MST 실시간 (p.operate_standard)
---   25.12 <= 행_월 < {reference_month} → PREP 익월 스냅샷 (ADD_MONTHS 1)
+--   25.12 <= 행_월 < {reference_month} → HST 익월 스냅샷 (ADD_MONTHS 1) — 구 PREP_MST_PRDT_SCS 대체
 --   24.01 ~ 25.11 → remark1~8
 stock_with_master AS (
-  SELECT 
+  SELECT
     st.yymm,
     st.shop_id,
     st.prdt_scs_cd,
@@ -75,8 +76,8 @@ stock_with_master AS (
     p.remark6, p.remark7, p.remark8,
     -- MST 실시간 operate_standard (기준월에 사용)
     p.operate_standard AS mst_operate_standard,
-    -- PREP 익월 스냅샷 (25.12 ~ 기준월 미만에 사용)
-    prep.operate_standard AS prep_operate_standard
+    -- HST 익월 스냅샷 (25.12 ~ 기준월 미만에 사용, 구 PREP_MST_PRDT_SCS 대체)
+    hst.operate_standard AS prep_operate_standard
   FROM CHN.DW_STOCK_M st
   LEFT JOIN FNF.CHN.MST_PRDT_SCS p ON st.prdt_scs_cd = p.prdt_scs_cd
   LEFT JOIN acc_item_map db ON SUBSTR(st.prdt_scs_cd, 7, 2) = db.ITEM
@@ -86,10 +87,10 @@ stock_with_master AS (
     WHERE fr_or_cls IS NOT NULL
     QUALIFY ROW_NUMBER() OVER(PARTITION BY shop_id ORDER BY COALESCE(open_dt, '1900-01-01') DESC) = 1
   ) d ON st.shop_id = d.shop_id
-  -- PREP 익월 조인: 25.12 <= 행_월 < 기준월만 매칭, 기준월은 NULL (MST 사용)
-  LEFT JOIN CHN.PREP_MST_PRDT_SCS prep
-    ON st.prdt_scs_cd = prep.prdt_scs_cd
-    AND prep.yyyymm = CASE
+  -- HST 익월 조인 (구 PREP): 25.12 <= 행_월 < 기준월만 매칭, 기준월은 NULL (MST 사용)
+  LEFT JOIN FNF.CHN.HST_PRDT_SCS hst
+    ON st.prdt_scs_cd = hst.prdt_scs_cd
+    AND hst.yyyymm = CASE
       WHEN st.yymm >= '202512' AND st.yymm < '{reference_month}'
         THEN TO_VARCHAR(ADD_MONTHS(TO_DATE(st.yymm || '01', 'YYYYMMDD'), 1), 'YYYYMM')
       ELSE NULL
@@ -102,14 +103,14 @@ stock_with_master AS (
 ),
 
 -- Step 2: 동적 operate_standard 선택
--- 24.01~25.11: remark1~8, 25.12~(기준월 미만): PREP 익월, 기준월: MST 실시간
+-- 24.01~25.11: remark1~8, 25.12~(기준월 미만): HST 익월(구 PREP), 기준월: MST 실시간
 stock_with_remark AS (
-  SELECT 
+  SELECT
     s.*,
-    CASE 
+    CASE
       -- 기준월: MST 실시간
       WHEN s.yymm = '{reference_month}' THEN s.mst_operate_standard
-      -- 25.12 ~ 기준월 미만: PREP 익월 스냅샷
+      -- 25.12 ~ 기준월 미만: HST 익월 스냅샷 (구 PREP)
       WHEN s.yymm >= '202512' AND s.yymm < '{reference_month}' THEN s.prep_operate_standard
       -- 24.01~25.11: 분기별 remark (remark1~8)
       WHEN s.remark_num = 1 THEN s.remark1

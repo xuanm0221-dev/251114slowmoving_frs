@@ -42,7 +42,7 @@ def build_sales_aggregation_query(
     Args:
         start_month: 시작월 (YYYYMM)
         end_month: 종료월 (YYYYMM)
-        reference_month: 기준월 (YYYYMM). 이 월은 MST 실시간, 이전 25.12~는 PREP 익월 스냅샷 사용.
+        reference_month: 기준월 (YYYYMM). 이 월은 MST 실시간, 이전 25.12~는 HST 익월 스냅샷 사용.
 
     Returns:
         str: 실행할 SQL 쿼리
@@ -50,7 +50,8 @@ def build_sales_aggregation_query(
     Note:
         operate_standard 소스 규칙:
         - 판매월 = reference_month → MST_PRDT_SCS.operate_standard (실시간)
-        - 25.12 <= 판매월 < reference_month → PREP_MST_PRDT_SCS.operate_standard 익월 (판매월+1)
+        - 25.12 <= 판매월 < reference_month → HST_PRDT_SCS.operate_standard 익월 (판매월+1)
+          (구 PREP_MST_PRDT_SCS 폐지, HST_PRDT_SCS로 이관됨 - 스키마 동일)
         - 24.01 ~ 25.11 → remark1~8 (분기별 고정)
     """
     query = f"""
@@ -65,10 +66,10 @@ acc_item_map AS (
 -- Step 1: 판매 데이터에 상품/매장 마스터 조인 및 remark 자동 계산
 -- operate_standard 규칙:
 --   판매월 = {reference_month} → MST 실시간 (p.operate_standard)
---   25.12 <= 판매월 < {reference_month} → PREP 익월 스냅샷 (ADD_MONTHS 1)
+--   25.12 <= 판매월 < {reference_month} → HST 익월 스냅샷 (ADD_MONTHS 1) — 구 PREP_MST_PRDT_SCS 대체
 --   24.01 ~ 25.11 → remark1~8
 sales_with_master AS (
-  SELECT 
+  SELECT
     s.sale_dt,
     TO_CHAR(s.sale_dt, 'YYYYMM') AS sale_ym,
     s.shop_id,
@@ -86,15 +87,15 @@ sales_with_master AS (
     p.remark6, p.remark7, p.remark8,
     -- MST 실시간 operate_standard (기준월에 사용)
     p.operate_standard AS mst_operate_standard,
-    -- PREP 익월 스냅샷 (25.12 ~ 기준월 미만에 사용)
-    prep.operate_standard AS prep_operate_standard
+    -- HST 익월 스냅샷 (25.12 ~ 기준월 미만에 사용, 구 PREP_MST_PRDT_SCS 대체)
+    hst.operate_standard AS prep_operate_standard
   FROM CHN.DW_SALE s
   LEFT JOIN FNF.CHN.MST_PRDT_SCS p ON s.prdt_scs_cd = p.prdt_scs_cd
   LEFT JOIN acc_item_map db ON SUBSTR(s.prdt_scs_cd, 7, 2) = db.ITEM
-  -- PREP 익월 조인: 25.12 <= 판매월 < 기준월만 매칭, 기준월은 NULL (MST 사용)
-  LEFT JOIN CHN.PREP_MST_PRDT_SCS prep
-    ON s.prdt_scs_cd = prep.prdt_scs_cd
-    AND prep.yyyymm = CASE
+  -- HST 익월 조인 (구 PREP): 25.12 <= 판매월 < 기준월만 매칭, 기준월은 NULL (MST 사용)
+  LEFT JOIN FNF.CHN.HST_PRDT_SCS hst
+    ON s.prdt_scs_cd = hst.prdt_scs_cd
+    AND hst.yyyymm = CASE
       WHEN TO_CHAR(s.sale_dt, 'YYYYMM') >= '202512'
         AND TO_CHAR(s.sale_dt, 'YYYYMM') < '{reference_month}'
         THEN TO_VARCHAR(ADD_MONTHS(TO_DATE(TO_CHAR(s.sale_dt, 'YYYYMM') || '01', 'YYYYMMDD'), 1), 'YYYYMM')
