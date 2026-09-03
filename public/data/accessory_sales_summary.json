@@ -249,6 +249,14 @@
           "FRS_outlet": 109042477,
           "OR_core": 15199267,
           "OR_outlet": 20121491
+        },
+        "2026.08": {
+          "전체_core": 192522683,
+          "전체_outlet": 138155640,
+          "FRS_core": 165835357,
+          "FRS_outlet": 114900189,
+          "OR_core": 26687326,
+          "OR_outlet": 23255451
         }
       },
       "Shoes": {
@@ -499,6 +507,14 @@
           "FRS_outlet": 75163855,
           "OR_core": 6707426,
           "OR_outlet": 13507520
+        },
+        "2026.08": {
+          "전체_core": 106524729,
+          "전체_outlet": 97426687,
+          "FRS_core": 92628279,
+          "FRS_outlet": 81550138,
+          "OR_core": 13896450,
+          "OR_outlet": 15876549
         }
       },
       "Headwear": {
@@ -749,6 +765,14 @@
           "FRS_outlet": 21687610,
           "OR_core": 6834991,
           "OR_outlet": 3554132
+        },
+        "2026.08": {
+          "전체_core": 68328721,
+          "전체_outlet": 26177248,
+          "FRS_core": 58442236,
+          "FRS_outlet": 21639443,
+          "OR_core": 9886485,
+          "OR_outlet": 4537805
         }
       },
       "Bag": {
@@ -999,6 +1023,14 @@
           "FRS_outlet": 11270540,
           "OR_core": 1550152,
           "OR_outlet": 2955672
+        },
+        "2026.08": {
+          "전체_core": 16344521,
+          "전체_outlet": 13411669,
+          "FRS_core": 13554319,
+          "FRS_outlet": 10681175,
+          "OR_core": 2790202,
+          "OR_outlet": 2730494
         }
       },
       "Acc_etc": {
@@ -1249,6 +1281,14 @@
           "FRS_outlet": 920472,
           "OR_core": 106698,
           "OR_outlet": 104167
+        },
+        "2026.08": {
+          "전체_core": 1324712,
+          "전체_outlet": 1140036,
+          "FRS_core": 1210523,
+          "FRS_outlet": 1029433,
+          "OR_core": 114189,
+          "OR_outlet": 110603
         }
       }
     },
@@ -1495,12 +1535,20 @@
           "OR_outlet": 1890496
         },
         "2026.07": {
-          "전체_core": 3537208,
-          "전체_outlet": 5258214,
-          "FRS_core": 2578555,
-          "FRS_outlet": 3779677,
-          "OR_core": 958653,
-          "OR_outlet": 1478537
+          "전체_core": 3521885,
+          "전체_outlet": 5273537,
+          "FRS_core": 2454993,
+          "FRS_outlet": 3903239,
+          "OR_core": 1066892,
+          "OR_outlet": 1370298
+        },
+        "2026.08": {
+          "전체_core": 7102897,
+          "전체_outlet": 6343086,
+          "FRS_core": 5027708,
+          "FRS_outlet": 4577730,
+          "OR_core": 2075189,
+          "OR_outlet": 1765356
         }
       },
       "Shoes": {
@@ -1745,12 +1793,20 @@
           "OR_outlet": 987229
         },
         "2026.07": {
-          "전체_core": 1266467,
-          "전체_outlet": 2973478,
-          "FRS_core": 954720,
-          "FRS_outlet": 2174162,
-          "OR_core": 311747,
-          "OR_outlet": 799316
+          "전체_core": 1103387,
+          "전체_outlet": 3136558,
+          "FRS_core": 803843,
+          "FRS_outlet": 2325039,
+          "OR_core": 299544,
+          "OR_outlet": 811519
+        },
+        "2026.08": {
+          "전체_core": 3402750,
+          "전체_outlet": 3804440,
+          "FRS_core": 2472530,
+          "FRS_outlet": 2651453,
+          "OR_core": 930220,
+          "OR_outlet": 1152987
         }
       },
       "Headwear": {
@@ -1995,12 +2051,20 @@
           "OR_outlet": 312829
         },
         "2026.07": {
-          "전체_core": 745611,
-          "전체_outlet": 1034417,
-          "FRS_core": 428023,
-          "FRS_outlet": 824967,
-          "OR_core": 317588,
-          "OR_outlet": 209450
+          "전체_core": 721455,
+          "전체_outlet": 1058573,
+          "FRS_core": 415804,
+          "FRS_outlet": 837186,
+          "OR_core": 305651,
+          "OR_outlet": 221387
+        },
+        "2026.08": {
+          "전체_core": 1158732,
+          "전체_outlet": 998395,
+          "FRS_core": 662287,
+          "FRS_outlet": 806178,
+          "OR_core": 496445,
+          "OR_outlet": 192217
         }
       },
       "Bag": {
@@ -2245,12 +2309,20 @@
           "OR_outlet": 562619
         },
         "2026.07": {
-          "전체_core": 1507436,
-          "전체_outlet": 1161235,
-          "FRS_core": 1182908,
-          "FRS_outlet": 706069,
-          "OR_core": 324528,
-          "OR_outlet": 455166
+          "전체_core": 1679349,
+          "전체_outlet": 989322,
+          "FRS_core": 1222442,
+          "FRS_outlet": 666535,
+          "OR_core": 456907,
+          "OR_outlet": 322787
+        },
+        "2026.08": {
+          "전체_core": 2513415,
+          "전체_outlet": 1408765,
+          "FRS_core": 1872644,
+          "FRS_outlet": 1014543,
+          "OR_core": 640771,
+          "OR_outlet": 394222
         }
       },
       "Acc_etc": {
@@ -2501,6 +2573,14 @@
           "FRS_outlet": 74479,
           "OR_core": 4790,
           "OR_outlet": 14605
+        },
+        "2026.08": {
+          "전체_core": 28000,
+          "전체_outlet": 131486,
+          "FRS_core": 20247,
+          "FRS_outlet": 105556,
+          "OR_core": 7753,
+          "OR_outlet": 25930
         }
       }
     },
@@ -2753,6 +2833,14 @@
           "FRS_outlet": 312092,
           "OR_core": 0,
           "OR_outlet": 69200
+        },
+        "2026.08": {
+          "전체_core": 0,
+          "전체_outlet": 436410,
+          "FRS_core": 0,
+          "FRS_outlet": 266898,
+          "OR_core": 0,
+          "OR_outlet": 169512
         }
       },
       "Shoes": {
@@ -3003,6 +3091,14 @@
           "FRS_outlet": 150320,
           "OR_core": 0,
           "OR_outlet": 27220
+        },
+        "2026.08": {
+          "전체_core": 0,
+          "전체_outlet": 148500,
+          "FRS_core": 0,
+          "FRS_outlet": 91240,
+          "OR_core": 0,
+          "OR_outlet": 57260
         }
       },
       "Headwear": {
@@ -3253,6 +3349,14 @@
           "FRS_outlet": 85950,
           "OR_core": 0,
           "OR_outlet": 24360
+        },
+        "2026.08": {
+          "전체_core": 0,
+          "전체_outlet": 184330,
+          "FRS_core": 0,
+          "FRS_outlet": 107030,
+          "OR_core": 0,
+          "OR_outlet": 77300
         }
       },
       "Bag": {
@@ -3503,6 +3607,14 @@
           "FRS_outlet": 62040,
           "OR_core": 0,
           "OR_outlet": 13350
+        },
+        "2026.08": {
+          "전체_core": 0,
+          "전체_outlet": 92540,
+          "FRS_core": 0,
+          "FRS_outlet": 61240,
+          "OR_core": 0,
+          "OR_outlet": 31300
         }
       },
       "Acc_etc": {
@@ -3753,6 +3865,14 @@
           "FRS_outlet": 13782,
           "OR_core": 0,
           "OR_outlet": 4270
+        },
+        "2026.08": {
+          "전체_core": 0,
+          "전체_outlet": 11040,
+          "FRS_core": 0,
+          "FRS_outlet": 7388,
+          "OR_core": 0,
+          "OR_outlet": 3652
         }
       }
     }
@@ -3789,6 +3909,7 @@
     "2026.04",
     "2026.05",
     "2026.06",
-    "2026.07"
+    "2026.07",
+    "2026.08"
   ]
 }

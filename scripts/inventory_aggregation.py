@@ -104,14 +104,16 @@ stock_with_master AS (
 
 -- Step 2: 동적 operate_standard 선택
 -- 24.01~25.11: remark1~8, 25.12~(기준월 미만): HST 익월(구 PREP), 기준월: MST 실시간
+-- HST 익월 스냅샷 미존재 시 MST 실시간으로 fallback (COALESCE)
 stock_with_remark AS (
   SELECT
     s.*,
     CASE
       -- 기준월: MST 실시간
       WHEN s.yymm = '{reference_month}' THEN s.mst_operate_standard
-      -- 25.12 ~ 기준월 미만: HST 익월 스냅샷 (구 PREP)
-      WHEN s.yymm >= '202512' AND s.yymm < '{reference_month}' THEN s.prep_operate_standard
+      -- 25.12 ~ 기준월 미만: HST 익월 스냅샷 (구 PREP), 없으면 MST 실시간 fallback
+      WHEN s.yymm >= '202512' AND s.yymm < '{reference_month}'
+        THEN COALESCE(s.prep_operate_standard, s.mst_operate_standard)
       -- 24.01~25.11: 분기별 remark (remark1~8)
       WHEN s.remark_num = 1 THEN s.remark1
       WHEN s.remark_num = 2 THEN s.remark2

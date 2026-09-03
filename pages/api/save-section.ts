@@ -84,12 +84,12 @@ async function fetchDealerData(
 
   // operate_standard 선택 CASE:
   //   yymm = ref → MST 실시간 (mst_operate_standard)
-  //   25.12 <= yymm < ref → PREP 익월 (prep_operate_standard)
+  //   25.12 <= yymm < ref → HST 익월(구 PREP), 없으면 MST 실시간 fallback
   //   24.01~25.11 → remark1~8
   const opStdCaseSQL = (ym: string) => `
     CASE
       WHEN '${ym}' = '${ref}' THEN mst_operate_standard
-      WHEN '${ym}' >= '202512' AND '${ym}' < '${ref}' THEN prep_operate_standard
+      WHEN '${ym}' >= '202512' AND '${ym}' < '${ref}' THEN COALESCE(prep_operate_standard, mst_operate_standard)
       WHEN (FLOOR(DATEDIFF('month',TO_DATE('202312','YYYYMM'),TO_DATE('${ym}01','YYYYMMDD'))/3)+1)=1 THEN remark1
       WHEN (FLOOR(DATEDIFF('month',TO_DATE('202312','YYYYMM'),TO_DATE('${ym}01','YYYYMMDD'))/3)+1)=2 THEN remark2
       WHEN (FLOOR(DATEDIFF('month',TO_DATE('202312','YYYYMM'),TO_DATE('${ym}01','YYYYMMDD'))/3)+1)=3 THEN remark3

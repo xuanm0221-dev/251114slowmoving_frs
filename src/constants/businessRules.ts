@@ -65,8 +65,8 @@ export const DATA_INFO = {
  * - 24.01~25.11: MST_PRDT_SCS의 분기별 remark1~8
  * - 25.12 ~ (기준월 미만): HST_PRDT_SCS 익월 스냅샷 (구 PREP_MST_PRDT_SCS 폐지, HST로 이관)
  *     25.12→HST 202601, 26.01→HST 202602, 26.02→HST 202603, 26.03→HST 202604,
- *     26.04→HST 202605, 26.05→HST 202606, 26.06→HST 202607 …
- *     (HST_PRDT_SCS는 26.01부터 데이터 존재)
+ *     26.04→HST 202605, 26.05→HST 202606, 26.06→HST 202607, 26.07→HST 202608 …
+ *     (HST_PRDT_SCS는 26.01부터 데이터 존재. HST 익월 스냅샷이 없으면 MST_PRDT_SCS 실시간으로 fallback)
  * - 기준월(현재 마감월): MST_PRDT_SCS.operate_standard 실시간
  *
  * ※ 마감월이 올라가면 25.12 이상 월은 재집계 필요:
@@ -89,7 +89,8 @@ export const REMARK_PERIODS = [
   { range: '26.04', remark: 'operate_standard', source: 'HST_PRDT_SCS (202605)' },
   { range: '26.05', remark: 'operate_standard', source: 'HST_PRDT_SCS (202606)' },
   { range: '26.06', remark: 'operate_standard', source: 'HST_PRDT_SCS (202607)' },
-  { range: '26.07 ★현재', remark: 'operate_standard', source: 'MST_PRDT_SCS (실시간)' },
+  { range: '26.07', remark: 'operate_standard', source: 'MST_PRDT_SCS (실시간 fallback, HST 202608 미존재)' },
+  { range: '26.08 ★현재', remark: 'operate_standard', source: 'MST_PRDT_SCS (실시간)' },
 ] as const;
 
 /**
@@ -103,7 +104,7 @@ export const CLOSED_MONTHS = [
   "2024.07", "2024.08", "2024.09", "2024.10", "2024.11", "2024.12",
   "2025.01", "2025.02", "2025.03", "2025.04", "2025.05", "2025.06",
   "2025.07", "2025.08", "2025.09", "2025.10", "2025.11", "2025.12",
-  "2026.01", "2026.02", "2026.03", "2026.04", "2026.05", "2026.06", "2026.07"
+  "2026.01", "2026.02", "2026.03", "2026.04", "2026.05", "2026.06", "2026.07", "2026.08"
 ] as const;
 
 

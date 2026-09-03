@@ -189,9 +189,12 @@ export default function Home() {
                 <span className="w-3 h-3 rounded bg-blue-700 inline-block"></span> MST (remark1~8)
               </span>
               <span className="inline-flex items-center gap-1.5 text-xs text-gray-300">
-                <span className="w-3 h-3 rounded bg-violet-700 inline-block"></span> PREP (operate_standard)
+                <span className="w-3 h-3 rounded bg-violet-700 inline-block"></span> HST (operate_standard, 구 PREP)
               </span>
             </div>
+            <p className="mt-2 text-[11px] text-amber-300/90 text-center">
+              ※ HST 익월 스냅샷이 없으면 MST_PRDT_SCS 실시간으로 fallback (COALESCE)
+            </p>
           </div>
 
           {/* 우: 데이터 전처리 안내 */}
@@ -243,7 +246,7 @@ export default function Home() {
                     이 차트 API는 JSON에 없는 월을 0으로만 채우고 Snowflake 실시간 조회를 하지 않습니다.
                   </p>
                   <p className="text-xs text-gray-400">
-                    마감한 기준월과 동일하게 지정하세요. 예: <code className="text-gray-300">--reference-month 2026.07</code>
+                    마감한 기준월과 동일하게 지정하세요. 예: <code className="text-gray-300">--reference-month 2026.08</code>
                   </p>
                 </div>
               </div>

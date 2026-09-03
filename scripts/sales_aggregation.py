@@ -155,8 +155,9 @@ sales_with_remark AS (
     CASE 
       -- 기준월: MST 실시간
       WHEN s.sale_ym = '{reference_month}' THEN s.mst_operate_standard
-      -- 25.12 ~ 기준월 미만: PREP 익월 스냅샷
-      WHEN s.sale_ym >= '202512' AND s.sale_ym < '{reference_month}' THEN s.prep_operate_standard
+      -- 25.12 ~ 기준월 미만: HST 익월 스냅샷 (구 PREP), 없으면 MST 실시간 fallback
+      WHEN s.sale_ym >= '202512' AND s.sale_ym < '{reference_month}'
+        THEN COALESCE(s.prep_operate_standard, s.mst_operate_standard)
       -- 24.01~25.11: 분기별 remark (remark1~8)
       WHEN s.remark_num = 1 THEN s.remark1
       WHEN s.remark_num = 2 THEN s.remark2

@@ -178,8 +178,9 @@ stock_with_segment AS (
     CASE 
       -- 기준월: MST 실시간
       WHEN sr.yymm = '{ref}' THEN sr.mst_operate_standard
-      -- 25.12 ~ 기준월 미만: HST 익월 (구 PREP)
-      WHEN sr.yymm >= '202512' AND sr.yymm < '{ref}' THEN sr.prep_operate_standard
+      -- 25.12 ~ 기준월 미만: HST 익월 (구 PREP), 없으면 MST 실시간 fallback
+      WHEN sr.yymm >= '202512' AND sr.yymm < '{ref}'
+        THEN COALESCE(sr.prep_operate_standard, sr.mst_operate_standard)
       WHEN (FLOOR(DATEDIFF('month', TO_DATE('202312', 'YYYYMM'), TO_DATE(sr.yymm || '01', 'YYYYMMDD')) / 3) + 1) = 1 THEN sr.remark1
       WHEN (FLOOR(DATEDIFF('month', TO_DATE('202312', 'YYYYMM'), TO_DATE(sr.yymm || '01', 'YYYYMMDD')) / 3) + 1) = 2 THEN sr.remark2
       WHEN (FLOOR(DATEDIFF('month', TO_DATE('202312', 'YYYYMM'), TO_DATE(sr.yymm || '01', 'YYYYMMDD')) / 3) + 1) = 3 THEN sr.remark3
@@ -247,8 +248,9 @@ sales_with_segment AS (
     CASE 
       -- 기준월: MST 실시간
       WHEN sr.yymm = '{ref}' THEN sr.mst_operate_standard
-      -- 25.12 ~ 기준월 미만: HST 익월 (구 PREP)
-      WHEN sr.yymm >= '202512' AND sr.yymm < '{ref}' THEN sr.prep_operate_standard
+      -- 25.12 ~ 기준월 미만: HST 익월 (구 PREP), 없으면 MST 실시간 fallback
+      WHEN sr.yymm >= '202512' AND sr.yymm < '{ref}'
+        THEN COALESCE(sr.prep_operate_standard, sr.mst_operate_standard)
       WHEN (FLOOR(DATEDIFF('month', TO_DATE('202312', 'YYYYMM'), TO_DATE(sr.yymm || '01', 'YYYYMMDD')) / 3) + 1) = 1 THEN sr.remark1
       WHEN (FLOOR(DATEDIFF('month', TO_DATE('202312', 'YYYYMM'), TO_DATE(sr.yymm || '01', 'YYYYMMDD')) / 3) + 1) = 2 THEN sr.remark2
       WHEN (FLOOR(DATEDIFF('month', TO_DATE('202312', 'YYYYMM'), TO_DATE(sr.yymm || '01', 'YYYYMMDD')) / 3) + 1) = 3 THEN sr.remark3

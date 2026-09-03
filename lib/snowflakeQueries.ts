@@ -300,8 +300,9 @@ sales_with_remark AS (
     CASE 
       -- 기준월: MST 실시간 (operate_standard = MST 컬럼)
       WHEN swr.sale_yyyymm = '${ref}' THEN swr.operate_standard
-      -- 25.12 ~ 기준월 미만: PREP 익월 스냅샷
-      WHEN swr.sale_yyyymm >= '202512' AND swr.sale_yyyymm < '${ref}' THEN swr.prep_operate_standard
+      -- 25.12 ~ 기준월 미만: HST 익월 스냅샷 (구 PREP), 없으면 MST 실시간 fallback
+      WHEN swr.sale_yyyymm >= '202512' AND swr.sale_yyyymm < '${ref}'
+        THEN COALESCE(swr.prep_operate_standard, swr.operate_standard)
       -- 24.01~25.11: remark 방식
       WHEN swr.remark_num = 1 THEN swr.remark1
       WHEN swr.remark_num = 2 THEN swr.remark2
@@ -479,8 +480,9 @@ stock_with_remark AS (
     CASE 
       -- 기준월: MST 실시간 (operate_standard = MST 컬럼)
       WHEN swr.yymm = '${ref}' THEN swr.operate_standard
-      -- 25.12 ~ 기준월 미만: PREP 익월 스냅샷
-      WHEN swr.yymm >= '202512' AND swr.yymm < '${ref}' THEN swr.prep_operate_standard
+      -- 25.12 ~ 기준월 미만: HST 익월 스냅샷 (구 PREP), 없으면 MST 실시간 fallback
+      WHEN swr.yymm >= '202512' AND swr.yymm < '${ref}'
+        THEN COALESCE(swr.prep_operate_standard, swr.operate_standard)
       -- 24.01~25.11: remark 방식
       WHEN swr.remark_num = 1 THEN swr.remark1
       WHEN swr.remark_num = 2 THEN swr.remark2
