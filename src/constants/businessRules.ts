@@ -89,7 +89,7 @@ export const REMARK_PERIODS = [
   { range: '26.04', remark: 'operate_standard', source: 'HST_PRDT_SCS (202605)' },
   { range: '26.05', remark: 'operate_standard', source: 'HST_PRDT_SCS (202606)' },
   { range: '26.06', remark: 'operate_standard', source: 'HST_PRDT_SCS (202607)' },
-  { range: '26.07', remark: 'operate_standard', source: 'MST_PRDT_SCS (실시간 fallback, HST 202608 미존재)' },
+  { range: '26.07', remark: 'operate_standard', source: 'HST_PRDT_SCS (202608)' },
   { range: '26.08 ★현재', remark: 'operate_standard', source: 'MST_PRDT_SCS (실시간)' },
 ] as const;
 
